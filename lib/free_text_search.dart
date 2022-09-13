@@ -3,8 +3,9 @@
 // All rights reserved
 
 /// Dart library for creating an inverted index on a collection of text documents.
-library dart_package_template;
+library free_text_search;
 
 /// Export of barrel file in the /src folder.
 /// src/_index.dart exports the barrel files from
-export 'src/_index.dart';
+export 'src/free_text_search.dart';
+export 'src/search_result.dart';

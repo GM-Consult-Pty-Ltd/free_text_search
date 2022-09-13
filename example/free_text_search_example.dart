@@ -3,7 +3,7 @@
 // All rights reserved
 
 // ignore: unused_import
-import 'package:dart_package_template/dart_package_template.dart';
+import 'package:free_text_search/free_text_search.dart';
 
 void main() {
   //TODO: example

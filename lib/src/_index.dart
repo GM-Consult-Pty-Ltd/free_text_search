@@ -2,10 +2,13 @@
 // BSD 3-Clause License
 // All rights reserved
 
-/// Barrel file for src/ folder. 
-/// List all exports below in alphabetical order.
-/// Prefer exporting barrel files from sub-folders rather than code files.
-// export 'src/_index.dart';
-
-//TODO: edit src/_index.dart
-
+/// Barrel file for src/ folder.
+export 'query_parser.dart';
+export 'free_text_query.dart';
+export 'free_text_search.dart';
+export 'query_modifier.dart';
+export 'query_term.dart';
+export 'search_result.dart';
+export 'vector_space_model.dart';
+export 'package:text_analysis/text_analysis.dart';
+export 'package:text_indexing/text_indexing.dart';

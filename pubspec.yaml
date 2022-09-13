@@ -2,20 +2,21 @@
 # Copyright (c) 2022, GM Consult Pty Ltd
 # All rights reserved.
 
-# TODO: Edit pubspec.yaml
-
-name: dart_package_template
-description: TODO - A short description of your package.
+name: free_text_search
+description: Parse a free-text phrase to a query, search a text index and return ranked references to documents relevant to the search phrase.
 version: 0.0.1-beta.1
-repository: https://github.com/GM-Consult-Pty-Ltd/dart_package_template
+repository: https://github.com/GM-Consult-Pty-Ltd/free_text_search
 homepage: https://github.com/GM-Consult-Pty-Ltd
-issue_tracker: https://github.com/GM-Consult-Pty-Ltd/dart_package_template/issues
+issue_tracker: https://github.com/GM-Consult-Pty-Ltd/free_text_search/issues
 
 environment:
   sdk: '>=2.17.6 <3.0.0'
 
 dependencies:
   # -----PubDev Packages (in alphabetic order) -----
+  porter_2_stemmer: ^1.0.0
+  text_analysis: ^0.1.0
+  text_indexing: ^0.0.1
 
 dev_dependencies:
   lints: ^2.0.0
