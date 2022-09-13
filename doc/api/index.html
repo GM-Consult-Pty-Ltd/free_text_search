@@ -50,17 +50,22 @@ Copyright (c) 2022, GM Consult Pty Ltd
 All rights reserved. 
 -->
 <h1 id="free_text_search">free_text_search</h1>
-<p>Parse a free-text phrase to a query, search a text index and return ranked references to documents relevant to the search phrase.</p>
+<p>Search a inverted positional index and return ranked references to documents relevant to the search phrase.</p>
 <p><em>THIS PACKAGE IS IN BETA DEVELOPMENT AND SUBJECT TO DAILY BREAKING CHANGES.</em></p>
 <h2 id="objective">Objective</h2>
 <p>The compoments of this library:</p>
 <ul>
 <li>parse a free-text phrase to a query;</li>
 <li>search the <code>dictionary</code> and <code>postings</code> of a text <code>index</code> for the query <code>terms</code>;</li>
-<li>perform scoring and ranking of the returned dictionary entries and postings through an iterative process; and</li>
+<li>perform iterative scoring and ranking of the returned dictionary entries and postings; and</li>
 <li>return ranked references to documents relevant to the search phrase.</li>
 </ul>
 <p><img src="https://github.com/GM-Consult-Pty-Ltd/free_text_search/raw/main/assets/images/free_text_search.png?raw=true?raw=true" alt="Free text search overview" title="Free text search  overview"></p>
+<h2 id="api">API</h2>
+<h3 id="class-freetextquery">class <code>FreeTextQuery</code></h3>
+<h3 id="class-queryparser">class <code>QueryParser</code></h3>
+<h2 id="usage">Usage</h2>
+<p>TODO: describe usage.</p>
 <h2 id="definitions">Definitions</h2>
 <p>The following definitions are used throughout the <a href="https://pub.dev/documentation/free_text_search/latest/">documentation</a>:</p>
 <ul>
@@ -76,11 +81,14 @@ All rights reserved.
 <li><code>tokenizer</code> - a function that returns a collection of <code>token</code>s from <code>text</code>, after applying a character filter, <code>term</code> filter, <a href="https://en.wikipedia.org/wiki/Stemming">stemmer</a> and / or <a href="https://en.wikipedia.org/wiki/Lemmatisation">lemmatizer</a>.</li>
 <li><code>vocabulary</code> - the collection of <code>terms</code> indexed from the <code>corpus</code>.</li>
 </ul>
-<h2 id="api">API</h2>
-<h3 id="class-freetextquery">class <code>FreeTextQuery</code></h3>
-<h3 id="class-queryparser">class <code>QueryParser</code></h3>
-<h2 id="usage">Usage</h2>
-<p>TODO: describe usage.</p>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="https://nlp.stanford.edu/IR-book/pdf/irbookprint.pdf">Manning, Raghavan and Schütze, "<em>Introduction to Information Retrieval</em>", Cambridge University Press, 2008</a></li>
+<li><a href="https://www.cl.cam.ac.uk/teaching/1516/InfoRtrv/">University of Cambridge, 2016 "<em>Information Retrieval</em>", course notes, Dr Ronan Cummins, 2016</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Inverted_index">Wikipedia (1), "<em>Inverted Index</em>", from Wikipedia, the free encyclopedia</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Lemmatisation">Wikipedia (2), "<em>Lemmatisation</em>", from Wikipedia, the free encyclopedia</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Stemming">Wikipedia (3), "<em>Stemming</em>", from Wikipedia, the free encyclopedia</a></li>
+</ul>
 <h2 id="issues">Issues</h2>
 <p>If you find a bug please fill an <a href="https://github.com/GM-Consult-Pty-Ltd/free_text_search/issues">issue</a>.</p>
 <p>This project is a supporting package for a revenue project that has priority call on resources, so please be patient if we don't respond immediately to issues or pull requests.</p>
@@ -130,7 +138,7 @@ All rights reserved.
 <footer>
   <span class="no-break">
     free_text_search
-      0.0.1-beta.1
+      0.0.1-beta.2
   </span>
 
   

@@ -8,6 +8,7 @@ export 'free_text_query.dart';
 export 'free_text_search.dart';
 export 'query_modifier.dart';
 export 'query_term.dart';
+export 'search_result_scorer.dart';
 export 'search_result.dart';
 export 'vector_space_model.dart';
 export 'package:text_analysis/text_analysis.dart';

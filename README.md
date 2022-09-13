@@ -6,7 +6,7 @@ All rights reserved.
 
 # free_text_search
 
-Parse a free-text phrase to a query, search a text index and return ranked references to documents relevant to the search phrase.
+Search a inverted positional index and return ranked references to documents relevant to the search phrase.
 
 *THIS PACKAGE IS IN BETA DEVELOPMENT AND SUBJECT TO DAILY BREAKING CHANGES.*
 
@@ -15,10 +15,20 @@ Parse a free-text phrase to a query, search a text index and return ranked refer
 The compoments of this library:
 * parse a free-text phrase to a query; 
 * search the `dictionary` and `postings` of a text `index` for the query `terms`; 
-* perform scoring and ranking of the returned dictionary entries and postings through an iterative process; and 
+* perform iterative scoring and ranking of the returned dictionary entries and postings; and 
 * return ranked references to documents relevant to the search phrase.
 
 ![Free text search overview](https://github.com/GM-Consult-Pty-Ltd/free_text_search/raw/main/assets/images/free_text_search.png?raw=true?raw=true "Free text search  overview")
+
+## API
+
+### class `FreeTextQuery` 
+
+### class `QueryParser`
+
+## Usage
+
+TODO: describe usage.
 
 ## Definitions
 
@@ -36,16 +46,13 @@ The following definitions are used throughout the [documentation](https://pub.de
 * `tokenizer` - a function that returns a collection of `token`s from `text`, after applying a character filter, `term` filter, [stemmer](https://en.wikipedia.org/wiki/Stemming) and / or [lemmatizer](https://en.wikipedia.org/wiki/Lemmatisation).
 * `vocabulary` - the collection of `terms` indexed from the `corpus`.
 
-## API
+## References
 
-### class `FreeTextQuery` 
-
-### class `QueryParser`
-
-## Usage
-
-TODO: describe usage.
-
+* [Manning, Raghavan and Schütze, "*Introduction to Information Retrieval*", Cambridge University Press, 2008](https://nlp.stanford.edu/IR-book/pdf/irbookprint.pdf)
+* [University of Cambridge, 2016 "*Information Retrieval*", course notes, Dr Ronan Cummins, 2016](https://www.cl.cam.ac.uk/teaching/1516/InfoRtrv/)
+* [Wikipedia (1), "*Inverted Index*", from Wikipedia, the free encyclopedia](https://en.wikipedia.org/wiki/Inverted_index)
+* [Wikipedia (2), "*Lemmatisation*", from Wikipedia, the free encyclopedia](https://en.wikipedia.org/wiki/Lemmatisation)
+* [Wikipedia (3), "*Stemming*", from Wikipedia, the free encyclopedia](https://en.wikipedia.org/wiki/Stemming)
 
 ## Issues
 

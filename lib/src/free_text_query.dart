@@ -21,15 +21,7 @@ class FreeTextQuery {
 
   /// A hashmap of the terms extracted from the [phrase] that will be
   /// used to look up results in an inverted index.
-  final Map<String, QueryTerm> terms;
-
-  /// A set of unique terms that must appear at least once in a document for it
-  /// to be included in the search results.
-  final Set<String> mustInclude;
-
-  /// A set of unique terms that must not appear in a document for it
-  /// to be included in the search results.
-  final Set<String> excludeTerms;
+  final List<QueryTerm> terms;
 
   /// Instantiates a const [FreeTextQuery] with the following required
   /// parameters:
@@ -43,9 +35,5 @@ class FreeTextQuery {
   /// - [excludeTerms] is a set of unique terms that must not appear in a
   ///   document for it to be included in the search results (defaults to an
   ///   empty set).
-  const FreeTextQuery(
-      {required this.phrase,
-      required this.terms,
-      this.mustInclude = const {},
-      this.excludeTerms = const {}});
+  const FreeTextQuery({required this.phrase, required this.terms});
 }

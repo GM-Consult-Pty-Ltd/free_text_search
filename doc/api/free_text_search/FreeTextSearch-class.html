@@ -51,8 +51,16 @@
 
     
 <section class="desc markdown">
-  <p>The free text class exposes the <a href="../free_text_search/FreeTextSearch/search.html">search</a> method that returns a list of
+  <p>The <a href="../free_text_search/FreeTextSearch-class.html">FreeTextSearch</a> class exposes the <a href="../free_text_search/FreeTextSearch/search.html">search</a> method that returns a list of
 <a href="../free_text_search/SearchResult-class.html">SearchResult</a> instances in descending order of relevance.</p>
+<p>The length of the returned collection of <a href="../free_text_search/SearchResult-class.html">SearchResult</a> can be limited by
+passing a limit parameter to <a href="../free_text_search/FreeTextSearch/search.html">search</a>. The default limit is 20.</p>
+<p>After parsing the phrase to terms, the <a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/Postings.html">Postings</a> and <a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/Dictionary.html">Dictionary</a> for the
+query terms are asynchronously retrieved from the index:</p>
+<ul>
+<li><a href="../free_text_search/FreeTextSearch/dictionaryLoader.html">dictionaryLoader</a> retrieves <a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/Dictionary.html">Dictionary</a>; and</li>
+<li><a href="../free_text_search/FreeTextSearch/postingsLoader.html">postingsLoader</a> retrieves <a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/Postings.html">Postings</a>.</li>
+</ul>
 </section>
 
 
@@ -63,10 +71,11 @@
 
     <dl class="constructor-summary-list">
         <dt id="FreeTextSearch" class="callable">
-          <span class="name"><a href="../free_text_search/FreeTextSearch/FreeTextSearch.html">FreeTextSearch</a></span><span class="signature">()</span>
+          <span class="name"><a href="../free_text_search/FreeTextSearch/FreeTextSearch.html">FreeTextSearch</a></span><span class="signature">(<span class="parameter" id="-param-dictionaryLoader">{<span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/DictionaryLoader.html">DictionaryLoader</a></span> <span class="parameter-name">dictionaryLoader</span>, </span><span class="parameter" id="-param-postingsLoader"><span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/PostingsLoader.html">PostingsLoader</a></span> <span class="parameter-name">postingsLoader</span>, </span><span class="parameter" id="-param-configuration"><span class="type-annotation"><a href="https://pub.dev/documentation/text_analysis/0.2.0+1/text_analysis/TextAnalyzerConfiguration-class.html">TextAnalyzerConfiguration</a></span> <span class="parameter-name">configuration</span> = <span class="default-value">English.configuration</span>, </span><span class="parameter" id="-param-tokenFilter"><span class="type-annotation"><a href="https://pub.dev/documentation/text_analysis/0.2.0+1/text_analysis/TokenFilter.html">TokenFilter</a></span> <span class="parameter-name">tokenFilter</span> = <span class="default-value">TextAnalyzer.defaultTokenFilter</span>}</span>)</span>
         </dt>
         <dd>
-          
+          Hydrate a <a href="../free_text_search/FreeTextSearch-class.html">FreeTextSearch</a> instance:
+            <div class="constructor-modifier features">factory</div>
         </dd>
     </dl>
   </section>
@@ -75,6 +84,18 @@
       <h2>Properties</h2>
 
       <dl class="properties">
+        <dt id="dictionaryLoader" class="property">
+  <span class="name"><a href="../free_text_search/FreeTextSearch/dictionaryLoader.html">dictionaryLoader</a></span>
+  <span class="signature">&#8594; <a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/DictionaryLoader.html">DictionaryLoader</a></span> 
+
+</dt>
+<dd>
+  Asynchronously retrieves a <a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/Dictionary.html">Dictionary</a> for query terms from a data
+source.
+  <div class="features">read-only</div>
+
+</dd>
+
         <dt id="hashCode" class="property inherited">
   <span class="name"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></span>
   <span class="signature">&#8594; <a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> 
@@ -88,12 +109,22 @@
 
         <dt id="postingsLoader" class="property">
   <span class="name"><a href="../free_text_search/FreeTextSearch/postingsLoader.html">postingsLoader</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/text_indexing/0.0.1+9/text_indexing/PostingsLoader.html">PostingsLoader</a></span> 
+  <span class="signature">&#8594; <a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/PostingsLoader.html">PostingsLoader</a></span> 
 
 </dt>
 <dd>
-  Asynchronously retrieves a <a href="https://pub.dev/documentation/text_indexing/0.0.1+9/text_indexing/Postings.html">Postings</a> subset for a collection of terms
-from a <a href="https://pub.dev/documentation/text_indexing/0.0.1+9/text_indexing/Postings.html">Postings</a> data source.
+  Asynchronously retrieves <a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/Postings.html">Postings</a> for query terms from a data source.
+  <div class="features">read-only</div>
+
+</dd>
+
+        <dt id="queryParser" class="property">
+  <span class="name"><a href="../free_text_search/FreeTextSearch/queryParser.html">queryParser</a></span>
+  <span class="signature">&#8594; QueryParser</span> 
+
+</dt>
+<dd>
+  The query parser
   <div class="features">read-only</div>
 
 </dd>
@@ -106,18 +137,6 @@ from a <a href="https://pub.dev/documentation/text_indexing/0.0.1+9/text_indexin
 <dd class="inherited">
   A representation of the runtime type of the object.
   <div class="features">read-only, inherited</div>
-
-</dd>
-
-        <dt id="termsLoader" class="property">
-  <span class="name"><a href="../free_text_search/FreeTextSearch/termsLoader.html">termsLoader</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/text_indexing/0.0.1+9/text_indexing/DictionaryLoader.html">DictionaryLoader</a></span> 
-
-</dt>
-<dd>
-  Asynchronously retrieves a <a href="https://pub.dev/documentation/text_indexing/0.0.1+9/text_indexing/Dictionary.html">Dictionary</a> subset for a collection of terms
-from a <a href="https://pub.dev/documentation/text_indexing/0.0.1+9/text_indexing/Dictionary.html">Dictionary</a> data source.
-  <div class="features">read-only</div>
 
 </dd>
 
@@ -144,7 +163,7 @@ from a <a href="https://pub.dev/documentation/text_indexing/0.0.1+9/text_indexin
 </dd>
 
         <dt id="search" class="callable">
-  <span class="name"><a href="../free_text_search/FreeTextSearch/search.html">search</a></span><span class="signature">(<wbr><span class="parameter" id="search-param-phrase"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">phrase</span></span>)
+  <span class="name"><a href="../free_text_search/FreeTextSearch/search.html">search</a></span><span class="signature">(<wbr><span class="parameter" id="search-param-phrase"><span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/String-class.html">String</a></span> <span class="parameter-name">phrase</span>, </span><span class="parameter" id="search-param-limit">[<span class="type-annotation"><a href="https://api.flutter.dev/flutter/dart-core/int-class.html">int</a></span> <span class="parameter-name">limit</span> = <span class="default-value">20</span>]</span>)
     <span class="returntype parameter">&#8594; <a href="https://api.flutter.dev/flutter/dart-async/Future-class.html">Future</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.flutter.dev/flutter/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../free_text_search/SearchResult-class.html">SearchResult</a></span>&gt;</span></span>&gt;</span></span>
   </span>
   
@@ -241,10 +260,11 @@ relevance to <code>phrase</code>.
     <li class="section-title">
       <a href="../free_text_search/FreeTextSearch-class.html#instance-properties">Properties</a>
     </li>
+    <li><a href="../free_text_search/FreeTextSearch/dictionaryLoader.html">dictionaryLoader</a></li>
     <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/hashCode.html">hashCode</a></li>
     <li><a href="../free_text_search/FreeTextSearch/postingsLoader.html">postingsLoader</a></li>
+    <li><a href="../free_text_search/FreeTextSearch/queryParser.html">queryParser</a></li>
     <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/runtimeType.html">runtimeType</a></li>
-    <li><a href="../free_text_search/FreeTextSearch/termsLoader.html">termsLoader</a></li>
 
     <li class="section-title"><a href="../free_text_search/FreeTextSearch-class.html#instance-methods">Methods</a></li>
     <li class="inherited"><a href="https://api.flutter.dev/flutter/dart-core/Object/noSuchMethod.html">noSuchMethod</a></li>
@@ -266,7 +286,7 @@ relevance to <code>phrase</code>.
 <footer>
   <span class="no-break">
     free_text_search
-      0.0.1-beta.1
+      0.0.1-beta.2
   </span>
 
   
