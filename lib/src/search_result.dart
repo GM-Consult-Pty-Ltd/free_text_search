@@ -2,8 +2,6 @@
 // BSD 3-Clause License
 // All rights reserved
 
-// import 'package:free_text_search/src/_index.dart';
-
 /// Object model for a ranked search result of a query against a text index:
 /// - [docId] is the unique identifier of the document result in the corpus; and
 /// - [relevance] is the relevance score awarded to the document by the scoring

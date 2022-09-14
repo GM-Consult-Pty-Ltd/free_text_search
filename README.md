@@ -77,9 +77,25 @@ The [examples](https://pub.dev/packages/free_text_search/example) demonstrate th
 
 ## API
 
-### FreeTextQuery class
+### FreeTextSearch class
 
-`TODO: README for FreeTextQuery class`
+The `FreeTextSearch` class exposes the `search` method that returns a list of [SearchResult](#searchresult-class) instances in descending order of relevance.
+
+The length of the returned collection of [SearchResult](#searchresult-class) can be limited by passing a limit parameter to `search`. The default limit is 20.
+
+After parsing the phrase to terms, the `Postings` and `Dictionary` for the query terms are asynchronously retrieved from the index:
+* `FreeTextSearch.dictionaryLoader` retrieves `Dictionary`; 
+* `FreeTextSearch.postingsLoader` retrieves `Postings`;
+* `FreeTextSearch.configuration` is used to tokenize the query phrase (defaults to `English.configuration`); and
+* provide a custom `tokenFilter` if you want to manipulate tokens or restrict tokenization to tokens that meet specific criteria (default is `TextAnalyzer.defaultTokenFilter`.
+  
+Ensure that the `FreeTextSearch.configuration` and `FreeTextSearch.tokenFilter` match the `TextAnalyzer` used to construct the index on the target collection that will be searched.
+
+### SearchResult class  
+
+ The `SearchResult` model represents a ranked search result of a query against a text index:
+ * `SearchResult.docId` is the unique identifier of the document result in the corpus; and
+ * `SearchResult.relevance` is the relevance score awarded to the document by the scoring and ranking  algorithm. Higher scores indicate increased relevance of the document.
 
 ### QueryParser class
 
@@ -88,17 +104,23 @@ The `QueryParser` parses free text queries, returning a collection of [QueryTerm
 The `QueryParser.configuration` and `QueryParser.tokenFilter` should match the `TextAnalyzer`used to construct the index on the target collection that will be searched.
 
 The `QueryParser.parse` method parses a phrase to a collection of [QueryTerm](#queryterm-class)s that includes:
-- all the original words in the phrase, except query modifiers ('AND', 'OR', '"', '+', '-', 'NOT);
-- derived versions of all words returned by the `QueryParser.configuration.termFilter`, including child words and stems or lemmas of exact phrases; and
+* all the original words in the phrase, except query modifiers ('AND', 'OR', '"', '+', '-', 'NOT);
+* derived versions of all words returned by the `QueryParser.configuration.termFilter`, including child words and stems or lemmas of exact phrases; and
 
 A [QueryTerm](#queryterm-class) for a derived version of a term always has its `QueryTerm.modifier` property set to `QueryTermModifier.OR`, unless the term was marked `QueryTermModifier.NOT` in the query phrase.
+
+### FreeTextQuery class
+
+The `FreeTextQuery` enumerates the properties of a text search query:
+* `FreeTextQuery.phrase` is the unmodified search phrase, including all modifiers and tokens; and
+* `FreeTextQuery.terms` is the ordered list of all terms extracted from the `phrase` used to look up results in an inverted index.
 
 ### QueryTerm class
 
 The `QueryTerm` object extends `Token`, and enumerates the properties of a term in a free text query phrase:
-* `term` is the term that will be looked up in the index;
-* `termPosition` is the zero-based position of the `term` in an ordered list of all the terms in the source text; and
-* `modifier` is the [QueryTermModifier](#querytermmodifier-enumeration) applied for this term. The default  modifier` is `QueryTermModifier.AND`.
+* `QueryTerm.term` is the term that will be looked up in the index;
+* `QueryTerm.termPosition` is the zero-based position of the `term` in an ordered list of all the terms in the source text; and
+* `FreeTextQuery.modifier` is the [QueryTermModifier](#querytermmodifier-enumeration) applied for this term. The default modifier` is `QueryTermModifier.AND`.
 
 ### QueryTermModifier Enumeration
 
