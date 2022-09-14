@@ -7,5 +7,5 @@ export 'free_text_search.dart';
 export 'search_result.dart';
 export 'query/_index.dart';
 export 'scoring/_index.dart';
-export 'package:text_analysis/text_analysis.dart';
+export 'package:text_indexing/text_indexing.dart';
 export 'package:text_indexing/text_indexing.dart';

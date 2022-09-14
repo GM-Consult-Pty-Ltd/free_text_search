@@ -5,5 +5,3 @@
 /// Barrel file for src/ folder.
 export 'search_result_scorer.dart';
 export 'vector_space_model.dart';
-export 'package:text_analysis/text_analysis.dart';
-export 'package:text_indexing/text_indexing.dart';

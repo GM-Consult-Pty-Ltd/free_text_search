@@ -7,5 +7,3 @@ export 'query_parser.dart';
 export 'free_text_query.dart';
 export 'query_term_modifier.dart';
 export 'query_term.dart';
-export 'package:text_analysis/text_analysis.dart';
-export 'package:text_indexing/text_indexing.dart';
