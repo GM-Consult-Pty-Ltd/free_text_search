@@ -55,11 +55,11 @@
 <a href="../free_text_search/SearchResult-class.html">SearchResult</a> instances in descending order of relevance.</p>
 <p>The length of the returned collection of <a href="../free_text_search/SearchResult-class.html">SearchResult</a> can be limited by
 passing a limit parameter to <a href="../free_text_search/FreeTextSearch/search.html">search</a>. The default limit is 20.</p>
-<p>After parsing the phrase to terms, the <a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/Postings.html">Postings</a> and <a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/Dictionary.html">Dictionary</a> for the
+<p>After parsing the phrase to terms, the <a href="https://pub.dev/documentation/text_indexing/0.1.0/text_indexing/Postings.html">Postings</a> and <a href="https://pub.dev/documentation/text_indexing/0.1.0/text_indexing/Dictionary.html">Dictionary</a> for the
 query terms are asynchronously retrieved from the index:</p>
 <ul>
-<li><a href="../free_text_search/FreeTextSearch/dictionaryLoader.html">dictionaryLoader</a> retrieves <a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/Dictionary.html">Dictionary</a>; and</li>
-<li><a href="../free_text_search/FreeTextSearch/postingsLoader.html">postingsLoader</a> retrieves <a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/Postings.html">Postings</a>.</li>
+<li><a href="../free_text_search/FreeTextSearch/dictionaryLoader.html">dictionaryLoader</a> retrieves <a href="https://pub.dev/documentation/text_indexing/0.1.0/text_indexing/Dictionary.html">Dictionary</a>; and</li>
+<li><a href="../free_text_search/FreeTextSearch/postingsLoader.html">postingsLoader</a> retrieves <a href="https://pub.dev/documentation/text_indexing/0.1.0/text_indexing/Postings.html">Postings</a>.</li>
 </ul>
 </section>
 
@@ -71,7 +71,7 @@ query terms are asynchronously retrieved from the index:</p>
 
     <dl class="constructor-summary-list">
         <dt id="FreeTextSearch" class="callable">
-          <span class="name"><a href="../free_text_search/FreeTextSearch/FreeTextSearch.html">FreeTextSearch</a></span><span class="signature">(<span class="parameter" id="-param-dictionaryLoader">{<span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/DictionaryLoader.html">DictionaryLoader</a></span> <span class="parameter-name">dictionaryLoader</span>, </span><span class="parameter" id="-param-postingsLoader"><span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/PostingsLoader.html">PostingsLoader</a></span> <span class="parameter-name">postingsLoader</span>, </span><span class="parameter" id="-param-configuration"><span class="type-annotation"><a href="https://pub.dev/documentation/text_analysis/0.2.0+1/text_analysis/TextAnalyzerConfiguration-class.html">TextAnalyzerConfiguration</a></span> <span class="parameter-name">configuration</span> = <span class="default-value">English.configuration</span>, </span><span class="parameter" id="-param-tokenFilter"><span class="type-annotation"><a href="https://pub.dev/documentation/text_analysis/0.2.0+1/text_analysis/TokenFilter.html">TokenFilter</a></span> <span class="parameter-name">tokenFilter</span> = <span class="default-value">TextAnalyzer.defaultTokenFilter</span>}</span>)</span>
+          <span class="name"><a href="../free_text_search/FreeTextSearch/FreeTextSearch.html">FreeTextSearch</a></span><span class="signature">(<span class="parameter" id="-param-dictionaryLoader">{<span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/text_indexing/0.1.0/text_indexing/DictionaryLoader.html">DictionaryLoader</a></span> <span class="parameter-name">dictionaryLoader</span>, </span><span class="parameter" id="-param-postingsLoader"><span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/text_indexing/0.1.0/text_indexing/PostingsLoader.html">PostingsLoader</a></span> <span class="parameter-name">postingsLoader</span>, </span><span class="parameter" id="-param-configuration"><span class="type-annotation"><a href="https://pub.dev/documentation/text_analysis/0.6.0/text_analysis/TextAnalyzerConfiguration-class.html">TextAnalyzerConfiguration</a></span> <span class="parameter-name">configuration</span> = <span class="default-value">English.configuration</span>, </span><span class="parameter" id="-param-tokenFilter"><span class="type-annotation"><a href="https://pub.dev/documentation/text_analysis/0.6.0/text_analysis/TokenFilter.html">TokenFilter</a></span> <span class="parameter-name">tokenFilter</span> = <span class="default-value">TextAnalyzer.defaultTokenFilter</span>}</span>)</span>
         </dt>
         <dd>
           Hydrate a <a href="../free_text_search/FreeTextSearch-class.html">FreeTextSearch</a> instance:
@@ -86,11 +86,11 @@ query terms are asynchronously retrieved from the index:</p>
       <dl class="properties">
         <dt id="dictionaryLoader" class="property">
   <span class="name"><a href="../free_text_search/FreeTextSearch/dictionaryLoader.html">dictionaryLoader</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/DictionaryLoader.html">DictionaryLoader</a></span> 
+  <span class="signature">&#8594; <a href="https://pub.dev/documentation/text_indexing/0.1.0/text_indexing/DictionaryLoader.html">DictionaryLoader</a></span> 
 
 </dt>
 <dd>
-  Asynchronously retrieves a <a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/Dictionary.html">Dictionary</a> for query terms from a data
+  Asynchronously retrieves a <a href="https://pub.dev/documentation/text_indexing/0.1.0/text_indexing/Dictionary.html">Dictionary</a> for query terms from a data
 source.
   <div class="features">read-only</div>
 
@@ -109,11 +109,11 @@ source.
 
         <dt id="postingsLoader" class="property">
   <span class="name"><a href="../free_text_search/FreeTextSearch/postingsLoader.html">postingsLoader</a></span>
-  <span class="signature">&#8594; <a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/PostingsLoader.html">PostingsLoader</a></span> 
+  <span class="signature">&#8594; <a href="https://pub.dev/documentation/text_indexing/0.1.0/text_indexing/PostingsLoader.html">PostingsLoader</a></span> 
 
 </dt>
 <dd>
-  Asynchronously retrieves <a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/Postings.html">Postings</a> for query terms from a data source.
+  Asynchronously retrieves <a href="https://pub.dev/documentation/text_indexing/0.1.0/text_indexing/Postings.html">Postings</a> for query terms from a data source.
   <div class="features">read-only</div>
 
 </dd>
@@ -237,6 +237,7 @@ relevance to <code>phrase</code>.
     <ol>
   <li class="section-title"><a href="../free_text_search/free_text_search-library.html#classes">Classes</a></li>
   <li><a href="../free_text_search/FreeTextSearch-class.html">FreeTextSearch</a></li>
+  <li><a href="../free_text_search/QueryTerm-class.html">QueryTerm</a></li>
   <li><a href="../free_text_search/SearchResult-class.html">SearchResult</a></li>
 
 
@@ -286,7 +287,7 @@ relevance to <code>phrase</code>.
 <footer>
   <span class="no-break">
     free_text_search
-      0.0.1-beta.2
+      0.0.1-beta.3
   </span>
 
   

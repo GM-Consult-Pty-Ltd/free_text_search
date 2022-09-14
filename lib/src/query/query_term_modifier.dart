@@ -19,8 +19,12 @@ enum QueryTermModifier {
   /// Terms preceding and following "OR" are marked [OR].
   OR,
 
-  /// Terms following the hyphen "-" are marked [NOT].
+  /// Terms following the hyphen "-" or the upper case word 'NOT'  are
+  /// marked [NOT].
   NOT,
+
+  /// Terms following the plus sign "+" are marked [IMPORTANT].
+  IMPORTANT,
 
   /// Terms enclosed in double "quotes", are marked [EXACT].
   EXACT

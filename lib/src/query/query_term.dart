@@ -9,10 +9,6 @@ import 'package:free_text_search/src/_index.dart';
 /// - [termPosition] is the zero-based position of the [term] in an ordered
 ///   list of all the terms in the source text;
 /// - [modifier] is the modifier used for this term;
-/// - [index] is the zero-based position of the start of the first character
-///   of [term] in the source text string (deprecated); and
-/// - [position] is the position of the term from the start of the source text
-///   as a fraction of the source text length (deprecated).
 class QueryTerm extends Token {
   //
 
@@ -27,7 +23,7 @@ class QueryTerm extends Token {
   ///   as a fraction of the source text length (deprecated).
   const QueryTerm(String term, this.modifier, int termPosition,
       [int index = 0, double position = 0.0])
-      : super(term, termPosition, position, index);
+      : super(term, termPosition);
 
   /// The modifier used for this term.
   ///

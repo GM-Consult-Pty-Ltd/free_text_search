@@ -52,20 +52,78 @@ All rights reserved.
 <h1 id="free_text_search">free_text_search</h1>
 <p>Search a inverted positional index and return ranked references to documents relevant to the search phrase.</p>
 <p><em>THIS PACKAGE IS IN BETA DEVELOPMENT AND SUBJECT TO DAILY BREAKING CHANGES.</em></p>
-<h2 id="objective">Objective</h2>
-<p>The compoments of this library:</p>
+<p>Skip to section:</p>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#api">API</a></li>
+<li><a href="#definitions">Definitions</a></li>
+<li><a href="#references">References</a></li>
+<li><a href="#issues">Issues</a></li>
+</ul>
+<h2 id="overview">Overview</h2>
+<p>The components of this library:</p>
 <ul>
 <li>parse a free-text phrase to a query;</li>
 <li>search the <code>dictionary</code> and <code>postings</code> of a text <code>index</code> for the query <code>terms</code>;</li>
 <li>perform iterative scoring and ranking of the returned dictionary entries and postings; and</li>
 <li>return ranked references to documents relevant to the search phrase.</li>
 </ul>
-<p><img src="https://github.com/GM-Consult-Pty-Ltd/free_text_search/raw/main/assets/images/free_text_search.png?raw=true?raw=true" alt="Free text search overview" title="Free text search  overview"></p>
-<h2 id="api">API</h2>
-<h3 id="class-freetextquery">class <code>FreeTextQuery</code></h3>
-<h3 id="class-queryparser">class <code>QueryParser</code></h3>
+<p>Query phrases can include <a href="#query-modifiers">modifiers</a> broadly consistent with Google search modifiers.</p>
+<p><img src="https://github.com/GM-Consult-Pty-Ltd/free_text_search/raw/main/assets/images/free_text_search.png?raw=true?raw=true" alt="Free text search overview" title="Free text search overview"></p>
+<p>Refer to the <a href="#references">references</a> to learn more about information retrieval systems and the theory behind this library.</p>
 <h2 id="usage">Usage</h2>
-<p>TODO: describe usage.</p>
+<p>In the <code>pubspec.yaml</code> of your flutter project, add the <code>free_text_search</code> dependency.</p>
+<pre class="language-yaml"><code class="language-yaml">dependencies:
+  free_text_search: &lt;latest version&gt;
+</code></pre>
+<p>In your code file add the <code>free_text_search</code> import.</p>
+<pre class="language-dart"><code class="language-dart">import 'package:free_text_search/free_text_search.dart';
+</code></pre>
+<p>To parse a phrase simply pass it to the <code>QueryParser.parse</code> method, including any <a href="#query-modifiers">modifiers</a> as shown  in the snippet below.</p>
+<pre class="language-dart"><code class="language-dart">// A phrase with all the modifiers
+  const phrase =
+      '"athletics track" +surfaced arena OR stadium "Launceston" -hobart NOT help-me';
+
+  // Pass the phrase to a QueryParser instance parse method
+  final queryTerms = await QueryParser().parse(phrase);
+
+  // The following terms and their `[MODIFIER]` properties are returned
+        // "athletics track" [EXACT] 
+        // "athletics" [OR] 
+        // "track" [OR] 
+        // "surfaced" [IMPORTANT] 
+        // "arena" [AND] 
+        // "stadium" [OR] 
+        // "Launceston" [EXACT] 
+        // "launceston" [OR] 
+        // "hobart" [NOT] 
+        // "help-me" [NOT] 
+        // "help" [NOT]     
+
+</code></pre>
+<p>The <a href="https://pub.dev/packages/free_text_search/example">examples</a> demonstrate the use of the <a href="#queryparser-class">QueryParser</a> and <a href="#persistedindexer-class">PersistedIndexer</a>.</p>
+<h2 id="api">API</h2>
+<h3 id="freetextquery-class"><code>FreeTextQuery</code> class</h3>
+<p><code>TODO: README for FreeTextQuery class</code></p>
+<h3 id="queryparser-class"><code>QueryParser</code> class</h3>
+<p><code>QueryParser</code> parses free text queries, returning a collection of <code>QueryTerm</code> objects that enumerate each term and its <code>QueryTermModifier</code>.</p>
+<p>The <code>QueryParser.configuration</code> and <code>QueryParser.tokenFilter</code> should match the <code>TextAnalyzer</code>used to construct the index on the target collection that will be searched.</p>
+<h4 id="query-modifiers">Query modifiers</h4>
+<p>The phrase can include the following modifiers to guide the the search results scoring/ranking algorithm:</p>
+<ul>
+<li>terms or phrases wrapped in double quotes will be marked <code>QueryTermModifier.EXACT</code> (e.g.<code>"athletics track"</code>);</li>
+<li>terms preceded by <code>"OR"</code> are marked <code>QueryTermModifier.OR</code> and are alternatives to the preceding term;</li>
+<li>terms can be preceded by <code>"NOT" or "-"</code> are marked <code>QueryTermModifier.NOT</code> to rank results lower if they include these terms;</li>
+<li>terms following the plus sign <code>"+"</code> are marked <code>QueryTermModifier.IMPORTANT</code> to rank results that include these terms higher; and</li>
+<li>all other terms are marked as <code>QueryTermModifier.AND</code>.</li>
+</ul>
+<p>The <code>QueryParser.parse</code> method parses a phrase to a collection of <code>QueryTerm</code>s that includes:</p>
+<ul>
+<li>all the original words in the phrase, except query modifiers ('AND', 'OR', '"', '-', 'NOT);</li>
+<li>derived versions of all words returned by the <code>QueryParser.configuration.termFilter</code>, including child words of exact hrases; and</li>
+<li>derived versions of all words always have the <code>QueryTermModifier.OR</code> unless they are already marked <code>QueryTermModifier.NOT</code>.</li>
+</ul>
 <h2 id="definitions">Definitions</h2>
 <p>The following definitions are used throughout the <a href="https://pub.dev/documentation/free_text_search/latest/">documentation</a>:</p>
 <ul>
@@ -138,7 +196,7 @@ All rights reserved.
 <footer>
   <span class="no-break">
     free_text_search
-      0.0.1-beta.2
+      0.0.1-beta.3
   </span>
 
   

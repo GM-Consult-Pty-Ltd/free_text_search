@@ -50,10 +50,10 @@
 </h1></div>
 
     <section class="multi-line-signature">
-      <span class="name ">FreeTextSearch</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="-param-dictionaryLoader">{<span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/DictionaryLoader.html">DictionaryLoader</a></span> <span class="parameter-name">dictionaryLoader</span>, </span></li>
-<li><span class="parameter" id="-param-postingsLoader"><span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/PostingsLoader.html">PostingsLoader</a></span> <span class="parameter-name">postingsLoader</span>, </span></li>
-<li><span class="parameter" id="-param-configuration"><span class="type-annotation"><a href="https://pub.dev/documentation/text_analysis/0.2.0+1/text_analysis/TextAnalyzerConfiguration-class.html">TextAnalyzerConfiguration</a></span> <span class="parameter-name">configuration</span> = <span class="default-value">English.configuration</span>, </span></li>
-<li><span class="parameter" id="-param-tokenFilter"><span class="type-annotation"><a href="https://pub.dev/documentation/text_analysis/0.2.0+1/text_analysis/TokenFilter.html">TokenFilter</a></span> <span class="parameter-name">tokenFilter</span> = <span class="default-value">TextAnalyzer.defaultTokenFilter</span>}</span></li>
+      <span class="name ">FreeTextSearch</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="-param-dictionaryLoader">{<span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/text_indexing/0.1.0/text_indexing/DictionaryLoader.html">DictionaryLoader</a></span> <span class="parameter-name">dictionaryLoader</span>, </span></li>
+<li><span class="parameter" id="-param-postingsLoader"><span>required</span> <span class="type-annotation"><a href="https://pub.dev/documentation/text_indexing/0.1.0/text_indexing/PostingsLoader.html">PostingsLoader</a></span> <span class="parameter-name">postingsLoader</span>, </span></li>
+<li><span class="parameter" id="-param-configuration"><span class="type-annotation"><a href="https://pub.dev/documentation/text_analysis/0.6.0/text_analysis/TextAnalyzerConfiguration-class.html">TextAnalyzerConfiguration</a></span> <span class="parameter-name">configuration</span> = <span class="default-value">English.configuration</span>, </span></li>
+<li><span class="parameter" id="-param-tokenFilter"><span class="type-annotation"><a href="https://pub.dev/documentation/text_analysis/0.6.0/text_analysis/TokenFilter.html">TokenFilter</a></span> <span class="parameter-name">tokenFilter</span> = <span class="default-value">TextAnalyzer.defaultTokenFilter</span>}</span></li>
 </ol>)
     </section>
 
@@ -61,17 +61,17 @@
 <section class="desc markdown">
   <p>Hydrate a <a href="../../free_text_search/FreeTextSearch-class.html">FreeTextSearch</a> instance:</p>
 <ul>
-<li><code>dictionaryLoader</code> asynchronously retrieves a <a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/Dictionary.html">Dictionary</a> for query
+<li><code>dictionaryLoader</code> asynchronously retrieves a <a href="https://pub.dev/documentation/text_indexing/0.1.0/text_indexing/Dictionary.html">Dictionary</a> for query
 terms from a data source;</li>
-<li><code>postingsLoader</code> asynchronously retrieves <a href="https://pub.dev/documentation/text_indexing/0.0.1+10/text_indexing/Postings.html">Postings</a> for query terms
+<li><code>postingsLoader</code> asynchronously retrieves <a href="https://pub.dev/documentation/text_indexing/0.1.0/text_indexing/Postings.html">Postings</a> for query terms
 from a data source;</li>
 <li><code>configuration</code> is used to tokenize the query phrase (defaults to
-<a href="https://pub.dev/documentation/text_analysis/0.2.0+1/text_analysis/English/configuration-constant.html">English.configuration</a>); and</li>
+<a href="https://pub.dev/documentation/text_analysis/0.6.0/text_analysis/English/configuration-constant.html">English.configuration</a>); and</li>
 <li>provide a custom <code>tokenFilter</code> if you want to manipulate tokens or
 restrict tokenization to tokens that meet specific criteria (default is
-<a href="https://pub.dev/documentation/text_analysis/0.2.0+1/text_analysis/TextAnalyzer/defaultTokenFilter.html">TextAnalyzer.defaultTokenFilter</a>.</li>
+<a href="https://pub.dev/documentation/text_analysis/0.6.0/text_analysis/TextAnalyzer/defaultTokenFilter.html">TextAnalyzer.defaultTokenFilter</a>.</li>
 </ul>
-<p>Ensure that the <code>configuration</code> and <code>tokenFilter</code> match the <a href="https://pub.dev/documentation/text_analysis/0.2.0+1/text_analysis/TextAnalyzer-class.html">TextAnalyzer</a>
+<p>Ensure that the <code>configuration</code> and <code>tokenFilter</code> match the <a href="https://pub.dev/documentation/text_analysis/0.6.0/text_analysis/TextAnalyzer-class.html">TextAnalyzer</a>
 used to construct the index on the target collection that will be searched.</p>
 </section>
 
@@ -147,7 +147,7 @@ used to construct the index on the target collection that will be searched.</p>
 <footer>
   <span class="no-break">
     free_text_search
-      0.0.1-beta.2
+      0.0.1-beta.3
   </span>
 
   

@@ -3,9 +3,9 @@
 // All rights reserved
 
 /// Barrel file for src/ folder.
-export 'free_text_search.dart';
-export 'search_result.dart';
-export 'query/_index.dart';
-export 'scoring/_index.dart';
+export 'query_parser.dart';
+export 'free_text_query.dart';
+export 'query_term_modifier.dart';
+export 'query_term.dart';
 export 'package:text_analysis/text_analysis.dart';
 export 'package:text_indexing/text_indexing.dart';

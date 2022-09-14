@@ -6,13 +6,9 @@ import 'package:free_text_search/src/_index.dart';
 
 /// A object model class that enumerates the properties of a text search query:
 /// - [phrase] is the unmodified search phrase, including all modifiers and
-///   tokens;
+///   tokens; and
 /// - [terms] is the ordered list of all terms extracted from the [phrase]
-///   used to look up results in an inverted index;
-/// - [mustInclude] is a set of unique terms that must appear at least once
-///   in a document for it to be included in the search results; and
-/// - [excludeTerms] is a set of unique terms that must not appear in a
-///   document for it to be included in the search results.
+///   used to look up results in an inverted index.
 class FreeTextQuery {
 //
 
@@ -26,14 +22,8 @@ class FreeTextQuery {
   /// Instantiates a const [FreeTextQuery] with the following required
   /// parameters:
   /// - [phrase] is the unmodified search phrase, including all modifiers and
-  ///   tokens;
+  ///   tokens; and
   /// - [terms] is the ordered list of all terms extracted from the [phrase]
-  ///   used to look up results in an inverted index;
-  /// - [mustInclude] is a set of unique terms that must appear at least once
-  ///   in a document for it to be included in the search results (defaults to an
-  ///   empty set); and
-  /// - [excludeTerms] is a set of unique terms that must not appear in a
-  ///   document for it to be included in the search results (defaults to an
-  ///   empty set).
+  ///   used to look up results in an inverted index.
   const FreeTextQuery({required this.phrase, required this.terms});
 }

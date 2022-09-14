@@ -10,25 +10,96 @@ Search a inverted positional index and return ranked references to documents rel
 
 *THIS PACKAGE IS IN BETA DEVELOPMENT AND SUBJECT TO DAILY BREAKING CHANGES.*
 
-## Objective
+Skip to section:
+- [Overview](#overview)
+- [Usage](#usage)
+- [API](#api)
+- [Definitions](#definitions)
+- [References](#references)
+- [Issues](#issues)
 
-The compoments of this library:
+
+## Overview
+
+The components of this library:
 * parse a free-text phrase to a query; 
 * search the `dictionary` and `postings` of a text `index` for the query `terms`; 
 * perform iterative scoring and ranking of the returned dictionary entries and postings; and 
 * return ranked references to documents relevant to the search phrase.
 
-![Free text search overview](https://github.com/GM-Consult-Pty-Ltd/free_text_search/raw/main/assets/images/free_text_search.png?raw=true?raw=true "Free text search  overview")
+Query phrases can include [modifiers](#query-modifiers) broadly consistent with Google search modifiers. 
 
-## API
+![Free text search overview](https://github.com/GM-Consult-Pty-Ltd/free_text_search/raw/main/assets/images/free_text_search.png?raw=true?raw=true "Free text search overview")
 
-### class `FreeTextQuery` 
-
-### class `QueryParser`
+Refer to the [references](#references) to learn more about information retrieval systems and the theory behind this library.
 
 ## Usage
 
-TODO: describe usage.
+In the `pubspec.yaml` of your flutter project, add the `free_text_search` dependency.
+
+```yaml
+dependencies:
+  free_text_search: <latest version>
+```
+
+In your code file add the `free_text_search` import.
+
+```dart
+import 'package:free_text_search/free_text_search.dart';
+```
+
+To parse a phrase simply pass it to the `QueryParser.parse` method, including any [modifiers](#query-modifiers) as shown  in the snippet below. 
+
+```dart
+// A phrase with all the modifiers
+  const phrase =
+      '"athletics track" +surfaced arena OR stadium "Launceston" -hobart NOT help-me';
+
+  // Pass the phrase to a QueryParser instance parse method
+  final queryTerms = await QueryParser().parse(phrase);
+
+  // The following terms and their `[MODIFIER]` properties are returned
+        // "athletics track" [EXACT] 
+        // "athletics" [OR] 
+        // "track" [OR] 
+        // "surfaced" [IMPORTANT] 
+        // "arena" [AND] 
+        // "stadium" [OR] 
+        // "Launceston" [EXACT] 
+        // "launceston" [OR] 
+        // "hobart" [NOT] 
+        // "help-me" [NOT] 
+        // "help" [NOT]     
+
+```
+
+The [examples](https://pub.dev/packages/free_text_search/example) demonstrate the use of the [QueryParser](#queryparser-class) and [PersistedIndexer](#persistedindexer-class).
+
+## API
+
+### `FreeTextQuery` class
+
+`TODO: README for FreeTextQuery class`
+
+### `QueryParser` class
+
+`QueryParser` parses free text queries, returning a collection of `QueryTerm` objects that enumerate each term and its `QueryTermModifier`.
+
+The `QueryParser.configuration` and `QueryParser.tokenFilter` should match the `TextAnalyzer`used to construct the index on the target collection that will be searched.
+
+#### Query modifiers
+
+The phrase can include the following modifiers to guide the the search results scoring/ranking algorithm:
+* terms or phrases wrapped in double quotes will be marked `QueryTermModifier.EXACT` (e.g.`"athletics track"`);
+* terms preceded by `"OR"` are marked `QueryTermModifier.OR` and are alternatives to the preceding term;
+* terms can be preceded by `"NOT" or "-"` are marked `QueryTermModifier.NOT` to rank results lower if they include these terms; 
+* terms following the plus sign `"+"` are marked `QueryTermModifier.IMPORTANT` to rank results that include these terms higher; and
+* all other terms are marked as `QueryTermModifier.AND`.
+
+The `QueryParser.parse` method parses a phrase to a collection of `QueryTerm`s that includes:
+- all the original words in the phrase, except query modifiers ('AND', 'OR', '"', '-', 'NOT);
+- derived versions of all words returned by the `QueryParser.configuration.termFilter`, including child words of exact hrases; and
+- derived versions of all words always have the `QueryTermModifier.OR` unless they are already marked `QueryTermModifier.NOT`.
 
 ## Definitions
 

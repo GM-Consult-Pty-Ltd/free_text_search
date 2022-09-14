@@ -66,7 +66,7 @@ class _FreeTextSearchImpl implements FreeTextSearch {
 
   @override
   Future<List<SearchResult>> search(String phrase, [int limit = 20]) async {
-    final queryTerms = queryParser.parse(phrase);
+    final queryTerms = await queryParser.parse(phrase);
     final query = FreeTextQuery(phrase: phrase, terms: queryTerms);
     final terms = queryTerms.map((e) => e.term);
     final dictionary = await dictionaryLoader(terms);
