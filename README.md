@@ -22,8 +22,8 @@ Skip to section:
 ## Overview
 
 The components of this library:
-* parse a free-text phrase to a query; 
-* search the `dictionary` and `postings` of a text `index` for the query `terms`; 
+* parse a free-text phrase with [query modifiers](#querytermmodifier-enumeration) to a query; 
+* search the `dictionary` and `postings` of a text `index` for the query [terms](#queryterm-class); 
 * perform iterative scoring and ranking of the returned dictionary entries and postings; and 
 * return ranked references to documents relevant to the search phrase.
 
@@ -48,7 +48,7 @@ In your code file add the `free_text_search` import.
 import 'package:free_text_search/free_text_search.dart';
 ```
 
-To parse a phrase simply pass it to the `QueryParser.parse` method, including any [modifiers](#query-modifiers) as shown  in the snippet below. 
+To parse a phrase simply pass it to the `QueryParser.parse` method, including any [modifiers](#querytermmodifier-enumeration) as shown  in the snippet below. 
 
 ```dart
 // A phrase with all the modifiers
@@ -77,29 +77,37 @@ The [examples](https://pub.dev/packages/free_text_search/example) demonstrate th
 
 ## API
 
-### `FreeTextQuery` class
+### FreeTextQuery class
 
 `TODO: README for FreeTextQuery class`
 
-### `QueryParser` class
+### QueryParser class
 
-`QueryParser` parses free text queries, returning a collection of `QueryTerm` objects that enumerate each term and its `QueryTermModifier`.
+The `QueryParser` parses free text queries, returning a collection of [QueryTerm](#queryterm-class) objects that enumerate each term and its [QueryTermModifier](#querytermmodifier-enumeration).
 
 The `QueryParser.configuration` and `QueryParser.tokenFilter` should match the `TextAnalyzer`used to construct the index on the target collection that will be searched.
 
-#### Query modifiers
+The `QueryParser.parse` method parses a phrase to a collection of [QueryTerm](#queryterm-class)s that includes:
+- all the original words in the phrase, except query modifiers ('AND', 'OR', '"', '+', '-', 'NOT);
+- derived versions of all words returned by the `QueryParser.configuration.termFilter`, including child words and stems or lemmas of exact phrases; and
+
+A [QueryTerm](#queryterm-class) for a derived version of a term always has its `QueryTerm.modifier` property set to `QueryTermModifier.OR`, unless the term was marked `QueryTermModifier.NOT` in the query phrase.
+
+### QueryTerm class
+
+The `QueryTerm` object extends `Token`, and enumerates the properties of a term in a free text query phrase:
+* `term` is the term that will be looked up in the index;
+* `termPosition` is the zero-based position of the `term` in an ordered list of all the terms in the source text; and
+* `modifier` is the [QueryTermModifier](#querytermmodifier-enumeration) applied for this term. The default  modifier` is `QueryTermModifier.AND`.
+
+### QueryTermModifier Enumeration
 
 The phrase can include the following modifiers to guide the the search results scoring/ranking algorithm:
 * terms or phrases wrapped in double quotes will be marked `QueryTermModifier.EXACT` (e.g.`"athletics track"`);
 * terms preceded by `"OR"` are marked `QueryTermModifier.OR` and are alternatives to the preceding term;
-* terms can be preceded by `"NOT" or "-"` are marked `QueryTermModifier.NOT` to rank results lower if they include these terms; 
+* terms preceded by `"NOT" or "-"` are marked `QueryTermModifier.NOT` to rank results lower if they include these terms; 
 * terms following the plus sign `"+"` are marked `QueryTermModifier.IMPORTANT` to rank results that include these terms higher; and
 * all other terms are marked as `QueryTermModifier.AND`.
-
-The `QueryParser.parse` method parses a phrase to a collection of `QueryTerm`s that includes:
-- all the original words in the phrase, except query modifiers ('AND', 'OR', '"', '-', 'NOT);
-- derived versions of all words returned by the `QueryParser.configuration.termFilter`, including child words of exact hrases; and
-- derived versions of all words always have the `QueryTermModifier.OR` unless they are already marked `QueryTermModifier.NOT`.
 
 ## Definitions
 
@@ -108,9 +116,9 @@ The following definitions are used throughout the [documentation](https://pub.de
 * `corpus`- the collection of `documents` for which an `index` is maintained.
 * `dictionary` - is a hash of `terms` (`vocabulary`) to the frequency of occurence in the `corpus` documents.
 * `document` - a record in the `corpus`, that has a unique identifier (`docId`) in the `corpus`'s primary key and that contains one or more text fields that are indexed.
-* `index` - an [inverted index](https://en.wikipedia.org/wiki/Inverted_index) used to look up `document` references from the `corpus` against a `vocabulary` of `terms`. The implementation in this package builds and maintains a positional inverted index, that also includes the positions of the indexed `term` in each `document`.
-* `postings` - a separate index that records which `documents` the `vocabulary` occurs in. In this implementation we also record the positions of each `term` in the `text` to create a positional inverted `index`.
-* `postings list` - a record of the positions of a `term` in a `document`. A position of a `term` refers to the index of the `term` in an array that contains all the `terms` in the `text`.
+* `index` - an [inverted index](https://en.wikipedia.org/wiki/Inverted_index) used to look up `document` references from the `corpus` against a `vocabulary` of `terms`. The implementation in this library relies on a positional inverted index, that also includes the positions of the indexed `term` in each `document`.
+* `postings` - a separate index that records which `documents` the `vocabulary` occurs in. .
+* `postings list` - a record of the positions of a `term` in a `document` and its fields. A position of a `term` refers to the index of the `term` in an array that contains all the `terms` in the `text`.
 * `term` - a word or phrase that is indexed from the `corpus`. The `term` may differ from the actual word used in the corpus depending on the `tokenizer` used.
 * `text` - the indexable content of a `document`.
 * `token` - representation of a `term` in a text source returned by a `tokenizer`. The token may include information about the `term` such as its position(s) in the text or frequency of occurrence.

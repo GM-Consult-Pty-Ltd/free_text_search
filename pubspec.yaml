@@ -4,7 +4,7 @@
 
 name: free_text_search
 description: Search a inverted positional index and return ranked references to documents relevant to the search phrase.
-version: 0.0.1-beta.3
+version: 0.0.1-beta.4
 repository: https://github.com/GM-Consult-Pty-Ltd/free_text_search
 homepage: https://github.com/GM-Consult-Pty-Ltd
 issue_tracker: https://github.com/GM-Consult-Pty-Ltd/free_text_search/issues

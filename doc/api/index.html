@@ -64,8 +64,8 @@ All rights reserved.
 <h2 id="overview">Overview</h2>
 <p>The components of this library:</p>
 <ul>
-<li>parse a free-text phrase to a query;</li>
-<li>search the <code>dictionary</code> and <code>postings</code> of a text <code>index</code> for the query <code>terms</code>;</li>
+<li>parse a free-text phrase with <a href="#querytermmodifier-enumeration">query modifiers</a> to a query;</li>
+<li>search the <code>dictionary</code> and <code>postings</code> of a text <code>index</code> for the query <a href="#queryterm-class">terms</a>;</li>
 <li>perform iterative scoring and ranking of the returned dictionary entries and postings; and</li>
 <li>return ranked references to documents relevant to the search phrase.</li>
 </ul>
@@ -80,7 +80,7 @@ All rights reserved.
 <p>In your code file add the <code>free_text_search</code> import.</p>
 <pre class="language-dart"><code class="language-dart">import 'package:free_text_search/free_text_search.dart';
 </code></pre>
-<p>To parse a phrase simply pass it to the <code>QueryParser.parse</code> method, including any <a href="#query-modifiers">modifiers</a> as shown  in the snippet below.</p>
+<p>To parse a phrase simply pass it to the <code>QueryParser.parse</code> method, including any <a href="#querytermmodifier-enumeration">modifiers</a> as shown  in the snippet below.</p>
 <pre class="language-dart"><code class="language-dart">// A phrase with all the modifiers
   const phrase =
       '"athletics track" +surfaced arena OR stadium "Launceston" -hobart NOT help-me';
@@ -104,25 +104,32 @@ All rights reserved.
 </code></pre>
 <p>The <a href="https://pub.dev/packages/free_text_search/example">examples</a> demonstrate the use of the <a href="#queryparser-class">QueryParser</a> and <a href="#persistedindexer-class">PersistedIndexer</a>.</p>
 <h2 id="api">API</h2>
-<h3 id="freetextquery-class"><code>FreeTextQuery</code> class</h3>
+<h3 id="freetextquery-class">FreeTextQuery class</h3>
 <p><code>TODO: README for FreeTextQuery class</code></p>
-<h3 id="queryparser-class"><code>QueryParser</code> class</h3>
-<p><code>QueryParser</code> parses free text queries, returning a collection of <code>QueryTerm</code> objects that enumerate each term and its <code>QueryTermModifier</code>.</p>
+<h3 id="queryparser-class">QueryParser class</h3>
+<p>The <code>QueryParser</code> parses free text queries, returning a collection of <a href="#queryterm-class">QueryTerm</a> objects that enumerate each term and its <a href="#querytermmodifier-enumeration">QueryTermModifier</a>.</p>
 <p>The <code>QueryParser.configuration</code> and <code>QueryParser.tokenFilter</code> should match the <code>TextAnalyzer</code>used to construct the index on the target collection that will be searched.</p>
-<h4 id="query-modifiers">Query modifiers</h4>
+<p>The <code>QueryParser.parse</code> method parses a phrase to a collection of <a href="#queryterm-class">QueryTerm</a>s that includes:</p>
+<ul>
+<li>all the original words in the phrase, except query modifiers ('AND', 'OR', '"', '+', '-', 'NOT);</li>
+<li>derived versions of all words returned by the <code>QueryParser.configuration.termFilter</code>, including child words and stems or lemmas of exact phrases; and</li>
+</ul>
+<p>A <a href="#queryterm-class">QueryTerm</a> for a derived version of a term always has its <code>QueryTerm.modifier</code> property set to <code>QueryTermModifier.OR</code>, unless the term was marked <code>QueryTermModifier.NOT</code> in the query phrase.</p>
+<h3 id="queryterm-class">QueryTerm class</h3>
+<p>The <code>QueryTerm</code> object extends <code>Token</code>, and enumerates the properties of a term in a free text query phrase:</p>
+<ul>
+<li><code>term</code> is the term that will be looked up in the index;</li>
+<li><code>termPosition</code> is the zero-based position of the <code>term</code> in an ordered list of all the terms in the source text; and</li>
+<li><code>modifier</code> is the <a href="#querytermmodifier-enumeration">QueryTermModifier</a> applied for this term. The default  modifier<code>is</code>QueryTermModifier.AND`.</li>
+</ul>
+<h3 id="querytermmodifier-enumeration">QueryTermModifier Enumeration</h3>
 <p>The phrase can include the following modifiers to guide the the search results scoring/ranking algorithm:</p>
 <ul>
 <li>terms or phrases wrapped in double quotes will be marked <code>QueryTermModifier.EXACT</code> (e.g.<code>"athletics track"</code>);</li>
 <li>terms preceded by <code>"OR"</code> are marked <code>QueryTermModifier.OR</code> and are alternatives to the preceding term;</li>
-<li>terms can be preceded by <code>"NOT" or "-"</code> are marked <code>QueryTermModifier.NOT</code> to rank results lower if they include these terms;</li>
+<li>terms preceded by <code>"NOT" or "-"</code> are marked <code>QueryTermModifier.NOT</code> to rank results lower if they include these terms;</li>
 <li>terms following the plus sign <code>"+"</code> are marked <code>QueryTermModifier.IMPORTANT</code> to rank results that include these terms higher; and</li>
 <li>all other terms are marked as <code>QueryTermModifier.AND</code>.</li>
-</ul>
-<p>The <code>QueryParser.parse</code> method parses a phrase to a collection of <code>QueryTerm</code>s that includes:</p>
-<ul>
-<li>all the original words in the phrase, except query modifiers ('AND', 'OR', '"', '-', 'NOT);</li>
-<li>derived versions of all words returned by the <code>QueryParser.configuration.termFilter</code>, including child words of exact hrases; and</li>
-<li>derived versions of all words always have the <code>QueryTermModifier.OR</code> unless they are already marked <code>QueryTermModifier.NOT</code>.</li>
 </ul>
 <h2 id="definitions">Definitions</h2>
 <p>The following definitions are used throughout the <a href="https://pub.dev/documentation/free_text_search/latest/">documentation</a>:</p>
@@ -130,9 +137,9 @@ All rights reserved.
 <li><code>corpus</code>- the collection of <code>documents</code> for which an <code>index</code> is maintained.</li>
 <li><code>dictionary</code> - is a hash of <code>terms</code> (<code>vocabulary</code>) to the frequency of occurence in the <code>corpus</code> documents.</li>
 <li><code>document</code> - a record in the <code>corpus</code>, that has a unique identifier (<code>docId</code>) in the <code>corpus</code>'s primary key and that contains one or more text fields that are indexed.</li>
-<li><code>index</code> - an <a href="https://en.wikipedia.org/wiki/Inverted_index">inverted index</a> used to look up <code>document</code> references from the <code>corpus</code> against a <code>vocabulary</code> of <code>terms</code>. The implementation in this package builds and maintains a positional inverted index, that also includes the positions of the indexed <code>term</code> in each <code>document</code>.</li>
-<li><code>postings</code> - a separate index that records which <code>documents</code> the <code>vocabulary</code> occurs in. In this implementation we also record the positions of each <code>term</code> in the <code>text</code> to create a positional inverted <code>index</code>.</li>
-<li><code>postings list</code> - a record of the positions of a <code>term</code> in a <code>document</code>. A position of a <code>term</code> refers to the index of the <code>term</code> in an array that contains all the <code>terms</code> in the <code>text</code>.</li>
+<li><code>index</code> - an <a href="https://en.wikipedia.org/wiki/Inverted_index">inverted index</a> used to look up <code>document</code> references from the <code>corpus</code> against a <code>vocabulary</code> of <code>terms</code>. The implementation in this library relies on a positional inverted index, that also includes the positions of the indexed <code>term</code> in each <code>document</code>.</li>
+<li><code>postings</code> - a separate index that records which <code>documents</code> the <code>vocabulary</code> occurs in. .</li>
+<li><code>postings list</code> - a record of the positions of a <code>term</code> in a <code>document</code> and its fields. A position of a <code>term</code> refers to the index of the <code>term</code> in an array that contains all the <code>terms</code> in the <code>text</code>.</li>
 <li><code>term</code> - a word or phrase that is indexed from the <code>corpus</code>. The <code>term</code> may differ from the actual word used in the corpus depending on the <code>tokenizer</code> used.</li>
 <li><code>text</code> - the indexable content of a <code>document</code>.</li>
 <li><code>token</code> - representation of a <code>term</code> in a text source returned by a <code>tokenizer</code>. The token may include information about the <code>term</code> such as its position(s) in the text or frequency of occurrence.</li>
@@ -196,7 +203,7 @@ All rights reserved.
 <footer>
   <span class="no-break">
     free_text_search
-      0.0.1-beta.3
+      0.0.1-beta.4
   </span>
 
   
