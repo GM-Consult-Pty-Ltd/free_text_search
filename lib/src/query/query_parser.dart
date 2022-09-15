@@ -103,7 +103,7 @@ class QueryParser extends TextAnalyzer {
               if (subTerm.isNotEmpty) {
                 // not an empty subTerm, so let's stem/split the subTerm by
                 // passing it to the termFilter callback
-                final filteredTerms = await _termFilter(subTerm);
+                final filteredTerms = (await tokenize(subTerm)).tokens.terms;
                 // now iterate through whatever we got back from the termFilter
                 for (final e in filteredTerms) {
                   // check the term is not already in the list
@@ -117,7 +117,7 @@ class QueryParser extends TextAnalyzer {
           } else {
             // this is not an EXACT match term, so pass it to the termFilter to
             // get the stemmed version or split terms and add it/them to the list
-            searchTerms.addAll(await _termFilter(rawTermOrPhrase));
+            searchTerms.addAll((await tokenize(rawTermOrPhrase)).tokens.terms);
           }
           // Let's get rid of duplicates.
           searchTerms = Set<String>.from(searchTerms).toList();

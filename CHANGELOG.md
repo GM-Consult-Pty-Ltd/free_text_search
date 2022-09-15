@@ -4,6 +4,16 @@ Copyright (c) 2022, GM Consult Pty Ltd
 All rights reserved. 
 -->
 
+### 0.0.1-beta.5
+
+- **PRE-RELEASE**
+- Added interface `Document`.
+- Added `Ft Postings.tFt(Term)` and `Ft Postings.dFt(Term)` methods.
+- Added `Ft DocumentPostingsEntry.tFt` getter.
+- Updated tests.
+- Updated examples.
+- Updated documentation.
+
 ### 0.0.1-beta.4
 
 - **PRE-RELEASE**
