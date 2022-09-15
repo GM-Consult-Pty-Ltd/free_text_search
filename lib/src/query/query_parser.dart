@@ -31,9 +31,6 @@ class QueryParser extends TextAnalyzer {
       TokenFilter tokenFilter = TextAnalyzer.defaultTokenFilter})
       : super(configuration: configuration, tokenFilter: tokenFilter);
 
-  /// Shortcut to configuration.termFilter
-  TermFilter get _termFilter => configuration.termFilter;
-
   /// Shortcut to configuration.termSplitter
   TermSplitter get _termSplitter => configuration.termSplitter;
 

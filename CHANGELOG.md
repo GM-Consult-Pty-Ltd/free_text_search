@@ -10,6 +10,7 @@ All rights reserved.
 - Added interface `Document`.
 - Added `Ft Postings.tFt(Term)` and `Ft Postings.dFt(Term)` methods.
 - Added `Ft DocumentPostingsEntry.tFt` getter.
+- Updated dependecies.
 - Updated tests.
 - Updated examples.
 - Updated documentation.

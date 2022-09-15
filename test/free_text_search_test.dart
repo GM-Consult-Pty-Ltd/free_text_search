@@ -2,6 +2,8 @@
 // BSD 3-Clause License
 // All rights reserved
 
+// ignore_for_file: unused_local_variable
+
 // ignore: unused_import
 import 'package:free_text_search/free_text_search.dart';
 import 'package:free_text_search/src/_index.dart';

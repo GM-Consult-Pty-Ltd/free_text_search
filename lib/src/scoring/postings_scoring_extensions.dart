@@ -52,15 +52,6 @@ extension PostingsScoringExtension on Postings {
   /// ```
   double idFt(Term t, int N) => log(N / dFt(t));
 
-  /// Returns all the unique document ids ([DocId]) in the [Postings].
-  Set<DocId> get documents {
-    final Set<DocId> retVal = {};
-    for (final docPostings in values) {
-      retVal.addAll(docPostings.keys);
-    }
-    return retVal;
-  }
-
   /// Returns a [Set] of [DocId] of those documents that contain all the
   /// [terms].
   Set<DocId> get andDocuments => containsAll(terms);
