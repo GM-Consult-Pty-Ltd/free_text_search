@@ -5,3 +5,4 @@
 /// Barrel file for src/ folder.
 export 'search_result_scorer.dart';
 export 'vector_space_model.dart';
+export 'postings_scoring_extensions.dart';
