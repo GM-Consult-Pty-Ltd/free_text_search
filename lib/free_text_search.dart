@@ -9,4 +9,4 @@ library free_text_search;
 /// src/_index.dart exports the barrel files from
 export 'src/free_text_search.dart';
 export 'src/query/query_term.dart';
-export 'src/search_result.dart';
+export 'src/scoring/search_result.dart';

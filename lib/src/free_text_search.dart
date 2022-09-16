@@ -40,7 +40,7 @@ abstract class FreeTextSearch {
     return _FreeTextSearchImpl(dictionaryLoader, postingsLoader, queryParser);
   }
 
-  /// The query parser
+  /// The query parser returns a [FreeTextQuery] from a searh phrase.
   QueryParser get queryParser;
 
   /// Asynchronously retrieves [Postings] for query terms from a data source.

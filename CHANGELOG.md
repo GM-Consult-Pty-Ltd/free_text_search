@@ -4,43 +4,48 @@ Copyright (c) 2022, GM Consult Pty Ltd
 All rights reserved. 
 -->
 
+### 0.0.1-beta.6 
+
+Added:
+- `ChampionList` definition and extensions.
+- scoring extension `Ft Postings.cFt(term)`;
+- scoring extension `Ft Postings.dFt(term)`; and
+- scoring extension `Ft DocumentPostingsEntry.tfIdf(idFt)`.
+
+Updated dependencies, tests, examples and documentation.
+
 ### 0.0.1-beta.5
 
-- **PRE-RELEASE**
-- Added interface `Document`.
-- Added `Ft Postings.tFt(Term)` and `Ft Postings.dFt(Term)` methods.
-- Added `Ft DocumentPostingsEntry.tFt` getter.
-- Updated dependecies.
-- Updated tests.
-- Updated examples.
-- Updated documentation.
+Added:
+- interface `Document`.
+- `Ft Postings.tFt(Term)` and `Ft Postings.dFt(Term)` methods.
+- `Ft DocumentPostingsEntry.tFt` getter.
+
+Updated dependencies, tests, examples and documentation.
 
 ### 0.0.1-beta.4
 
-- **PRE-RELEASE**
-- Updated documentation.
+Updated documentation.
 
 ### 0.0.1-beta.3
 
-- **PRE-RELEASE**
-- Testing of `QueryParser` passed.
-- Updated tests.
-- Updated examples.
-- Updated documentation.
+Testing of `QueryParser` passed.
+
+Updated dependencies, tests, examples and documentation.
 
 ### 0.0.1-beta.2
 
-- **PRE-RELEASE**
-- Added object model class `FreeTextQuery`.
-- Added interface class `FreeTextSearch`.
-- Added private implementation class `_FreeTextSearchImpl`.
-- Added enum `QueryTermModifier`.
-- Added class `QueryParser`.
-- Added stub for class `SearchResultScorer`.
-- Added object model class `SearchResult`.
-- Added stub for class `VectorSpaceModel`.
+Added:
+- object model class `FreeTextQuery`.
+- interface class `FreeTextSearch`.
+- private implementation class `_FreeTextSearchImpl`.
+- enum `QueryTermModifier`.
+- class `QueryParser`.
+- stub for class `SearchResultScorer`.
+- object model class `SearchResult`.
+- stub for class `VectorSpaceModel`.
+
+Updated dependencies, tests, examples and documentation.
 
 ### 0.0.1-beta.1
-
-- **PRE-RELEASE**
 - Initial version.

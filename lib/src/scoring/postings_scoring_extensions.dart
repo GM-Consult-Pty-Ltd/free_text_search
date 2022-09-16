@@ -8,6 +8,8 @@ import 'dart:math';
 
 ///
 extension DocumentPostingsEntryScoringExtension on DocumentPostingsEntry {
+  //
+
   /// The tf-idf weighting for the document is the product of the term's
   /// frequency in the document ([tFt]) with the inverse document frequency of
   /// the term ([PostingsExtension.idFt]) in the collection.
@@ -29,6 +31,8 @@ extension DocumentPostingsEntryScoringExtension on DocumentPostingsEntry {
 
 /// Extension methods and properties on [Postings].
 extension PostingsScoringExtension on Postings {
+  //
+
   /// The number of occurences in the [Postings] of [term] (the
   /// collection frequency).
   Ft cFt(Term term) {

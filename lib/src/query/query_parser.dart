@@ -70,7 +70,7 @@ class QueryParser extends TextAnalyzer {
         //  exact match phrase
         final modifier = rawTermOrPhrase.isEmpty
             // infer the modifier for the term from the previous term, or
-            ? term.modifier(previous)
+            ? term.modifier(previous, next)
             // if this is a term in an exact phrase, set it to EXACT
             : QueryTermModifier.EXACT;
         // concatenate rawTermOrPhrase and term, inserting a space if rawTermOrPhrase
@@ -154,13 +154,15 @@ class QueryParser extends TextAnalyzer {
   }
 }
 
-extension _TermsListExtension on List<String> {
+extension _TermsListExtension on List<Term> {
+  //
+
   String? previous(int index) => index == 0 ? null : this[index - 1];
 
   String? next(int index) => index < length - 1 ? this[index + 1] : null;
 }
 
-extension _QueryModifierReplacementExtension on String {
+extension _QueryModifierReplacementExtension on Term {
   //
 
   /// Matches all phrases included in quotes.
@@ -185,8 +187,8 @@ extension _QueryModifierReplacementExtension on String {
         'EXACTEND'
       ].contains(trim());
 
-  QueryTermModifier modifier(String? previousTerm) {
-    switch (previousTerm) {
+  QueryTermModifier modifier(Term? precedingTerm, Term? followingTerm) {
+    switch (precedingTerm) {
       case 'OR':
         return QueryTermModifier.OR;
       case 'NOT':
@@ -196,7 +198,9 @@ extension _QueryModifierReplacementExtension on String {
       case 'EXACTSTART':
         return QueryTermModifier.EXACT;
       default:
-        return QueryTermModifier.AND;
+        return precedingTerm == 'OR'
+            ? QueryTermModifier.OR
+            : QueryTermModifier.AND;
     }
   }
 
