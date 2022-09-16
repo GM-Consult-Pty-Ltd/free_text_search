@@ -3,6 +3,7 @@
 // All rights reserved
 
 import 'package:text_indexing/text_indexing.dart';
+import 'postings_scoring_extensions.dart';
 
 /// The [Document] object-model enumerates the properties of a document and
 /// its indexed terms in an inverted positional index.
@@ -13,6 +14,16 @@ import 'package:text_indexing/text_indexing.dart';
 /// elements with the same identifier [docId] as the document.
 abstract class Document {
   //
+
+  /// Initializes a [Document] with all fields empty, except [docId].
+  factory Document.empty(DocId docId) {
+    assert(docId.isNotEmpty, 'The docId paramater must not be empty.');
+    return _DocumentImpl(docId, {}, {});
+  }
+
+  /// Returns an updated [Document] after updating the [termFrequencies]
+  /// and [termFieldPostings] for [term] from the [entry].
+  Document addPostings(Term term, DocumentPostingsEntry entry);
 
   /// Instantiates a const [Document] instance.
   const Document();
@@ -31,7 +42,44 @@ abstract class Document {
   Ft tF(Term term);
 
   /// A hashmap of [Term]s to [FieldPostings] for the document.
-  Map<FieldName, FieldPostings> get termFieldPostings;
+  Map<Term, FieldPostings> get termFieldPostings;
 
   //
+}
+
+class _DocumentImpl implements Document {
+  //
+
+  @override
+  Document addPostings(Term term, DocumentPostingsEntry entry) {
+    final docId = entry.key;
+    if (docId != this.docId) return this;
+    termFieldPostings[term] = entry.value;
+    final Map<Term, Ft> termFrequencies =
+        Map<Term, Ft>.from(this.termFrequencies);
+    termFrequencies[term] = entry.value.tFt;
+
+    return _DocumentImpl(docId, termFieldPostings, termFrequencies);
+  }
+
+  @override
+  final DocId docId;
+
+  const _DocumentImpl(this.docId, this.termFieldPostings, this.termFrequencies);
+
+  @override
+  Ft tF(Term term) => termFrequencies[term] ?? 0;
+
+  @override
+  final Map<FieldName, FieldPostings> termFieldPostings;
+
+  @override
+  final Map<Term, Ft> termFrequencies;
+
+  @override
+  List<Term> get terms {
+    final terms = termFrequencies.keys.toList();
+    terms.sort(((a, b) => a.compareTo(b)));
+    return terms;
+  }
 }

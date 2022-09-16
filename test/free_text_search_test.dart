@@ -33,13 +33,15 @@ void main() {
       await indexer
           .indexCollection(sampleNews, ['name', 'description', 'hashTags']);
 
-      final dictionaryTerms = indexer.dictionary.terms;
+      final dictionaryTerms = indexer.index.dictionary.terms;
 
       // Get the document ids of those postings that contain ANY of the terms.
-      indexer.printDocuments(indexer.postings.containsAny(queryTerms.terms));
+      indexer
+          .printDocuments(indexer.index.postings.containsAny(queryTerms.terms));
 
       // Get the document ids of those postings that contain ALL the terms.
-      indexer.printDocuments(indexer.postings.containsAll(queryTerms.terms));
+      indexer
+          .printDocuments(indexer.index.postings.containsAll(queryTerms.terms));
     });
   });
 }

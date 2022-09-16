@@ -149,7 +149,8 @@ The following definitions are used throughout the [documentation](https://pub.de
 * `dictionary` - is a hash of `terms` (`vocabulary`) to the frequency of occurence in the `corpus` documents.
 * `document` - a record in the `corpus`, that has a unique identifier (`docId`) in the `corpus`'s primary key and that contains one or more text fields that are indexed.
 * `index` - an [inverted index](https://en.wikipedia.org/wiki/Inverted_index) used to look up `document` references from the `corpus` against a `vocabulary` of `terms`. The implementation in this library relies on a positional inverted index, that also includes the positions of the indexed `term` in each `document`.
-* `postings` - a separate index that records which `documents` the `vocabulary` occurs in. .
+* `index-elimination` - selecting a subset of the entries in an index where the `term` is in the collection of `terms` in a search phrase.
+* `postings` - a separate index that records which `documents` the `vocabulary` occurs in. 
 * `postings list` - a record of the positions of a `term` in a `document` and its fields. A position of a `term` refers to the index of the `term` in an array that contains all the `terms` in the `text`.
 * `term` - a word or phrase that is indexed from the `corpus`. The `term` may differ from the actual word used in the corpus depending on the `tokenizer` used.
 * `text` - the indexable content of a `document`.

@@ -6,6 +6,20 @@ import 'package:free_text_search/src/_index.dart';
 import 'package:text_indexing/text_indexing.dart';
 import 'dart:math';
 
+/// Extension methods on a collection of [FieldPostings].
+extension FieldPostingsExtension on FieldPostings {
+  //
+
+  /// Returns the term frequncy in a [FieldPostings] instance.
+  Ft get tFt {
+    var tFt = 0;
+    for (final entry in values) {
+      tFt += entry.length;
+    }
+    return tFt;
+  }
+}
+
 ///
 extension DocumentPostingsEntryScoringExtension on DocumentPostingsEntry {
   //
@@ -60,10 +74,10 @@ extension PostingsScoringExtension on Postings {
   /// [terms].
   Set<DocId> get andDocuments => containsAll(terms);
 
-  /// Returns a [Set] of [DocId] of those documents that contain
-  /// all the [terms].
+  /// Returns a [Set] of [DocId] of those documents that contain all the
+  /// [terms].
   Set<DocId> containsAll(Iterable<Term> terms) {
-    final byTerm = termPostings(terms);
+    final byTerm = getPostings(terms);
     Set<String> intersection = byTerm.documents;
     for (final docPostings in byTerm.values) {
       intersection = intersection.intersection(docPostings.keys.toSet());
@@ -71,7 +85,8 @@ extension PostingsScoringExtension on Postings {
     return intersection;
   }
 
-  /// Returns a [Set] of [DocId] of those documents that contain
-  /// all the [terms].
-  Set<DocId> containsAny(Iterable<Term> terms) => termPostings(terms).documents;
+  /// Returns a [Set] of [DocId] of those documents that contain any of
+  /// the [terms]. Used for `index-elimination` as a fist pass in scoring and
+  /// ranking of search results.
+  Set<DocId> containsAny(Iterable<Term> terms) => getPostings(terms).documents;
 }

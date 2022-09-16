@@ -25,7 +25,14 @@ class SearchResultScorer {
   /// frequency ([Ft]) and each document ([Document.docId]) can only occur once.
   ChampionList getChampionList() {
     ChampionList championList = {};
-    //TODO: implement SearchResultScorer.getChampionList
+    final List<DocumentPostingsEntry> docEntries = postings.termPostingsList();
+    //final docIds = postings.documents;
+
+    for (final entry in docEntries) {
+      final docId = entry.key;
+      final document = championList[docId] ?? Document.empty(docId);
+      document. /// This is where to start tomorrow
+    }
     return championList;
   }
 

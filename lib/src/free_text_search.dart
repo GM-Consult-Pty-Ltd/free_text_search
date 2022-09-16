@@ -62,17 +62,22 @@ class _FreeTextSearchImpl implements FreeTextSearch {
   _FreeTextSearchImpl(
       this.dictionaryLoader, this.postingsLoader, this.queryParser);
 
-  //
+  /// Private index elimination function that requests only those entries from
+  /// the index dictionary that contains any of the query [Term]s.
+  Future<Dictionary> _getQueryDictionary(Iterable<String> terms) =>
+      dictionaryLoader(terms);
 
   @override
   Future<List<SearchResult>> search(String phrase, [int limit = 20]) async {
     final queryTerms = await queryParser.parse(phrase);
     final query = FreeTextQuery(phrase: phrase, terms: queryTerms);
     final terms = queryTerms.map((e) => e.term);
-    final dictionary = await dictionaryLoader(terms);
+    // final dictionary = await dictionaryLoader(terms);
     final postings = await postingsLoader(terms);
     final scorer = SearchResultScorer(
-        query: query, dictionary: dictionary, postings: postings);
+        query: query,
+        dictionary: await _getQueryDictionary(terms),
+        postings: postings);
     final retVal = scorer.results(limit);
     return retVal;
   }
