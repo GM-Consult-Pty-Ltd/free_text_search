@@ -104,6 +104,14 @@ All rights reserved.
 </code></pre>
 <p>The <a href="https://pub.dev/packages/free_text_search/example">examples</a> demonstrate the use of the <a href="#queryparser-class">QueryParser</a> and <a href="#persistedindexer-class">PersistedIndexer</a>.</p>
 <h2 id="api">API</h2>
+<p>To maximise performance the API manipulates nested hashmaps of DART core types <code>int</code>, <code>double</code> and <code>String</code> rather than defining strongly typed object models. To improve code legibility and maintainability the API makes use of <a href="#type-aliases">type aliases</a> throughout.</p>
+<h3 id="type-aliases">Type Aliases</h3>
+<p>The following type definitions are defined in this library to complement the type definitions imported from the <code>text_analysis</code> and <code>text_indexing</code> packages.</p>
+<ul>
+<li><code>ChampionList</code> is an alias for <code>Map&lt;Term, List&lt;Document&gt;&gt;</code>, a hashmap of <code>Term</code> to the list of <code>Document</code>s that contain that  term. The ordered set of <code>Document</code>s is in descending order of term frequency (<code>Ft</code>) and each document (<code>Document.docId</code>) can only occur once.;</li>
+<li><code>ChampionListEntry</code> is an alias for <code>MapEntry&lt;Term, List&lt;Document&gt;&gt;</code>, an entry in a <code>ChampionList</code>;</li>
+<li><code>is an alias for</code>, a ;</li>
+</ul>
 <h3 id="freetextsearch-class">FreeTextSearch class</h3>
 <p>The <code>FreeTextSearch</code> class exposes the <code>search</code> method that returns a list of <a href="#searchresult-class">SearchResult</a> instances in descending order of relevance.</p>
 <p>The length of the returned collection of <a href="#searchresult-class">SearchResult</a> can be limited by passing a limit parameter to <code>search</code>. The default limit is 20.</p>
@@ -224,7 +232,7 @@ All rights reserved.
 <footer>
   <span class="no-break">
     free_text_search
-      0.0.1-beta.5
+      0.0.1-beta.6
   </span>
 
   

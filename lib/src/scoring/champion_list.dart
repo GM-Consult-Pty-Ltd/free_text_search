@@ -4,14 +4,12 @@
 
 import 'package:free_text_search/src/_index.dart';
 
-/// A hashmap of [Term] to the list of [Document]s that contain that term.
-/// - the list of [Document]s is in descending order of term frequency
-/// ([Ft]); and
-/// - the list is unique for [DocId], i.e. each document can only occur once
-/// (ordered set).
+/// A hashmap of [Term] to the list of [Document]s that contain that
+/// term. The ordered set of [Document]s is in descending order of term
+/// frequency ([Ft]) and each document ([Document.docId]) can only occur once.
 typedef ChampionList = Map<Term, List<Document>>;
 
-/// An entry in a [ChanpionList]
+/// An entry in a [ChampionList].
 typedef ChampionListEntry = MapEntry<Term, List<Document>>;
 
 /// Extension methods on a [Iterable] of [Document]s.

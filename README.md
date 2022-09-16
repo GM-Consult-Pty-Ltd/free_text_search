@@ -77,6 +77,16 @@ The [examples](https://pub.dev/packages/free_text_search/example) demonstrate th
 
 ## API
 
+To maximise performance the API manipulates nested hashmaps of DART core types `int`, `double` and `String` rather than defining strongly typed object models. To improve code legibility and maintainability the API makes use of [type aliases](#type-aliases) throughout.
+
+### Type Aliases
+
+The following type definitions are defined in this library to complement the type definitions imported from the `text_analysis` and `text_indexing` packages.
+
+* `ChampionList` is an alias for `Map<Term, List<Document>>`, a hashmap of `Term` to the list of `Document`s that contain that  term. The ordered set of `Document`s is in descending order of term frequency (`Ft`) and each document (`Document.docId`) can only occur once.;
+* `ChampionListEntry` is an alias for `MapEntry<Term, List<Document>>`, an entry in a `ChampionList`;
+* `` is an alias for ``, a ;
+
 ### FreeTextSearch class
 
 The `FreeTextSearch` class exposes the `search` method that returns a list of [SearchResult](#searchresult-class) instances in descending order of relevance.

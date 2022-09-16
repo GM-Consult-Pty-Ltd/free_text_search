@@ -20,7 +20,7 @@ class SearchResultScorer {
   /// - remove elements from [postings] where documents have few of the terms;
   void indexElimination() {}
 
-  ///  Returns a hashmap of [Term] to the list of [Document]s that contain that
+  /// Returns a hashmap of [Term] to the list of [Document]s that contain that
   /// term. The ordered set of [Document]s is in descending order of term
   /// frequency ([Ft]) and each document ([Document.docId]) can only occur once.
   ChampionList getChampionList() {
