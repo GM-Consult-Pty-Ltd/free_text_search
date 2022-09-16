@@ -6,7 +6,7 @@ All rights reserved.
 
 # free_text_search
 
-Search a inverted positional index and return ranked references to documents relevant to the search phrase.
+Search an inverted positional index and return ranked references to documents relevant to the search phrase.
 
 *THIS PACKAGE IS IN BETA DEVELOPMENT AND SUBJECT TO DAILY BREAKING CHANGES.*
 
