@@ -18,14 +18,15 @@ extension DocumentListExtension on Iterable<Document> {
 
   /// Returns ordered set of [Document]s, unique for [Document.docId], in
   /// descending order of [Document.tF] for [term].
-  List<Document> toRankedSet(Term term) {
+  List<Document> toRankedSet(Term term, [int? r]) {
     final hashedSet = <DocId, Document>{};
     // turn into a set unique for docId.
     for (final document in this) {
       hashedSet[document.docId] = document;
     }
     final rankedSet = hashedSet.values.toList();
-    rankedSet.sort(((a, b) => b.tF(term).compareTo(a.tF(term))));
-    return rankedSet;
+    rankedSet.sort(((a, b) => b.tFt(term).compareTo(a.tFt(term))));
+    if (r == null) return rankedSet;
+    return r > rankedSet.length ? rankedSet.sublist(0, r) : rankedSet;
   }
 }

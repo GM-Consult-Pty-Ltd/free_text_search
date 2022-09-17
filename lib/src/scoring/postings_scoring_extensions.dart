@@ -3,7 +3,6 @@
 // All rights reserved
 
 import 'package:free_text_search/src/_index.dart';
-import 'package:text_indexing/text_indexing.dart';
 import 'dart:math';
 
 /// Extension methods on a collection of [FieldPostings].
@@ -47,6 +46,27 @@ extension DocumentPostingsEntryScoringExtension on DocumentPostingsEntry {
 extension PostingsScoringExtension on Postings {
   //
 
+  /// Iterates through all the entries in the postings and builds a hashmap
+  /// of [DocId] to [Document].
+  Map<DocId, Document> documents(Iterable<Term> terms) {
+    final documents = <DocId, Document>{};
+    for (final term in terms) {
+      final Iterable<DocumentPostingsEntry> docEntries =
+          this[term]?.entries.toList() ?? [];
+      for (final entry in docEntries) {
+        // get the id of the document from the entry
+        final docId = entry.key;
+        // get the document from championList if it already exists, otherwise initialize one
+        Document document = documents[docId] ?? Document.empty(docId);
+        // add the document postings for term to document
+        document = document.setTermPostings(term, entry);
+        // update the document in the documents hashmap
+        documents[docId] = document;
+      }
+    }
+    return documents;
+  }
+
   /// The number of occurences in the [Postings] of [term] (the
   /// collection frequency).
   Ft cFt(Term term) {
@@ -62,31 +82,11 @@ extension PostingsScoringExtension on Postings {
   /// instances of [term] (the document frequency of term).
   Ft dFt(Term term) => this[term]?.length ?? 0;
 
-  /// The inverse document frequency is the logarith of the total number of
+  /// The inverse document frequency is the logarithm of the total number of
   /// documents ([N]) divided by the document frequency (df) of term [t].
   ///
   /// ``` dart
   /// idFt(t, N) = log ( N / dFt(t) )
   /// ```
   double idFt(Term t, int N) => log(N / dFt(t));
-
-  /// Returns a [Set] of [DocId] of those documents that contain all the
-  /// [terms].
-  Set<DocId> get andDocuments => containsAll(terms);
-
-  /// Returns a [Set] of [DocId] of those documents that contain all the
-  /// [terms].
-  Set<DocId> containsAll(Iterable<Term> terms) {
-    final byTerm = getPostings(terms);
-    Set<String> intersection = byTerm.documents;
-    for (final docPostings in byTerm.values) {
-      intersection = intersection.intersection(docPostings.keys.toSet());
-    }
-    return intersection;
-  }
-
-  /// Returns a [Set] of [DocId] of those documents that contain any of
-  /// the [terms]. Used for `index-elimination` as a fist pass in scoring and
-  /// ranking of search results.
-  Set<DocId> containsAny(Iterable<Term> terms) => getPostings(terms).documents;
 }

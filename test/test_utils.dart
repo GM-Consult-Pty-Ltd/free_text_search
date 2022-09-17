@@ -8,7 +8,7 @@ import 'package:free_text_search/src/_index.dart';
 import 'data/sample_news.dart';
 
 class TestIndex extends InMemoryIndexer {
-  TestIndex._();
+  TestIndex._() : super(analyzer: TextAnalyzer());
 
   static Future<TestIndex> hydrate() async {
     final indexer = TestIndex._();

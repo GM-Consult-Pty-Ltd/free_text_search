@@ -15,30 +15,65 @@ import 'package:free_text_search/src/_index.dart';
 class SearchResultScorer {
   //
 
+  /// A hashmap of [Term] to the number of occurences in the [Postings] of
+  /// the [Term].
+  final TermFrequencyMap cFtMap = {};
+
+  /// A hashmap of [Term] to the inverse document frequency of the [Term] in
+  /// [Postings].
+  final Map<String, double> idFtMap = {};
+
+  /// The [ChampionList] containing all the documents for a [Term].
+  ChampionList low = {};
+
+  /// The [ChampionList] containing documents with best static match with
+  /// the [query]:
+  /// - contains all the [query.queryTerms] with the [QueryTermModifier.EXACT],
+  ///   if any are present in the [query]; and
+  /// - contains one or more term pairs in the same order as in the
+  ///   [query.phrase], if the phrase has more than 1 term
+  ChampionList high = {};
+
   /// Reduce the size of the [postings] before scoring (if it is large):
   /// - remove elements from [postings] for terms with a low idf;
   /// - remove elements from [postings] where documents have few of the terms;
   void indexElimination() {}
 
-  /// Returns a hashmap of [Term] to the list of [Document]s that contain that
-  /// term. The ordered set of [Document]s is in descending order of term
-  /// frequency ([Ft]) and each document ([Document.docId]) can only occur once.
-  ChampionList getChampionList() {
-    ChampionList championList = {};
-    final List<DocumentPostingsEntry> docEntries = postings.termPostingsList();
-    //final docIds = postings.documents;
-
-    for (final entry in docEntries) {
-      final docId = entry.key;
-      final document = championList[docId] ?? Document.empty(docId);
-      document. /// This is where to start tomorrow
+  /// Returns a hashmap of [Term] to an ordered set of [Document]s that contain
+  /// that term:
+  /// - the hash value is an ordered set of [Document]s is in descending order
+  ///   of term frequency ([Document.tF]) for the [Term];
+  /// - each document ([Document.docId])] can only occur once in the ordered
+  ///   list (i.e. an ordered set);
+  /// - if [r] is not null, the length of the ordered set of [Document]s will be
+  ///   limited to the first [r] documents, i.e. the [r] documents with the
+  ///   highest [Document.tF].
+  void getChampionLists([int? r]) {
+    final terms = query.uniqueTerms;
+    final documents = postings.documents(terms);
+    //now build the champion list
+    final ChampionList championList = {};
+    for (final queryTerm in query.queryTerms) {
+      final term = queryTerm.term;
+      // get the collection frequency for the term while we're iterating through
+      // the postings
+      cFtMap[term] = postings.cFt(term);
+      // get the inverse document frequency for the term while we're iterating through
+      // the postings
+      idFtMap[term] = postings.idFt(term, documents.length);
+      // get the documents for term
+      final termDocs = documents.values
+          .where((element) => element.terms.contains(term))
+          .toRankedSet(term, r);
+      championList[term] = termDocs;
     }
-    return championList;
+    low = championList;
   }
 
   /// Returns a [List] of [SearchResult]
   List<SearchResult> computeScores() {
-    final ChampionList candidates = getChampionList();
+    getChampionLists();
+
     final List<SearchResult> results =
         []; // TODO: SearchResultScorer.computeScores
     return results;

@@ -26,4 +26,6 @@ class QueryTerm extends Token {
   /// All terms are marked [QueryTermModifier.AND] unless marked with another
   /// modifier.
   final QueryTermModifier modifier;
+
+  //
 }

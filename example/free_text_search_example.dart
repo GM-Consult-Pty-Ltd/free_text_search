@@ -21,7 +21,7 @@ Future<List<QueryTerm>> _parsePhrase(String phrase) async {
   // initialize the QueryParser
   final queryParser = QueryParser();
   // parse the phrase
-  final queryTerms = await queryParser.parse(phrase);
+  final queryTerms = await queryParser.parseTerms(phrase);
   // print the terms and their modifiers
   for (final qt in queryTerms) {
     // prints -   "term" [MODIFIER]

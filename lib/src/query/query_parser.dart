@@ -28,11 +28,26 @@ class QueryParser extends TextAnalyzer {
   ///   [TextAnalyzer.defaultTokenFilter].
   const QueryParser(
       {TextAnalyzerConfiguration configuration = English.configuration,
-      TokenFilter tokenFilter = TextAnalyzer.defaultTokenFilter})
+      TokenFilter? tokenFilter = TextAnalyzer.defaultTokenFilter})
       : super(configuration: configuration, tokenFilter: tokenFilter);
 
   /// Shortcut to configuration.termSplitter
   TermSplitter get _termSplitter => configuration.termSplitter;
+
+  /// Parses a search [phrase] to a [FreeTextQuery].
+  ///
+  /// The returned [FreeTextQuery.terms] will include:
+  /// - all the original words in the [phrase], except query modifiers
+  ///   ('AND', 'OR', '"', '-', 'NOT);
+  /// - derived versions of all words returned by the [_termFilter], including
+  ///   child words of exact phrases; and
+  /// - derived versions of all words always have the [QueryTermModifier.OR]
+  ///   unless they are already marked [QueryTermModifier.NOT].
+  Future<FreeTextQuery> parseQuery(String phrase) async {
+    final queryTerms = await parseTerms(phrase);
+    final query = FreeTextQuery(phrase: phrase, queryTerms: queryTerms);
+    return query;
+  }
 
   /// Parses a search [phrase] to a collection of [QueryTerm]s.
   ///
@@ -43,7 +58,7 @@ class QueryParser extends TextAnalyzer {
   ///   child words of exact phrases; and
   /// - derived versions of all words always have the [QueryTermModifier.OR]
   ///   unless they are already marked [QueryTermModifier.NOT].
-  Future<List<QueryTerm>> parse(String phrase) async {
+  Future<List<QueryTerm>> parseTerms(String phrase) async {
     // - initialize the return value;
     final retVal = <QueryTerm>[];
     // - replace the modifiers with tokens;
@@ -57,7 +72,8 @@ class QueryParser extends TextAnalyzer {
     // - initialize a placeholder for the search term, in case we need to
     // concatenate words that are part of an exact match phrase.
     var rawTermOrPhrase = '';
-    for (final term in terms) {
+    var previousParsedTerm = '';
+    await Future.forEach(terms, (String term) async {
       // get the previous term if this is not the first term
       final previous = terms.previous(termIndex);
       // get the next term if this is not the last term
@@ -87,14 +103,17 @@ class QueryParser extends TextAnalyzer {
           // let's initialize a collection to hold the exact term/phrase and any
           // child words of a phrase or a stemmed version of the term.
           var searchTerms = <String>[rawTermOrPhrase];
+
           // check if we are dealing with an exact term or phrase
           if (modifier == QueryTermModifier.EXACT) {
             // ok it's an exact match phrase
             //
-
+            previousParsedTerm = rawTermOrPhrase;
             // now split the phrase at whitespace into its component words
             final subterms = rawTermOrPhrase.split(RegExp(r'\s+'));
             // let's iterate through the subTerms and add them to the searchTerms
+            // var previousExactTerm = '';
+            var previousSubTerm = '';
             for (var subTerm in subterms) {
               // first check the subTerm is not empty
               if (subTerm.isNotEmpty) {
@@ -102,6 +121,7 @@ class QueryParser extends TextAnalyzer {
                 // passing it to the termFilter callback
                 final filteredTerms = (await tokenize(subTerm)).tokens.terms;
                 // now iterate through whatever we got back from the termFilter
+                // var previousFilteredTerm = '';
                 for (final e in filteredTerms) {
                   // check the term is not already in the list
                   if (!searchTerms.contains(e)) {
@@ -109,12 +129,31 @@ class QueryParser extends TextAnalyzer {
                     searchTerms.add(e);
                   }
                 }
+                // add a paired term for the exact terms
+                final newSubterm =
+                    filteredTerms.length == 1 ? filteredTerms.first : subTerm;
+                if (previousSubTerm.isNotEmpty && newSubterm.isNotEmpty) {
+                  searchTerms
+                      .add(TermPair(previousSubTerm, newSubterm).toString());
+                }
+                previousSubTerm = newSubterm;
               }
             }
           } else {
             // this is not an EXACT match term, so pass it to the termFilter to
             // get the stemmed version or split terms and add it/them to the list
-            searchTerms.addAll((await tokenize(rawTermOrPhrase)).tokens.terms);
+            final searchTerm = (await tokenize(rawTermOrPhrase)).tokens.terms;
+            searchTerms.addAll(searchTerm);
+            final newParsedTerm =
+                searchTerm.length != 1 ? rawTermOrPhrase : searchTerm.first;
+            if (previousParsedTerm.isNotEmpty &&
+                newParsedTerm.isNotEmpty &&
+                modifier != QueryTermModifier.NOT) {
+              searchTerms
+                  .add(TermPair(previousParsedTerm, newParsedTerm).toString());
+            }
+            previousParsedTerm =
+                next != 'OR' ? newParsedTerm : previousParsedTerm;
           }
           // Let's get rid of duplicates.
           searchTerms = Set<String>.from(searchTerms).toList();
@@ -122,18 +161,21 @@ class QueryParser extends TextAnalyzer {
           var queryTermIndex = 0;
           // let's iterate through the unique terms/phrases
           for (final qt in searchTerms) {
-            // hydrate the QueryTerm
-            final queryTerm = QueryTerm(
-                qt,
-                // if this is the second or later term at this position set its
-                // modifier to OR, unless this is a NOT modified term
-                queryTermIndex == 0 || modifier == QueryTermModifier.NOT
-                    ? modifier
-                    : QueryTermModifier.OR,
-                // the QueryTerms all have the same position
-                termPosition);
-            // add it to the return value
-            retVal.add(queryTerm);
+            if (qt.isNotEmpty) {
+              // add a QueryTerm to the return value
+              retVal.add(QueryTerm(
+                  qt,
+                  // if this is the second or later term at this position set its
+                  // modifier to OR, unless this is a NOT modified term
+                  queryTermIndex == 0 ||
+                          modifier == QueryTermModifier.NOT ||
+                          (modifier == QueryTermModifier.IMPORTANT &&
+                              !qt.contains(' '))
+                      ? modifier
+                      : QueryTermModifier.OR,
+                  // the QueryTerms all have the same position
+                  termPosition));
+            }
             // increment the queryTermIndex
             queryTermIndex++;
           }
@@ -148,8 +190,7 @@ class QueryParser extends TextAnalyzer {
       }
       // increment the termIndex
       termIndex++;
-    }
-    // return the QueryTerms collection return value
+    });
     return retVal;
   }
 }
@@ -198,7 +239,7 @@ extension _QueryModifierReplacementExtension on Term {
       case 'EXACTSTART':
         return QueryTermModifier.EXACT;
       default:
-        return precedingTerm == 'OR'
+        return followingTerm == 'OR'
             ? QueryTermModifier.OR
             : QueryTermModifier.AND;
     }

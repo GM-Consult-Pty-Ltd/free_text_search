@@ -12,7 +12,7 @@ void main() {
   //
 
   const phraseWithModifiers =
-      '"athletics track" +surfaced arena OR stadium "Launceston" -hobart NOT help-me';
+      '"athletics running track" +surfaced arena OR stadium "Launceston" -hobart NOT help-me';
 
   group('QueryParser', () {
     setUp(() {
@@ -23,7 +23,7 @@ void main() {
       // initialize the QueryParser
       final queryParser = QueryParser();
       // parse the phrase
-      final queryTerms = await queryParser.parse(phraseWithModifiers);
+      final queryTerms = await queryParser.parseTerms(phraseWithModifiers);
       // print the terms and their modifiers
       TestIndex.printQueryTerms(queryTerms);
 
