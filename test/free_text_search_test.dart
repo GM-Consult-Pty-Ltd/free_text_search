@@ -14,7 +14,7 @@ import 'test_utils.dart';
 void main() {
   //
 
-  const phrase = 'tesla battery technology';
+  const phrase = 'Tesla EV battery technology';
 
   const fields = ['name', 'description', 'hashTags'];
 
@@ -36,13 +36,17 @@ void main() {
 
       final dictionaryTerms = indexer.index.dictionary.terms;
 
+      final andTerms = queryTerms.where((element) =>
+          element.modifier == QueryTermModifier.EXACT ||
+          element.modifier == QueryTermModifier.AND ||
+          element.modifier == QueryTermModifier.IMPORTANT);
       // Get the document ids of those postings that contain ANY of the terms.
       indexer
           .printDocuments(indexer.index.postings.containsAny(queryTerms.terms));
 
       // Get the document ids of those postings that contain ALL the terms.
       indexer
-          .printDocuments(indexer.index.postings.containsAll(queryTerms.terms));
+          .printDocuments(indexer.index.postings.containsAll(andTerms.terms));
     });
 
     test('SearchResultScorer: championList', () async {

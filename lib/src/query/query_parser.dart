@@ -102,12 +102,13 @@ class QueryParser extends TextAnalyzer {
           //
           // let's initialize a collection to hold the exact term/phrase and any
           // child words of a phrase or a stemmed version of the term.
-          var searchTerms = <String>[rawTermOrPhrase];
+          var searchTerms = <String>[];
 
           // check if we are dealing with an exact term or phrase
           if (modifier == QueryTermModifier.EXACT) {
             // ok it's an exact match phrase
             //
+            searchTerms = <String>[rawTermOrPhrase];
             previousParsedTerm = rawTermOrPhrase;
             // now split the phrase at whitespace into its component words
             final subterms = rawTermOrPhrase.split(RegExp(r'\s+'));
@@ -144,6 +145,7 @@ class QueryParser extends TextAnalyzer {
             // get the stemmed version or split terms and add it/them to the list
             final searchTerm = (await tokenize(rawTermOrPhrase)).tokens.terms;
             searchTerms.addAll(searchTerm);
+            searchTerms.add(rawTermOrPhrase);
             final newParsedTerm =
                 searchTerm.length != 1 ? rawTermOrPhrase : searchTerm.first;
             if (previousParsedTerm.isNotEmpty &&
