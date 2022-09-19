@@ -25,12 +25,18 @@ abstract class Document {
   /// An exception is thrown if the [docId] parameter is empty.
   factory Document.empty(DocId docId) {
     assert(docId.isNotEmpty, 'The docId parameter must not be empty.');
-    return _DocumentImpl(docId, {}, {}, []);
+    return _DocumentImpl(docId, {}, {}, [], 0.0, 0.0);
   }
 
   /// Returns an updated [Document] after inserting the [term] in [terms] and
   /// overwriting the [termFrequencies] and [termFieldPostings] for [term].
   Document setTermPostings(Term term, DocumentPostingsEntry entry);
+
+  /// Returns an updated [Document] after re-calculating [termPairWeight].
+  Document setTermPairWeight(List<QueryTerm> queryTerms);
+
+  /// Returns an updated [Document] after re-calculating [proximityWeight].
+  Document setPoximityWeight(List<QueryTerm> queryTerms);
 
   /// Instantiates a const [Document] instance.
   const Document();
@@ -55,35 +61,60 @@ abstract class Document {
   /// matched in a document.  The weight is calculated as follows:
   /// fqPt - is the number of term pairs in query; and
   /// fdPt - is the number of query term pairs present in the document.
-  double proximityWeight(List<QueryTerm> queryTerms);
+  double get proximityWeight;
 
+  /// Returns a weighting that reflects the number of term pairs that are
+  /// matched in a document.  The weight is calculated as follows:
+  /// fqPt - is the number of term pairs in query; and
+  /// fdPt - is the number of query term pairs present in the document.
+  double get termPairWeight;
+
+  /// A list of all the terms in the document that contain white-space.
+  List<String> get phrases;
+
+  /// Returns the proprtion of query terms matched in the document.
+  double termsMatchWeight(Iterable<QueryTerm> queryTerms);
   //
+
+  Document setWeightings(Iterable<QueryTerm> queryTerms);
 }
 
 class _DocumentImpl implements Document {
   //
 
+  @override
   List<String> get phrases =>
       terms.where((element) => element.contains(' ')).toList();
 
   @override
-  double proximityWeight(List<QueryTerm> queryTerms) {
-    // TODO: implement proximityWeight
-    throw UnimplementedError();
+  Document setPoximityWeight(List<QueryTerm> queryTerms) {
+    final proximityWeight = 0.0;
+    //TODO: implement setProximityWeight
+    return _DocumentImpl(docId, termFieldPostings, termFrequencies, terms,
+        termPairWeight, proximityWeight);
   }
 
-  // @override
-  // int pairMatches(List<TermPair> termPairs) {
-  //   var matches = 0;
-  //   final docTermPairs = <TermPair>[];
-  //   for (var i = 0; i < terms.length - 1; i++) {
-  //     final termPair = TermPair(terms[i], terms[i + 1]);
-  //     docTermPairs.add();
-  //     matches = termPairs.contains(termPair) ? matches++ : matches;
-  //   }
-  //   final weight = log(matches / termPairs.length / (terms.length - 1));
-  //   return matches;
-  // }
+  @override
+  Document setTermPairWeight(List<QueryTerm> queryTerms) {
+    double termPairWeight = 0.0;
+    final queryPhrases = queryTerms.phrases.toSet();
+    final docPhrases = phrases;
+    final matchedPhrases =
+        docPhrases.where((element) => queryPhrases.contains(element));
+    if (queryPhrases.isNotEmpty &&
+        docPhrases.isNotEmpty &&
+        matchedPhrases.isNotEmpty) {
+      termPairWeight = matchedPhrases.length / queryPhrases.length;
+    }
+    return _DocumentImpl(docId, termFieldPostings, termFrequencies, terms,
+        termPairWeight, proximityWeight);
+  }
+
+  @override
+  final double termPairWeight;
+
+  @override
+  final double proximityWeight;
 
   @override
   Document setTermPostings(Term term, DocumentPostingsEntry entry) {
@@ -107,17 +138,26 @@ class _DocumentImpl implements Document {
     terms.sort(((a, b) => a.compareTo(b)));
     // return a new _DocumentImpl wiht the updated termFieldPostings and
     // termFrerquencies
-    return _DocumentImpl(docId, termFieldPostings, termFrequencies, terms);
+    return _DocumentImpl(docId, termFieldPostings, termFrequencies, terms,
+        termPairWeight, proximityWeight);
   }
 
   @override
   final DocId docId;
 
-  const _DocumentImpl(
-      this.docId, this.termFieldPostings, this.termFrequencies, this.terms);
+  const _DocumentImpl(this.docId, this.termFieldPostings, this.termFrequencies,
+      this.terms, this.termPairWeight, this.proximityWeight);
 
   @override
   Ft tFt(Term term) => termFrequencies[term] ?? 0;
+
+  @override
+  double termsMatchWeight(Iterable<QueryTerm> queryTerms) {
+    final andTerms = queryTerms.andTerms;
+    final matchedTerms =
+        termFrequencies.entries.where((element) => element.value != 0);
+    return matchedTerms.length / andTerms.length;
+  }
 
   @override
   final Map<FieldName, FieldPostings> termFieldPostings;

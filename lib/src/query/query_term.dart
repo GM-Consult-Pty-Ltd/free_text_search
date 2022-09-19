@@ -29,3 +29,25 @@ class QueryTerm extends Token {
 
   //
 }
+
+///
+extension QueryTermCollectionExtension on Iterable<QueryTerm> {
+  //
+
+  /// Returns the [QueryTerm] elements where [QueryTerm.modifier] is equal to:
+  /// [QueryTermModifier.EXACT]; or
+  /// [QueryTermModifier.AND]; or
+  /// [QueryTermModifier.IMPORTANT].
+  List<QueryTerm> get andTerms => where((element) =>
+      element.modifier == QueryTermModifier.EXACT ||
+      element.modifier == QueryTermModifier.AND ||
+      element.modifier == QueryTermModifier.IMPORTANT).toList();
+
+  /// A list of all the [Term]s in the collection that contain white-space.
+  List<String> get phrases =>
+      uniqueTerms.where((element) => element.contains(' ')).toList();
+
+  /// A list of the unique [Term]s in the collection  in the same order
+  /// as they occur in the source text.
+  Set<Term> get uniqueTerms => allTerms.toSet();
+}

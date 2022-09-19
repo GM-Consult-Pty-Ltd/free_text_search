@@ -52,7 +52,6 @@ class SearchResultScorer {
     final terms = query.uniqueTerms;
     final documents = postings.documents(terms);
     //now build the champion list
-    final ChampionList championList = {};
     for (final queryTerm in query.queryTerms) {
       final term = queryTerm.term;
       // get the collection frequency for the term while we're iterating through
@@ -62,12 +61,29 @@ class SearchResultScorer {
       // the postings
       idFtMap[term] = postings.idFt(term, documents.length);
       // get the documents for term
-      final termDocs = documents.values
-          .where((element) => element.terms.contains(term))
-          .toRankedSet(term, r);
-      championList[term] = termDocs;
+      final termDocs =
+          documents.values.where((element) => element.terms.contains(term));
+      final lowDocs = <Document>[];
+      final highDocs = <Document>[];
+      for (Document doc in termDocs) {
+        doc = doc
+            .setPoximityWeight(query.queryTerms)
+            .setTermPairWeight(query.queryTerms);
+        lowDocs.add(doc);
+        if (doc.proximityWeight > 0 ||
+            doc.termPairWeight > 0 ||
+            doc.termsMatchWeight(query.queryTerms) > 0.5) {
+          highDocs.add(doc);
+        }
+      }
+
+      if (lowDocs.isNotEmpty) {
+        low[term] = lowDocs.toRankedSet(term);
+      }
+      if (highDocs.isNotEmpty) {
+        high[term] = highDocs.toRankedSet(term);
+      }
     }
-    low = championList;
   }
 
   /// Returns a [List] of [SearchResult]

@@ -25,7 +25,10 @@ extension DocumentListExtension on Iterable<Document> {
       hashedSet[document.docId] = document;
     }
     final rankedSet = hashedSet.values.toList();
+    // sort by term frequency
     rankedSet.sort(((a, b) => b.tFt(term).compareTo(a.tFt(term))));
+    // sort by termPairWeight
+    rankedSet.sort(((a, b) => b.termPairWeight.compareTo(a.termPairWeight)));
     if (r == null) return rankedSet;
     return r > rankedSet.length ? rankedSet.sublist(0, r) : rankedSet;
   }

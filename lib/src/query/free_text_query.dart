@@ -32,10 +32,16 @@ abstract class FreeTextQuery {
   /// A list of the [Term]s extracted from the [phrase] in the same order
   /// as they occur in the [phrase].
   Set<Term> get uniqueTerms;
+
+  /// A list of all the terms in the query that contain white-space.
+  List<String> get phrases;
 }
 
 class _FreeTextQueryImpl implements FreeTextQuery {
 //
+
+  @override
+  List<String> get phrases => queryTerms.phrases;
 
   /// The unmodified search phrase, including all modifiers and tokens.
   @override
@@ -54,7 +60,7 @@ class _FreeTextQueryImpl implements FreeTextQuery {
   /// A list of the [Term]s extracted from the [phrase] in the same order
   /// as they occur in the [phrase].
   @override
-  Set<Term> get uniqueTerms => allTerms.toSet();
+  Set<Term> get uniqueTerms => queryTerms.uniqueTerms;
 
   /// Instantiates a const [FreeTextQuery] with the following required
   /// parameters:

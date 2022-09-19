@@ -36,10 +36,7 @@ void main() {
 
       final dictionaryTerms = indexer.index.dictionary.terms;
 
-      final andTerms = queryTerms.where((element) =>
-          element.modifier == QueryTermModifier.EXACT ||
-          element.modifier == QueryTermModifier.AND ||
-          element.modifier == QueryTermModifier.IMPORTANT);
+      final andTerms = queryTerms.andTerms;
       // Get the document ids of those postings that contain ANY of the terms.
       indexer
           .printDocuments(indexer.index.postings.containsAny(queryTerms.terms));
@@ -57,7 +54,7 @@ void main() {
       // parse the phrase to a query
       final FreeTextQuery query = await queryParser.parseQuery(phrase);
       // get the terms from the query
-      final terms = query.uniqueTerms;
+      final terms = query.queryTerms.uniqueTerms;
 
       final scorer = SearchResultScorer(
           query: query,
