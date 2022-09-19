@@ -28,17 +28,22 @@ void main() {
       TestIndex.printQueryTerms(queryTerms);
 
       // prints:
-      //  - "athletics track" [EXACT]
-      //  - "athletics" [OR]
-      //  - "track" [OR]
-      //  - "surfaced" [IMPORTANT]
-      //  - "arena" [AND]
-      //  - "stadium" [OR]
+      //  - "athletics running track" [EXACT]
       //  - "Launceston" [EXACT]
+      //  - "athlet" [AND]
+      //  - "run" [OR]
+      //  - "athletics running" [OR]
+      //  - "track" [AND]
+      //  - "surfac" [IMPORTANT]
+      //  - "surfaced" [IMPORTANT]
+      //  - "track surfac" [OR]
+      //  - "arena" [OR]
+      //  - "surfac arena" [OR]
+      //  - "stadium" [OR]
+      //  - "surfac stadium" [OR]
       //  - "launceston" [OR]
       //  - "hobart" [NOT]
       //  - "help-me" [NOT]
-      //  - "help" [NOT]"
     });
   });
 }

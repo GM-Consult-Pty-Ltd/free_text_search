@@ -49,6 +49,25 @@ class QueryParser extends TextAnalyzer {
     return query;
   }
 
+  /// Returns all the terms or phrases in double quotes as QueryTerm instances
+  /// with the [QueryTermModifier.EXACT].  These phrases are also given
+  /// a term position of 0 to give them the highest weighting in scoring.
+  Future<List<QueryTerm>> exactMatchPhrases(String phrase) async {
+    // - initialize the return value;
+    final retVal = <QueryTerm>[];
+    // - inditialize a term counter
+    final exactTerms = RegExp(_rInDoubleQuotes)
+        .allMatches(phrase)
+        .map((e) => e.group(0)?.replaceAll('"', ''));
+    for (final e in exactTerms) {
+      if (e != null) {
+        final qt = QueryTerm(e, QueryTermModifier.EXACT, 0);
+        retVal.add(qt);
+      }
+    }
+    return retVal;
+  }
+
   /// Parses a search [phrase] to a collection of [QueryTerm]s.
   ///
   /// The returned collection will include:
@@ -60,7 +79,9 @@ class QueryParser extends TextAnalyzer {
   ///   unless they are already marked [QueryTermModifier.NOT].
   Future<List<QueryTerm>> parseTerms(String phrase) async {
     // - initialize the return value;
-    final retVal = <QueryTerm>[];
+    final retVal = await exactMatchPhrases(phrase);
+
+    final exactPhrases = retVal.terms;
     // - replace the modifiers with tokens;
     phrase = phrase.replaceModifiers();
     // - tokenize the phrase;
@@ -88,7 +109,7 @@ class QueryParser extends TextAnalyzer {
             // infer the modifier for the term from the previous term, or
             ? term.modifier(previous, next)
             // if this is a term in an exact phrase, set it to EXACT
-            : QueryTermModifier.EXACT;
+            : QueryTermModifier.AND;
         // concatenate rawTermOrPhrase and term, inserting a space if rawTermOrPhrase
         // already contains a word.
         rawTermOrPhrase =
@@ -106,9 +127,9 @@ class QueryParser extends TextAnalyzer {
 
           // check if we are dealing with an exact term or phrase
           if (modifier == QueryTermModifier.EXACT) {
-            // ok it's an exact match phrase
+            // ok it's the end of an exact match phrase
             //
-            searchTerms = <String>[rawTermOrPhrase];
+            // searchTerms = <String>[rawTermOrPhrase];
             previousParsedTerm = rawTermOrPhrase;
             // now split the phrase at whitespace into its component words
             final subterms = rawTermOrPhrase.split(RegExp(r'\s+'));
@@ -163,26 +184,26 @@ class QueryParser extends TextAnalyzer {
           var queryTermIndex = 0;
           // let's iterate through the unique terms/phrases
           for (final qt in searchTerms) {
-            if (qt.isNotEmpty) {
+            if (qt.isNotEmpty && !exactPhrases.contains(qt)) {
               // add a QueryTerm to the return value
               retVal.add(QueryTerm(
                   qt,
                   // if this is the second or later term at this position set its
                   // modifier to OR, unless this is a NOT modified term
-                  queryTermIndex == 0 ||
-                          modifier == QueryTermModifier.NOT ||
-                          (modifier == QueryTermModifier.IMPORTANT &&
-                              !qt.contains(' '))
-                      ? modifier
-                      : QueryTermModifier.OR,
+                  modifier == QueryTermModifier.EXACT
+                      ? QueryTermModifier.OR
+                      : queryTermIndex == 0 ||
+                              modifier == QueryTermModifier.NOT ||
+                              (modifier == QueryTermModifier.IMPORTANT &&
+                                  !qt.contains(' '))
+                          ? modifier
+                          : QueryTermModifier.OR,
                   // the QueryTerms all have the same position
                   termPosition));
             }
             // increment the queryTermIndex
             queryTermIndex++;
           }
-          // as this was not an EXACT modified term or the next term is
-          // "EXACTEND":
 
           // reset the rawTermOrPhrase
           rawTermOrPhrase = '';
@@ -195,6 +216,17 @@ class QueryParser extends TextAnalyzer {
     });
     return retVal;
   }
+
+  /// Matches all phrases included in quotes.
+  static const _rInDoubleQuotes = r'"\w[^"]+\w"';
+
+  /// Matches '-' where preceded by white-space or the start of the string AND
+  /// followed by a double quote or word character.
+  static const _rNot = r'(?<=^|\s)-(?="|\w)';
+
+  /// Matches '+' where preceded by white-space or the start of the string AND
+  /// followed by a double quote or word character.
+  static const _rImportant = r'(?<=^|\s)\+(?="|\w)';
 }
 
 extension _TermsListExtension on List<Term> {
@@ -207,17 +239,6 @@ extension _TermsListExtension on List<Term> {
 
 extension _QueryModifierReplacementExtension on Term {
   //
-
-  /// Matches all phrases included in quotes.
-  static const rInDoubleQuotes = r'"\w[^"]+\w"';
-
-  /// Matches '-' where preceded by white-space or the start of the string AND
-  /// followed by a double quote or word character.
-  static const rNot = r'(?<=^|\s)-(?="|\w)';
-
-  /// Matches '+' where preceded by white-space or the start of the string AND
-  /// followed by a double quote or word character.
-  static const rImportant = r'(?<=^|\s)\+(?="|\w)';
 
   /// Returns true if the trimmed String is equal to any of:
   /// - ('AND', 'OR', 'NOT', 'EXACTSTART', 'EXACTEND').
@@ -251,14 +272,16 @@ extension _QueryModifierReplacementExtension on Term {
   String replaceModifiers() => not().important().exact();
 
   /// Replaces '-' at the start of a term or phrase with 'NOT '.
-  String not() => replaceAll(RegExp(rNot), 'NOT ');
+  String not() => replaceAll(RegExp(QueryParser._rNot), 'NOT ');
 
   /// Replaces '-' at the start of a term or phrase with 'NOT '.
-  String important() => replaceAll(RegExp(rImportant), 'IMPORTANT ');
+  String important() =>
+      replaceAll(RegExp(QueryParser._rImportant), 'IMPORTANT ');
 
   /// Matches words or phrases enclosed with double quotes and replaces the
   /// leading quote with 'EXACTSTART' and the ending quote with 'EXACTEND'.
-  String exact() => replaceAllMapped(RegExp(rInDoubleQuotes), (match) {
+  String exact() =>
+      replaceAllMapped(RegExp(QueryParser._rInDoubleQuotes), (match) {
         String phrase = match.group(0) ?? '';
         if (phrase.length > 2 &&
             phrase.startsWith(r'"') &&

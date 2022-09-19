@@ -167,4 +167,10 @@ class _DocumentImpl implements Document {
 
   @override
   final List<Term> terms;
+
+  @override
+  Document setWeightings(Iterable<QueryTerm> queryTerms) {
+    // TODO: implement setWeightings
+    throw UnimplementedError();
+  }
 }
