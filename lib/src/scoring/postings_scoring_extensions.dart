@@ -5,11 +5,11 @@
 import 'package:free_text_search/src/_index.dart';
 import 'dart:math';
 
-/// Extension methods on a collection of [FieldPostings].
-extension FieldPostingsExtension on FieldPostings {
+/// Extension methods on a collection of [ZonePostings].
+extension FieldPostingsExtension on ZonePostings {
   //
 
-  /// Returns the term frequncy in a [FieldPostings] instance.
+  /// Returns the term frequncy in a [ZonePostings] instance.
   Ft get tFt {
     var tFt = 0;
     for (final entry in values) {

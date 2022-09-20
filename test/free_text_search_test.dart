@@ -16,7 +16,7 @@ void main() {
 
   const phrase = 'Tesla EV battery technology';
 
-  const fields = ['name', 'description', 'hashTags'];
+  // const fields = ['name', 'description', 'hashTags'];
 
   group('FreeTextSearch', () {
     setUp(() {
@@ -34,16 +34,14 @@ void main() {
       // create the in-memory dictionary and postings for sampleNews
       // await indexer.indexCollection(sampleNews, fields);
 
-      final dictionaryTerms = indexer.index.dictionary.terms;
+      final dictionaryTerms = indexer.dictionary.terms;
 
       final andTerms = queryTerms.andTerms;
       // Get the document ids of those postings that contain ANY of the terms.
-      indexer
-          .printDocuments(indexer.index.postings.containsAny(queryTerms.terms));
+      indexer.printDocuments(indexer.postings.containsAny(queryTerms.terms));
 
       // Get the document ids of those postings that contain ALL the terms.
-      indexer
-          .printDocuments(indexer.index.postings.containsAll(andTerms.terms));
+      indexer.printDocuments(indexer.postings.containsAll(andTerms.terms));
     });
 
     test('SearchResultScorer: championList', () async {

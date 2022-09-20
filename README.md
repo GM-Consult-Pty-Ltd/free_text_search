@@ -6,7 +6,7 @@ All rights reserved.
 
 # free_text_search
 
-Search an inverted positional index and return ranked references to documents relevant to the search phrase.
+Search a text index and return ranked references to documents relevant to a search phrase.
 
 *THIS PACKAGE IS IN BETA DEVELOPMENT AND SUBJECT TO DAILY BREAKING CHANGES.*
 
@@ -21,17 +21,37 @@ Skip to section:
 
 ## Overview
 
-The components of this library:
-* parse a free-text phrase with [query modifiers](#querytermmodifier-enumeration) to a query; 
-* search the `dictionary` and `postings` of a text `index` for the query [terms](#queryterm-class); 
-* perform iterative scoring and ranking of the returned dictionary entries and postings; and 
-* return ranked references to documents relevant to the search phrase.
+This library is intended for applications that are part of an information retrieval system
+with the following components:
 
-Query phrases can include [modifiers](#query-modifiers) broadly consistent with Google search modifiers. 
+* a [text analyzer](https://pub.dev/packages/text_analysis) that extracts tokens from text for use in full-text search queries and indexes (`tokenizer`);
+* a [text indexer](https://pub.dev/packages/text_indexing) that creates an [inverted positional index](https://pub.dev/packages/text_indexing) for a collection of text documents (the `inverted index`); 
+* a [query parser](#queryparser) that parses a free text query into tokens using a `tokenizer` while extracting the `query term modifiers` for each
+token;
+* tools for performing [index elimination](#index-elimination) to reduce the number of results returned from the `index` (if too many results are found); and
+* a `scoring and ranking` tool that iterates over the results to compute a score for each document that enumerates how well it matches the search phrase.
+
+This library provides the [query parser](#queryparser), [index elimination tools](#index-elimination) and a [scoring and ranking module](#scoring-and-ranking).
+
+Refer to the [references](#references) to learn more about information retrieval systems and the theory behind this library.
+
+### Free Text Search Workflow
 
 ![Free text search overview](https://github.com/GM-Consult-Pty-Ltd/free_text_search/raw/main/assets/images/free_text_search.png?raw=true?raw=true "Free text search overview")
 
-Refer to the [references](#references) to learn more about information retrieval systems and the theory behind this library.
+* parse a free-text phrase with [query modifiers](#querytermmodifier-enumeration) to a query; 
+* retrieves `postings` for the query [terms](#queryterm-class) from an inverted index; 
+
+* perform iterative scoring and ranking of the returned dictionary entries and postings; and 
+* return ranked references to documents relevant to the search phrase.
+
+### Query Parser
+
+### Index Elimination
+
+### Scoring and Ranking
+
+
 
 ## Usage
 

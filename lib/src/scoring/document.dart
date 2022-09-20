@@ -29,7 +29,7 @@ abstract class Document {
   }
 
   /// Returns an updated [Document] after inserting the [term] in [terms] and
-  /// overwriting the [termFrequencies] and [termFieldPostings] for [term].
+  /// overwriting the [termFrequencies] and [termZonePostings] for [term].
   Document setTermPostings(Term term, DocumentPostingsEntry entry);
 
   /// Returns an updated [Document] after re-calculating [termPairWeight].
@@ -54,8 +54,8 @@ abstract class Document {
   /// Returns the frequency of [term] in the document.
   Ft tFt(Term term);
 
-  /// A hashmap of [Term]s to [FieldPostings] for the document.
-  Map<Term, FieldPostings> get termFieldPostings;
+  /// A hashmap of [Term]s to [ZonePostings] for the document.
+  Map<Term, ZonePostings> get termZonePostings;
 
   /// Returns a weighting that reflects the number of term pairs that are
   /// matched in a document.  The weight is calculated as follows:
@@ -90,7 +90,7 @@ class _DocumentImpl implements Document {
   Document setPoximityWeight(List<QueryTerm> queryTerms) {
     final proximityWeight = 0.0;
     //TODO: implement setProximityWeight
-    return _DocumentImpl(docId, termFieldPostings, termFrequencies, terms,
+    return _DocumentImpl(docId, termZonePostings, termFrequencies, terms,
         termPairWeight, proximityWeight);
   }
 
@@ -106,7 +106,7 @@ class _DocumentImpl implements Document {
         matchedPhrases.isNotEmpty) {
       termPairWeight = matchedPhrases.length / queryPhrases.length;
     }
-    return _DocumentImpl(docId, termFieldPostings, termFrequencies, terms,
+    return _DocumentImpl(docId, termZonePostings, termFrequencies, terms,
         termPairWeight, proximityWeight);
   }
 
@@ -121,14 +121,14 @@ class _DocumentImpl implements Document {
     final docId = entry.key;
     // First check the entry is for this document
     if (docId != this.docId) return this;
-    // Make a copy of termFieldPostings
-    final termFieldPostings =
-        Map<String, FieldPostings>.from(this.termFieldPostings);
+    // Make a copy of termZonePostings
+    final termZonePostings =
+        Map<String, ZonePostings>.from(this.termZonePostings);
     // make a copy of termFrequencies
     final Map<Term, Ft> termFrequencies =
         Map<Term, Ft>.from(this.termFrequencies);
     // overwrite/insert the field postings for term
-    termFieldPostings[term] = entry.value;
+    termZonePostings[term] = entry.value;
     // overwrite/insert the frequency for term
     termFrequencies[term] = entry.value.tFt;
 
@@ -136,16 +136,16 @@ class _DocumentImpl implements Document {
     final terms = termFrequencies.keys.toList();
     // sort the terms alphabetically
     terms.sort(((a, b) => a.compareTo(b)));
-    // return a new _DocumentImpl wiht the updated termFieldPostings and
+    // return a new _DocumentImpl wiht the updated termZonePostings and
     // termFrerquencies
-    return _DocumentImpl(docId, termFieldPostings, termFrequencies, terms,
+    return _DocumentImpl(docId, termZonePostings, termFrequencies, terms,
         termPairWeight, proximityWeight);
   }
 
   @override
   final DocId docId;
 
-  const _DocumentImpl(this.docId, this.termFieldPostings, this.termFrequencies,
+  const _DocumentImpl(this.docId, this.termZonePostings, this.termFrequencies,
       this.terms, this.termPairWeight, this.proximityWeight);
 
   @override
@@ -160,7 +160,7 @@ class _DocumentImpl implements Document {
   }
 
   @override
-  final Map<FieldName, FieldPostings> termFieldPostings;
+  final Map<Zone, ZonePostings> termZonePostings;
 
   @override
   final Map<Term, Ft> termFrequencies;

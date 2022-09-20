@@ -22,7 +22,7 @@ abstract class FreeTextSearch {
   /// - [index] is an inverted, positional, zoned index on a collection of
   ///   documents that is queried; and
   /// - [queryParser] returns a [FreeTextQuery] from a searh phrase.
-  factory FreeTextSearch(InvertedPositionalZoneIndex index) {
+  factory FreeTextSearch(InvertedIndex index) {
     final queryParser = QueryParser(
         configuration: index.analyzer.configuration,
         tokenFilter: index.analyzer.tokenFilter);
@@ -34,7 +34,7 @@ abstract class FreeTextSearch {
 
   /// An an inverted, positional, zoned index on a collection of documents that
   /// is queried.
-  InvertedPositionalZoneIndex get index;
+  InvertedIndex get index;
 
   /// Returns a list of [SearchResult] instances in descending order of
   /// relevance to [phrase].
@@ -62,7 +62,7 @@ class _FreeTextSearchImpl implements FreeTextSearch {
   }
 
   @override
-  final InvertedPositionalZoneIndex index;
+  final InvertedIndex index;
 
   @override
   final QueryParser queryParser;
