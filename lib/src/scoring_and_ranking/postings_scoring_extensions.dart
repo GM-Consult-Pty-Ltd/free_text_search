@@ -5,11 +5,11 @@
 import 'package:free_text_search/src/_index.dart';
 import 'dart:math';
 
-/// Extension methods on a collection of [ZonePostings].
-extension FieldPostingsExtension on ZonePostings {
+/// Extension methods on a collection of [ZonePostingsMap].
+extension FieldPostingsExtension on ZonePostingsMap {
   //
 
-  /// Returns the term frequncy in a [ZonePostings] instance.
+  /// Returns the term frequncy in a [ZonePostingsMap] instance.
   Ft get tFt {
     var tFt = 0;
     for (final entry in values) {
@@ -20,9 +20,9 @@ extension FieldPostingsExtension on ZonePostings {
 }
 
 ///
-extension DocumentPostingsEntryScoringExtension on DocumentPostingsEntry {
+extension DocumentPostingsEntryScoringExtension on DocPostingsMapEntry {
   //
-
+//PostingsMap
   /// The tf-idf weighting for the document is the product of the term's
   /// frequency in the document ([tFt]) with the inverse document frequency of
   /// the term ([PostingsExtension.idFt]) in the collection.
@@ -42,8 +42,8 @@ extension DocumentPostingsEntryScoringExtension on DocumentPostingsEntry {
   }
 }
 
-/// Extension methods and properties on [Postings].
-extension PostingsScoringExtension on Postings {
+/// Extension methods and properties on [PostingsMap].
+extension PostingsScoringExtension on PostingsMap {
   //
 
   /// Iterates through all the entries in the postings and builds a hashmap
@@ -51,7 +51,7 @@ extension PostingsScoringExtension on Postings {
   Map<DocId, Document> documents(Iterable<Term> terms) {
     final documents = <DocId, Document>{};
     for (final term in terms) {
-      final Iterable<DocumentPostingsEntry> docEntries =
+      final Iterable<DocPostingsMapEntry> docEntries =
           this[term]?.entries.toList() ?? [];
       for (final entry in docEntries) {
         // get the id of the document from the entry
@@ -67,7 +67,7 @@ extension PostingsScoringExtension on Postings {
     return documents;
   }
 
-  /// The number of occurences in the [Postings] of [term] (the
+  /// The number of occurences in the [PostingsMap] of [term] (the
   /// collection frequency).
   Ft cFt(Term term) {
     var collectionFrequency = 0;
@@ -78,7 +78,7 @@ extension PostingsScoringExtension on Postings {
     return collectionFrequency;
   }
 
-  /// The number of documents in the [Postings] that contains one or more
+  /// The number of documents in the [PostingsMap] that contains one or more
   /// instances of [term] (the document frequency of term).
   Ft dFt(Term term) => this[term]?.length ?? 0;
 

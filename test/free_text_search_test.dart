@@ -8,7 +8,6 @@
 import 'package:free_text_search/free_text_search.dart';
 import 'package:free_text_search/src/_index.dart';
 import 'package:test/test.dart';
-import 'data/sample_news.dart';
 import 'test_utils.dart';
 
 void main() {
@@ -26,19 +25,22 @@ void main() {
     test('FreeTextSearch: TestIndex', () async {
       final indexer = await TestIndex.hydrate();
       // initialize the QueryParser
-      final queryParser = QueryParser();
+      final queryParser = QueryParser(TextTokenizer.english);
       // parse the phrase
-      final queryTerms = await queryParser.parseTerms(phrase);
+      final query = await queryParser.parseQuery(phrase);
+
+    
       // print the terms and their modifiers
-      TestIndex.printQueryTerms(queryTerms);
+      TestIndex.printQueryTerms(query.queryTerms);
       // create the in-memory dictionary and postings for sampleNews
       // await indexer.indexCollection(sampleNews, fields);
 
       final dictionaryTerms = indexer.dictionary.terms;
 
-      final andTerms = queryTerms.andTerms;
+      final andTerms = query.queryTerms.andTerms;
       // Get the document ids of those postings that contain ANY of the terms.
-      indexer.printDocuments(indexer.postings.containsAny(queryTerms.terms));
+      indexer
+          .printDocuments(indexer.postings.containsAny(query.queryTerms.terms));
 
       // Get the document ids of those postings that contain ALL the terms.
       indexer.printDocuments(indexer.postings.containsAll(andTerms.terms));
@@ -48,7 +50,7 @@ void main() {
       // initialize an in-memory indexer
       final indexer = await TestIndex.hydrate();
       // initialize the QueryParser
-      final queryParser = QueryParser();
+      final queryParser = QueryParser(TextTokenizer.english);
       // parse the phrase to a query
       final FreeTextQuery query = await queryParser.parseQuery(phrase);
       // get the terms from the query

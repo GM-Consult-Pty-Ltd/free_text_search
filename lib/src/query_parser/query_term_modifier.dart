@@ -12,15 +12,14 @@
 enum QueryTermModifier {
   //
 
-  /// Default. All terms are marked [AND] unless marked
-  /// with another modifier.
+  /// Default. All terms are marked [AND] unless marked with another modifier.
   AND,
 
   /// Terms preceding and following "OR" are marked [OR].
   OR,
 
-  /// Terms following the hyphen "-" or the upper case word 'NOT'  are
-  /// marked [NOT].
+  /// Terms following the hyphen "-" or the upper case word 'NOT'  are marked
+  /// [NOT].
   NOT,
 
   /// Terms following the plus sign "+" are marked [IMPORTANT].

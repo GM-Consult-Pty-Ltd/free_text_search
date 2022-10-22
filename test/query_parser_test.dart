@@ -21,9 +21,11 @@ void main() {
 
     test('QueryParser: Test Modifiers', () async {
       // initialize the QueryParser
-      final queryParser = QueryParser();
+      final queryParser = QueryParser(TextTokenizer.english);
       // parse the phrase
-      final queryTerms = await queryParser.parseTerms(phraseWithModifiers);
+      final query = await queryParser.parseQuery(phraseWithModifiers);
+
+      final queryTerms = query.queryTerms;
       // print the terms and their modifiers
       TestIndex.printQueryTerms(queryTerms);
 

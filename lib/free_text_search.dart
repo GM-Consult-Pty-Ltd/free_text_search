@@ -7,5 +7,3 @@ library free_text_search;
 
 /// Export of barrel file in the /src folder.
 export 'src/free_text_search.dart';
-export 'src/query/query_term.dart';
-export 'src/scoring/search_result.dart';

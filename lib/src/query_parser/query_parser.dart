@@ -9,7 +9,7 @@ import 'package:free_text_search/src/_index.dart';
 /// Ensure that the [configuration] and [tokenFilter] match the [TextAnalyzer]
 /// used to construct the index on the target collection that will be searched.
 ///
-/// The [parse] method parses a phrase to a collection of [QueryTerm]s
+/// The [parseQuery] method parses a phrase to a collection of [QueryTerm]s
 /// that includes:
 /// - all the original words in the phrase, except query modifiers
 ///   ('AND', 'OR', '"', '-', 'NOT);
@@ -17,22 +17,8 @@ import 'package:free_text_search/src/_index.dart';
 ///   including child words of exact phrases; and
 /// - derived versions of all words always have the [QueryTermModifier.OR]
 ///   unless they are already marked [QueryTermModifier.NOT].
-class QueryParser extends TextAnalyzer {
+abstract class QueryParser {
   //
-
-  /// Instantiates a [QueryParser] instance:
-  /// - [configuration] is used to tokenize the query phrase (default is
-  ///   [English.configuration]); and
-  /// - provide a custom [tokenFilter] if you want to manipulate tokens or
-  ///   restrict tokenization to tokens that meet specific criteria (default is
-  ///   [TextAnalyzer.defaultTokenFilter].
-  const QueryParser(
-      {TextAnalyzerConfiguration configuration = English.configuration,
-      TokenFilter? tokenFilter = TextAnalyzer.defaultTokenFilter})
-      : super(configuration: configuration, tokenFilter: tokenFilter);
-
-  /// Shortcut to configuration.termSplitter
-  TermSplitter get _termSplitter => configuration.termSplitter;
 
   /// Parses a search [phrase] to a [FreeTextQuery].
   ///
@@ -43,8 +29,44 @@ class QueryParser extends TextAnalyzer {
   ///   child words of exact phrases; and
   /// - derived versions of all words always have the [QueryTermModifier.OR]
   ///   unless they are already marked [QueryTermModifier.NOT].
+  Future<FreeTextQuery> parseQuery(String phrase);
+
+  /// Instantiates a [QueryParser] instance with a [tokenizer].
+  factory QueryParser(TextTokenizer tokenizer) => _QueryParserImpl(tokenizer);
+
+  /// Instantiates a [QueryParser] instance associated with the [index].
+  factory QueryParser.index(InvertedIndex index) =>
+      _QueryParserImpl(index.tokenizer);
+}
+
+class _QueryParserImpl extends QueryParserBase {
+  @override
+  final TextTokenizer tokenizer;
+
+  const _QueryParserImpl(this.tokenizer);
+}
+
+/// Abstract base class implementation of [QueryParser] with [QueryParserMixin].
+///
+/// Provides an unnamed const default generative constructor for sub-classes.
+abstract class QueryParserBase with QueryParserMixin {
+  /// Unnamed const default generative constructor for sub-classes.
+  const QueryParserBase();
+}
+
+/// Mixin class implements [QueryParser.parseQuery].
+abstract class QueryParserMixin implements QueryParser {
+  //
+
+  /// A TextAnalyzer used to tokenize the query phrase.
+  TextTokenizer get tokenizer;
+
+  /// Shortcut to tokenizer.termSplitter
+  TermSplitter get _termSplitter => tokenizer.analyzer.termSplitter;
+
+  @override
   Future<FreeTextQuery> parseQuery(String phrase) async {
-    final queryTerms = await parseTerms(phrase);
+    final queryTerms = await _parseToTerms(phrase);
     final query = FreeTextQuery(phrase: phrase, queryTerms: queryTerms);
     return query;
   }
@@ -52,7 +74,7 @@ class QueryParser extends TextAnalyzer {
   /// Returns all the terms or phrases in double quotes as QueryTerm instances
   /// with the [QueryTermModifier.EXACT].  These phrases are also given
   /// a term position of 0 to give them the highest weighting in scoring.
-  Future<List<QueryTerm>> exactMatchPhrases(String phrase) async {
+  Future<List<QueryTerm>> _exactMatchPhrases(String phrase) async {
     // - initialize the return value;
     final retVal = <QueryTerm>[];
     // - inditialize a term counter
@@ -77,10 +99,11 @@ class QueryParser extends TextAnalyzer {
   ///   child words of exact phrases; and
   /// - derived versions of all words always have the [QueryTermModifier.OR]
   ///   unless they are already marked [QueryTermModifier.NOT].
-  Future<List<QueryTerm>> parseTerms(String phrase) async {
-    // - initialize the return value;
-    final retVal = await exactMatchPhrases(phrase);
-
+  Future<List<QueryTerm>> _parseToTerms(String phrase) async {
+    //
+    // - initialize the return value, front-load it with all the exact-matches
+    final retVal = await _exactMatchPhrases(phrase);
+    // - keep a record of the exactmatches
     final exactPhrases = retVal.terms;
     // - replace the modifiers with tokens;
     phrase = phrase.replaceModifiers();
@@ -118,8 +141,8 @@ class QueryParser extends TextAnalyzer {
         if (modifier != QueryTermModifier.EXACT || next == 'EXACTEND') {
           // if we're here it means we can add the term to the return value
           // because it is either:
-          // NOT an exact match term, or
-          // the last word in an exact match phrase
+          //  - NOT an exact match term, or
+          //  - the last word in an exact match phrase
           //
           // let's initialize a collection to hold the exact term/phrase and any
           // child words of a phrase or a stemmed version of the term.
@@ -133,21 +156,18 @@ class QueryParser extends TextAnalyzer {
             previousParsedTerm = rawTermOrPhrase;
             // now split the phrase at whitespace into its component words
             final subterms = rawTermOrPhrase.split(RegExp(r'\s+'));
-            // let's iterate through the subTerms and add them to the searchTerms
-            // var previousExactTerm = '';
+            // let's iterate through the subTerms and add them to searchTerms
             var previousSubTerm = '';
             for (var subTerm in subterms) {
               // first check the subTerm is not empty
               if (subTerm.isNotEmpty) {
-                // not an empty subTerm, so let's stem/split the subTerm by
-                // passing it to the termFilter callback
-                final filteredTerms = (await tokenize(subTerm)).tokens.terms;
-                // now iterate through whatever we got back from the termFilter
-                // var previousFilteredTerm = '';
+                // not an empty subTerm, so let's tokenize it
+                final filteredTerms = (await tokenizer.tokenize(subTerm)).terms;
+                // now iterate through whatever we got back from the tokenizer
                 for (final e in filteredTerms) {
                   // check the term is not already in the list
                   if (!searchTerms.contains(e)) {
-                    // it's a new term, let's add it to the list
+                    // it's a new term, let's add it to searchTerms
                     searchTerms.add(e);
                   }
                 }
@@ -155,25 +175,22 @@ class QueryParser extends TextAnalyzer {
                 final newSubterm =
                     filteredTerms.length == 1 ? filteredTerms.first : subTerm;
                 if (previousSubTerm.isNotEmpty && newSubterm.isNotEmpty) {
-                  searchTerms
-                      .add(TermPair(previousSubTerm, newSubterm).toString());
+                  searchTerms.add('$previousSubTerm $newSubterm');
                 }
                 previousSubTerm = newSubterm;
               }
             }
           } else {
-            // this is not an EXACT match term, so pass it to the termFilter to
-            // get the stemmed version or split terms and add it/them to the list
-            final searchTerm = (await tokenize(rawTermOrPhrase)).tokens.terms;
-            searchTerms.addAll(searchTerm);
+            // not an EXACT match term, so tokenize it and add to searchTerms
+            final tokens = (await tokenizer.tokenize(rawTermOrPhrase)).terms;
+            searchTerms.addAll(tokens);
             searchTerms.add(rawTermOrPhrase);
             final newParsedTerm =
-                searchTerm.length != 1 ? rawTermOrPhrase : searchTerm.first;
+                tokens.length != 1 ? rawTermOrPhrase : tokens.first;
             if (previousParsedTerm.isNotEmpty &&
                 newParsedTerm.isNotEmpty &&
                 modifier != QueryTermModifier.NOT) {
-              searchTerms
-                  .add(TermPair(previousParsedTerm, newParsedTerm).toString());
+              searchTerms.add('$previousParsedTerm $newParsedTerm');
             }
             previousParsedTerm =
                 next != 'OR' ? newParsedTerm : previousParsedTerm;
@@ -272,16 +289,16 @@ extension _QueryModifierReplacementExtension on Term {
   String replaceModifiers() => not().important().exact();
 
   /// Replaces '-' at the start of a term or phrase with 'NOT '.
-  String not() => replaceAll(RegExp(QueryParser._rNot), 'NOT ');
+  String not() => replaceAll(RegExp(QueryParserMixin._rNot), 'NOT ');
 
   /// Replaces '-' at the start of a term or phrase with 'NOT '.
   String important() =>
-      replaceAll(RegExp(QueryParser._rImportant), 'IMPORTANT ');
+      replaceAll(RegExp(QueryParserMixin._rImportant), 'IMPORTANT ');
 
   /// Matches words or phrases enclosed with double quotes and replaces the
   /// leading quote with 'EXACTSTART' and the ending quote with 'EXACTEND'.
   String exact() =>
-      replaceAllMapped(RegExp(QueryParser._rInDoubleQuotes), (match) {
+      replaceAllMapped(RegExp(QueryParserMixin._rInDoubleQuotes), (match) {
         String phrase = match.group(0) ?? '';
         if (phrase.length > 2 &&
             phrase.startsWith(r'"') &&
@@ -292,5 +309,3 @@ extension _QueryModifierReplacementExtension on Term {
         return phrase;
       });
 }
-// ///
-// class QueryParserConfiguration extends English {}

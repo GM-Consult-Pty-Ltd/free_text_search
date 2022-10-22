@@ -21,23 +21,108 @@ Skip to section:
 
 ## Overview
 
-This library is intended for applications that are part of an information retrieval system
-with the following components:
-
+This library is intended for applications that are part of an information retrieval system with the following components:
 * a [text analyzer](https://pub.dev/packages/text_analysis) that extracts tokens from text for use in full-text search queries and indexes (`tokenizer`);
 * a [text indexer](https://pub.dev/packages/text_indexing) that creates an [inverted positional index](https://pub.dev/packages/text_indexing) for a collection of text documents (the `inverted index`); 
-* a [query parser](#queryparser) that parses a free text query into tokens using a `tokenizer` while extracting the `query term modifiers` for each
-token;
-* tools for performing [index elimination](#index-elimination) to reduce the number of results returned from the `index` (if too many results are found); and
+* a [query parser](#queryparser) that parses a free text query into tokens using a `tokenizer` while extracting the `query term modifiers` for each token;
+* tools for performing [index elimination](#index-elimination) to reduce the number of results returned from the `index` (if too many results are found); 
+* `query expansion functions` to increase the number of search results by including synonyms for terms and correcting the spelling of misspelt terms; and
 * a `scoring and ranking` tool that iterates over the results to compute a score for each document that enumerates how well it matches the search phrase.
 
-This library provides the [query parser](#queryparser), [index elimination tools](#index-elimination) and a [scoring and ranking module](#scoring-and-ranking).
+This library provides the [query parser](#queryparser), [index elimination tools](#index-elimination), `query expansion functions` and a [scoring and ranking module](#scoring-and-ranking).
 
 Refer to the [references](#references) to learn more about information retrieval systems and the theory behind this library.
 
 ### Free Text Search Workflow
 
-![Free text search overview](https://github.com/GM-Consult-Pty-Ltd/free_text_search/raw/main/assets/images/free_text_search.png?raw=true?raw=true "Free text search overview")
+The free-text search workflow consists of:
+* a [query phrase](#the-query-phrase) is presented to the search engine;
+* the [query parser](#the-query-parser) splits the [query phrase](#the-query-phrase) into query terms, each with a modifier and position information. The [query parser](#the-query-phrase) applies `query expansion` techniques to add synonyms to the terms, apply a spell checker and compose phrases from adjacent terms;
+* the `postings` in an inverted index is then queried, retrieving all postings for the terms (or phrases) in the query;
+* if the number of returned postings is greater than required (e.g. the number of document summaries that can be displayed on a list of search results), a process of [index elimination](#index-elimination) culls the postings to the those most likely to match the query.
+* the [scoring and ranking engine](#scoring-and-ranking) is now applied to the remaining postings candidates, returning a ranked and scored set of [query results](#query-results).
+
+
+![Free text search overview](https://github.com/GM-Consult-Pty-Ltd/free_text_search/raw/main/dev/images/free_text_search.png?raw=true?raw=true "Free text search overview")
+
+
+### The Query Phrase
+
+A free-text query is usually a small number of key terms, possibly also including one or more query term modifiers. The objective is to find from the `corpus` a subset of documents that have the best match with the query. 
+
+This library implements query term modifiers broadly consistent with those used in the [Google](https://support.google.com/websearch/answer/2466433?hl=en) the search engine:
+* terms or phrases can be wrapped in double quotes to find an exact match;
+* terms preceded by `"OR"` are alternatives to the preceding term;
+* if terms are preceded by `"NOT" or "-"` documents including these terms are excluded from results; and
+* query results that contain terms preceded by plus sign `"+"` or the upper-case word `"IMPORTANT"` are ranked higher.
+
+### The Query Parser
+
+The query parser converts a free-text query into a collection of [QueryTerm](#queryterm-class) objects, each with its term, position in the query phrase and any modifiers.
+
+![Query Parser](https://github.com/GM-Consult-Pty-Ltd/free_text_search/raw/main/dev/images/query_parser.png?raw=true?raw=true "Query Parser")
+
+The [term parser](#querytermparser-class) first:
+* extracts any words or phrases in double quotes and adds them to the query terms collection at position 0; then
+* replaces all modifier tokens and characters with special tokens; before 
+* calling the the tokenizer for the index that is queried to tokenize the phrase; then
+* iterates over the tokens to map terms to [QueryTerm](#queryterm-class)s each with a position and modifier. 
+
+Once the first pass of the query terms collection has been created, the [query expander](#querytermexpander-class) adds the following additional query terms:
+* each term is checked using a spelling correction API callback and an auto-correct term with an 'OR' modifier is inserted at the same position as the misspelt term;
+* each term is checked against a thesaurus API callback and, if a synonym is found, the synonym is inserted at the same position as the query term; and
+* phrases are composed using adjacent terms. The phrase length is limited to the phrase length limit of the index.
+
+The search phrase and final query terms are used to return a [FreeTextQuery](#freetextquery-class).
+
+An extension method on [Token](https://pub.dev/documentation/text_analysis/latest/text_analysis/Token-class.html), [Set<KGram> kGrams([int k = 3])](https://pub.dev/documentation/text_analysis/latest/text_analysis/KGramParserExtension/kGrams.html) is used to the `k-grams` in the query tokens.
+
+### Query Expansion
+
+If a query does not return the expected number of search results from the index the query terms can be expanded to include synonyms or correct the spelling for terms not found in the index:
+* synonyms are looked up in a synonym index, a key - value dictionary of terms each with a set of synonyms. Synonyms should be tokenized using the `index`'s tokenizer; and
+* terms that are not found in the index can be converted to a spell-correction function that returns suggested
+corrections for a term if it is not present in the spell-checker dictionary.
+
+### Index Elimination
+
+`Index elimination` is the process of extracting a subset of the index postings for the likely highest scoring documents against the query phrase (`inexact top K document retrieval`). In this library, `index elimination` is an iterative process:
+* calculate the number of documents (`K`)that would return a set of search results with high precision while maintaining performance;
+* query the index `postings` for all the terms in the [FreeTextQuery.queryTerms](#freetextquery-class);
+* if the number of returned `postings` is less than K, return proceed to [scoring and ranking](#scoring-and-ranking); else
+* iteratively create consecutive tiered indexes and add the postings for each tiered index to the results set until it has grown to K, or all steps have been completed.
+
+The tiered indexes are created as follows:
+* `exact terms index` contains only those postings for `"exact match"` modified query terms;
+* `phrase index` contains only those postings for query sub-phrases (i.e. more than one word); and
+* `champion lists` are postings for documents with the highest term frequencies for each term.
+
+![Index Elimination](https://github.com/GM-Consult-Pty-Ltd/free_text_search/raw/main/dev/images/index_elimination.png?raw=true?raw=true "Index Elimination")
+
+### Scoring and Ranking
+
+#### Champion Lists
+
+#### Static Quality Scoring
+
+#### Impact Ordering
+
+#### Vector Space Model
+
+### Query Results
+
+
+
+
+
+
+
+
+Usually the number of returned documents is limited to what can be displayed on one page of a list of search results, say in the range of 20 - 50.
+
+The workflow for performing a free-text search implemented in this library has the following steps:
+*
+
 
 * parse a free-text phrase with [query modifiers](#querytermmodifier-enumeration) to a query; 
 * retrieves `postings` for the query [terms](#queryterm-class) from an inverted index; 
@@ -45,9 +130,6 @@ Refer to the [references](#references) to learn more about information retrieval
 * perform iterative scoring and ranking of the returned dictionary entries and postings; and 
 * return ranked references to documents relevant to the search phrase.
 
-### Query Parser
-
-### Index Elimination
 
 ### Scoring and Ranking
 
@@ -97,7 +179,7 @@ The [examples](https://pub.dev/packages/free_text_search/example) demonstrate th
 
 ## API
 
-To maximise performance the API manipulates nested hashmaps of DART core types `int`, `double` and `String` rather than defining strongly typed object models. To improve code legibility and maintainability the API makes use of [type aliases](#type-aliases) throughout.
+To maximise performance, the API manipulates nested hashmaps of DART core types `int`, `double` and `String` rather than defining strongly typed object models. To improve code legibility and maintainability the API makes use of [type aliases](#type-aliases) throughout.
 
 ### Type Aliases
 
@@ -121,11 +203,24 @@ After parsing the phrase to terms, the `Postings` and `Dictionary` for the query
   
 Ensure that the `FreeTextSearch.configuration` and `FreeTextSearch.tokenFilter` match the `TextAnalyzer` used to construct the index on the target collection that will be searched.
 
+### FreeTextQuery class
+
+The `FreeTextQuery` enumerates the properties of a text search query:
+* `FreeTextQuery.phrase` is the unmodified search phrase, including all modifiers and tokens; and
+* `FreeTextQuery.terms` is the ordered list of all terms extracted from the `phrase` used to look up results in an inverted index.
+
 ### SearchResult class  
 
  The `SearchResult` model represents a ranked search result of a query against a text index:
  * `SearchResult.docId` is the unique identifier of the document result in the corpus; and
  * `SearchResult.relevance` is the relevance score awarded to the document by the scoring and ranking  algorithm. Higher scores indicate increased relevance of the document.
+
+### QueryTerm class
+
+The `QueryTerm` object extends `Token`, and enumerates the properties of a term in a free text query phrase:
+* `QueryTerm.term` is the term that will be looked up in the index;
+* `QueryTerm.termPosition` is the zero-based position of the `term` in an ordered list of all the terms in the source text; and
+* `FreeTextQuery.modifier` is the [QueryTermModifier](#querytermmodifier-enumeration) applied for this term. The default modifier` is `QueryTermModifier.AND`.
 
 ### QueryParser class
 
@@ -139,20 +234,7 @@ The `QueryParser.parse` method parses a phrase to a collection of [QueryTerm](#q
 
 A [QueryTerm](#queryterm-class) for a derived version of a term always has its `QueryTerm.modifier` property set to `QueryTermModifier.OR`, unless the term was marked `QueryTermModifier.NOT` in the query phrase.
 
-### FreeTextQuery class
-
-The `FreeTextQuery` enumerates the properties of a text search query:
-* `FreeTextQuery.phrase` is the unmodified search phrase, including all modifiers and tokens; and
-* `FreeTextQuery.terms` is the ordered list of all terms extracted from the `phrase` used to look up results in an inverted index.
-
-### QueryTerm class
-
-The `QueryTerm` object extends `Token`, and enumerates the properties of a term in a free text query phrase:
-* `QueryTerm.term` is the term that will be looked up in the index;
-* `QueryTerm.termPosition` is the zero-based position of the `term` in an ordered list of all the terms in the source text; and
-* `FreeTextQuery.modifier` is the [QueryTermModifier](#querytermmodifier-enumeration) applied for this term. The default modifier` is `QueryTermModifier.AND`.
-
-### QueryTermModifier Enumeration
+### QueryTermModifier enumeration
 
 The phrase can include the following modifiers to guide the the search results scoring/ranking algorithm:
 * terms or phrases wrapped in double quotes will be marked `QueryTermModifier.EXACT` (e.g.`"athletics track"`);
@@ -160,6 +242,12 @@ The phrase can include the following modifiers to guide the the search results s
 * terms preceded by `"NOT" or "-"` are marked `QueryTermModifier.NOT` to rank results lower if they include these terms; 
 * terms following the plus sign `"+"` are marked `QueryTermModifier.IMPORTANT` to rank results that include these terms higher; and
 * all other terms are marked as `QueryTermModifier.AND`.
+
+
+### QueryTermParser class
+
+
+### QueryTermExpander class
 
 ## Definitions
 
@@ -169,7 +257,7 @@ The following definitions are used throughout the [documentation](https://pub.de
 * `dictionary` - is a hash of `terms` (`vocabulary`) to the frequency of occurence in the `corpus` documents.
 * `document` - a record in the `corpus`, that has a unique identifier (`docId`) in the `corpus`'s primary key and that contains one or more text fields that are indexed.
 * `index` - an [inverted index](https://en.wikipedia.org/wiki/Inverted_index) used to look up `document` references from the `corpus` against a `vocabulary` of `terms`. The implementation in this library relies on a positional inverted index, that also includes the positions of the indexed `term` in each `document`.
-* `index-elimination` - selecting a subset of the entries in an index where the `term` is in the collection of `terms` in a search phrase.
+* `index-elimination` - extracting a subset of the index postings for the likely highest scoring documents against the query phrase (`inexact top K document retrieval`).
 * `postings` - a separate index that records which `documents` the `vocabulary` occurs in. 
 * `postings list` - a record of the positions of a `term` in a `document` and its fields. A position of a `term` refers to the index of the `term` in an array that contains all the `terms` in the `text`.
 * `term` - a word or phrase that is indexed from the `corpus`. The `term` may differ from the actual word used in the corpus depending on the `tokenizer` used.

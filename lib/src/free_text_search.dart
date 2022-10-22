@@ -23,9 +23,7 @@ abstract class FreeTextSearch {
   ///   documents that is queried; and
   /// - [queryParser] returns a [FreeTextQuery] from a searh phrase.
   factory FreeTextSearch(InvertedIndex index) {
-    final queryParser = QueryParser(
-        configuration: index.analyzer.configuration,
-        tokenFilter: index.analyzer.tokenFilter);
+    final queryParser = QueryParser(index.tokenizer);
     return _FreeTextSearchImpl(index, queryParser);
   }
 

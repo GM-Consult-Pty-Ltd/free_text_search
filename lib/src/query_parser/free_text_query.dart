@@ -25,11 +25,11 @@ abstract class FreeTextQuery {
   /// as they occur in the [phrase].
   List<QueryTerm> get queryTerms;
 
-  /// A list of the [Term]s extracted from the [phrase] in the same order
+  /// A list of all the [Term]s extracted from the [phrase] in the same order
   /// as they occur in the [phrase].
   List<Term> get allTerms;
 
-  /// A list of the [Term]s extracted from the [phrase] in the same order
+  /// A list of the unique [Term]s extracted from the [phrase] in the same order
   /// as they occur in the [phrase].
   Set<Term> get uniqueTerms;
 
@@ -37,11 +37,33 @@ abstract class FreeTextQuery {
   List<String> get phrases;
 }
 
-class _FreeTextQueryImpl implements FreeTextQuery {
-//
+/// Mixin class that implements [FreeTextQuery.phrases],
+/// [FreeTextQuery.allTerms] and [FreeTextQuery.uniqueTerms].
+abstract class FreeTextQueryMixin implements FreeTextQuery {
+  //
 
   @override
   List<String> get phrases => queryTerms.phrases;
+
+  @override
+  List<Term> get allTerms => queryTerms.allTerms;
+
+  @override
+  Set<Term> get uniqueTerms => queryTerms.uniqueTerms;
+}
+
+/// A [FreeTextQuery] implementation base-class with [FreeTextQueryMixin].
+///
+/// Provides a const, unnamed default generative constructor for sub-classes.
+abstract class FreeTextQueryBase with FreeTextQueryMixin {
+//
+
+  /// Const default generative constructor for sub-classes.
+  const FreeTextQueryBase();
+}
+
+class _FreeTextQueryImpl extends FreeTextQueryBase {
+//
 
   /// The unmodified search phrase, including all modifiers and tokens.
   @override
@@ -51,16 +73,6 @@ class _FreeTextQueryImpl implements FreeTextQuery {
   /// as they occur in the [phrase].
   @override
   final List<QueryTerm> queryTerms;
-
-  /// A list of the [Term]s extracted from the [phrase] in the same order
-  /// as they occur in the [phrase].
-  @override
-  List<Term> get allTerms => queryTerms.allTerms;
-
-  /// A list of the [Term]s extracted from the [phrase] in the same order
-  /// as they occur in the [phrase].
-  @override
-  Set<Term> get uniqueTerms => queryTerms.uniqueTerms;
 
   /// Instantiates a const [FreeTextQuery] with the following required
   /// parameters:

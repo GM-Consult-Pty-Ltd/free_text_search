@@ -11,7 +11,10 @@ class TestIndex extends TextIndexerBase {
 
   @override
   final index = InMemoryIndex(
-      dictionary: {}, postings: {}, analyzer: TextAnalyzer(), zones: zoneMap);
+      dictionary: {},
+      postings: {},
+      tokenizer: TextTokenizer.english,
+      zones: zoneMap);
   static Future<TestIndex> hydrate() async {
     final indexer = TestIndex._();
     await indexer.indexCollection(indexer.collection);
@@ -19,10 +22,10 @@ class TestIndex extends TextIndexerBase {
   }
 
   /// The in-memory term dictionary for the indexer.
-  Dictionary get dictionary => (index as InMemoryIndex).dictionary;
+  DftMap get dictionary => (index as InMemoryIndex).dictionary;
 
   /// The in-memory postings hashmap for the indexer.
-  Postings get postings => (index as InMemoryIndex).postings;
+  PostingsMap get postings => (index as InMemoryIndex).postings;
 
   final JsonCollection collection = sampleNews;
 
@@ -59,7 +62,7 @@ class TestIndex extends TextIndexerBase {
   Stream<Map<DocId, JSON>>? get collectionStream => null;
 
   @override
-  final controller = BehaviorSubject<Postings>();
+  final controller = BehaviorSubject<PostingsMap>();
 
   @override
   Stream<MapEntry<DocId, JSON>>? get documentStream => null;

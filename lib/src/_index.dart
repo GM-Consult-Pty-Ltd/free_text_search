@@ -4,8 +4,9 @@
 
 /// Barrel file for src/ folder.
 export 'free_text_search.dart';
-export 'scoring/_index.dart';
-export 'query/_index.dart';
-export 'scoring/_index.dart';
+export 'query_parser/_index.dart';
+export 'scoring_and_ranking/_index.dart';
 export 'package:text_indexing/text_indexing.dart';
 export 'package:text_indexing/text_indexing.dart';
+export 'package:text_indexing/type_definitions.dart';
+export 'package:text_indexing/extensions.dart';

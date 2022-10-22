@@ -15,12 +15,12 @@ import 'package:free_text_search/src/_index.dart';
 class SearchResultScorer {
   //
 
-  /// A hashmap of [Term] to the number of occurences in the [Postings] of
+  /// A hashmap of [Term] to the number of occurences in the [PostingsMap] of
   /// the [Term].
   final TermFrequencyMap cFtMap = {};
 
   /// A hashmap of [Term] to the inverse document frequency of the [Term] in
-  /// [Postings].
+  /// [PostingsMap].
   final Map<String, double> idFtMap = {};
 
   /// The [ChampionList] containing all the documents for a [Term].
@@ -99,13 +99,13 @@ class SearchResultScorer {
   ///
   /// A subset of the collection dictionary that only contains the keys
   /// ([Term]s) in [query.terms].
-  final Dictionary dictionary;
+  final DftMap dictionary;
 
   /// A hashmap of terms to posting lists for the search terms.
   ///
   /// A subset of the collection dictionary that only contains the keys
   /// ([Term]s) in [query.terms].
-  final Postings postings;
+  final PostingsMap postings;
 
   /// The query that was used to obtain the [dictionary] and [postings].
   final FreeTextQuery query;

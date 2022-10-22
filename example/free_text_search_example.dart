@@ -19,11 +19,12 @@ void main() async {
 /// including any modifiers.
 Future<List<QueryTerm>> _parsePhrase(String phrase) async {
   // initialize the QueryParser
-  final queryParser = QueryParser();
+  final queryParser = QueryParser(TextTokenizer.english);
   // parse the phrase
-  final queryTerms = await queryParser.parseTerms(phrase);
+  final query = await queryParser.parseQuery(phrase);
+
   // print the terms and their modifiers
-  for (final qt in queryTerms) {
+  for (final qt in query.queryTerms) {
     // prints -   "term" [MODIFIER]
     print(' - "${qt.term}" [${qt.modifier.name}]');
   }
@@ -39,5 +40,5 @@ Future<List<QueryTerm>> _parsePhrase(String phrase) async {
   //  - "hobart" [NOT]
   //  - "help-me" [NOT]
   //  - "help" [NOT]"
-  return queryTerms;
+  return query.queryTerms;
 }

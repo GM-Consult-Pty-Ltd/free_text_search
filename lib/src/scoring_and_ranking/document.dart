@@ -2,10 +2,7 @@
 // BSD 3-Clause License
 // All rights reserved
 
-import 'package:free_text_search/free_text_search.dart';
-import 'package:text_indexing/text_indexing.dart';
-import 'postings_scoring_extensions.dart';
-import 'dart:math';
+import 'package:free_text_search/src/_index.dart';
 
 /// Alias for Map<String, int>
 typedef TermFrequencyMap = Map<Term, Ft>;
@@ -15,7 +12,7 @@ typedef TermFrequencyMap = Map<Term, Ft>;
 ///
 /// The [Document] properties are stored in the [Postings] of the index,
 /// distributed over the vocabulary terms.  [Document]s are extracted from
-/// the [Postings] by filtering the [Postings] entries for [DocumentPostingsEntry]
+/// the [Postings] by filtering the [Postings] entries for [DocPostingsMapEntry]
 /// elements with the same identifier [docId] as the document.
 abstract class Document {
   //
@@ -30,7 +27,7 @@ abstract class Document {
 
   /// Returns an updated [Document] after inserting the [term] in [terms] and
   /// overwriting the [termFrequencies] and [termZonePostings] for [term].
-  Document setTermPostings(Term term, DocumentPostingsEntry entry);
+  Document setTermPostings(Term term, DocPostingsMapEntry entry);
 
   /// Returns an updated [Document] after re-calculating [termPairWeight].
   Document setTermPairWeight(List<QueryTerm> queryTerms);
@@ -54,8 +51,8 @@ abstract class Document {
   /// Returns the frequency of [term] in the document.
   Ft tFt(Term term);
 
-  /// A hashmap of [Term]s to [ZonePostings] for the document.
-  Map<Term, ZonePostings> get termZonePostings;
+  /// A hashmap of [Term]s to [ZonePostingsMap] for the document.
+  Map<Term, ZonePostingsMap> get termZonePostings;
 
   /// Returns a weighting that reflects the number of term pairs that are
   /// matched in a document.  The weight is calculated as follows:
@@ -117,13 +114,13 @@ class _DocumentImpl implements Document {
   final double proximityWeight;
 
   @override
-  Document setTermPostings(Term term, DocumentPostingsEntry entry) {
+  Document setTermPostings(Term term, DocPostingsMapEntry entry) {
     final docId = entry.key;
     // First check the entry is for this document
     if (docId != this.docId) return this;
     // Make a copy of termZonePostings
     final termZonePostings =
-        Map<String, ZonePostings>.from(this.termZonePostings);
+        Map<String, ZonePostingsMap>.from(this.termZonePostings);
     // make a copy of termFrequencies
     final Map<Term, Ft> termFrequencies =
         Map<Term, Ft>.from(this.termFrequencies);
@@ -160,7 +157,7 @@ class _DocumentImpl implements Document {
   }
 
   @override
-  final Map<Zone, ZonePostings> termZonePostings;
+  final Map<Zone, ZonePostingsMap> termZonePostings;
 
   @override
   final Map<Term, Ft> termFrequencies;
