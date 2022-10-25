@@ -67,28 +67,26 @@ The [term parser](#querytermparser-class) first:
 * replaces all modifier tokens and characters with special tokens; before 
 * calling the the tokenizer for the index that is queried to tokenize the phrase; then
 * iterates over the tokens to map terms to [QueryTerm](#queryterm-class)s each with a position and modifier. 
-
-Once the first pass of the query terms collection has been created, the [query expander](#querytermexpander-class) adds the following additional query terms:
-* each term is checked using a spelling correction API callback and an auto-correct term with an 'OR' modifier is inserted at the same position as the misspelt term;
-* each term is checked against a thesaurus API callback and, if a synonym is found, the synonym is inserted at the same position as the query term; and
-* phrases are composed using adjacent terms. The phrase length is limited to the phrase length limit of the index.
+Phrases are composed using adjacent terms. The phrase length is limited to the phrase length limit of the index.
 
 The search phrase and final query terms are used to return a [FreeTextQuery](#freetextquery-class).
 
 An extension method on [Token](https://pub.dev/documentation/text_analysis/latest/text_analysis/Token-class.html), [Set<KGram> kGrams([int k = 3])](https://pub.dev/documentation/text_analysis/latest/text_analysis/KGramParserExtension/kGrams.html) is used to the `k-grams` in the query tokens.
 
+If a query does not return the expected number of search results from the index (see [index elimination](#index-elimination)) the collection of query terms can be [expanded](#query-expansion).
+
 ### Query Expansion
 
-If a query does not return the expected number of search results from the index the query terms can be expanded to include synonyms or correct the spelling for terms not found in the index:
-* synonyms are looked up in a synonym index, a key - value dictionary of terms each with a set of synonyms. Synonyms should be tokenized using the `index`'s tokenizer; and
-* terms that are not found in the index can be converted to a spell-correction function that returns suggested
-corrections for a term if it is not present in the spell-checker dictionary.
+If a query does not return the expected number of search results from the index (see [index elimination](#index-elimination)) the collection of query terms can be expanded:
+* synonyms may be retrieved from a synonym index or a lexical (dictionary/thesaurus) service; and
+* terms that are not found in the index can bassed to a spelling correction callback appropriate to the index. 
 
 ### Index Elimination
 
 `Index elimination` is the process of extracting a subset of the index postings for the likely highest scoring documents against the query phrase (`inexact top K document retrieval`). In this library, `index elimination` is an iterative process:
-* calculate the number of documents (`K`)that would return a set of search results with high precision while maintaining performance;
+* calculate the number of documents (`K`) that would return a set of search results with high precision while maintaining performance;
 * query the index `postings` for all the terms in the [FreeTextQuery.queryTerms](#freetextquery-class);
+* expand the collection of query terms if too few results are returned or important or exact terms return no results from the index;
 * if the number of returned `postings` is less than K, return proceed to [scoring and ranking](#scoring-and-ranking); else
 * iteratively create consecutive tiered indexes and add the postings for each tiered index to the results set until it has grown to K, or all steps have been completed.
 
@@ -195,9 +193,9 @@ The `FreeTextSearch` class exposes the `search` method that returns a list of [S
 
 The length of the returned collection of [SearchResult](#searchresult-class) can be limited by passing a limit parameter to `search`. The default limit is 20.
 
-After parsing the phrase to terms, the `Postings` and `Dictionary` for the query terms are asynchronously retrieved from the index:
+After parsing the phrase to terms, the `PostingsMap` and `Dictionary` for the query terms are asynchronously retrieved from the index:
 * `FreeTextSearch.dictionaryLoader` retrieves `Dictionary`; 
-* `FreeTextSearch.postingsLoader` retrieves `Postings`;
+* `FreeTextSearch.postingsLoader` retrieves `PostingsMap`;
 * `FreeTextSearch.configuration` is used to tokenize the query phrase (defaults to `English.configuration`); and
 * provide a custom `tokenFilter` if you want to manipulate tokens or restrict tokenization to tokens that meet specific criteria (default is `TextAnalyzer.defaultTokenFilter`.
   

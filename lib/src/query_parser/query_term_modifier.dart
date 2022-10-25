@@ -28,3 +28,4 @@ enum QueryTermModifier {
   /// Terms enclosed in double "quotes", are marked [EXACT].
   EXACT
 }
+

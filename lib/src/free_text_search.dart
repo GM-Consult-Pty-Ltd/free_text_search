@@ -13,7 +13,7 @@ import 'package:free_text_search/src/_index.dart';
 /// The length of the returned collection of [SearchResult] can be limited by
 /// passing a limit parameter to [search]. The default limit is 20.
 ///
-/// After parsing the phrase to terms, the [Postings] and [Dictionary] for the
+/// After parsing the phrase to terms, the [PostingsMap] and [Dictionary] for the
 /// query terms are asynchronously retrieved from the [index].
 abstract class FreeTextSearch {
   //
@@ -23,7 +23,7 @@ abstract class FreeTextSearch {
   ///   documents that is queried; and
   /// - [queryParser] returns a [FreeTextQuery] from a searh phrase.
   factory FreeTextSearch(InvertedIndex index) {
-    final queryParser = QueryParser(index.tokenizer);
+    final queryParser = QueryParser(tokenizer: index.tokenizer);
     return _FreeTextSearchImpl(index, queryParser);
   }
 

@@ -4,7 +4,6 @@
 
 import 'package:free_text_search/src/_index.dart';
 import 'data/sample_news.dart';
-import 'package:rxdart/rxdart.dart';
 
 class TestIndex extends TextIndexerBase {
   TestIndex._(); // : super(analyzer: TextAnalyzer());
@@ -58,12 +57,5 @@ class TestIndex extends TextIndexerBase {
         '==================================================================');
   }
 
-  @override
-  Stream<Map<DocId, JSON>>? get collectionStream => null;
 
-  @override
-  final controller = BehaviorSubject<PostingsMap>();
-
-  @override
-  Stream<MapEntry<DocId, JSON>>? get documentStream => null;
 }

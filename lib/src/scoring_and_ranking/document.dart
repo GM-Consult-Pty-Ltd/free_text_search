@@ -10,9 +10,9 @@ typedef TermFrequencyMap = Map<Term, Ft>;
 /// The [Document] object-model enumerates the properties of a document and
 /// its indexed terms in an inverted positional index.
 ///
-/// The [Document] properties are stored in the [Postings] of the index,
+/// The [Document] properties are stored in the [PostingsMap] of the index,
 /// distributed over the vocabulary terms.  [Document]s are extracted from
-/// the [Postings] by filtering the [Postings] entries for [DocPostingsMapEntry]
+/// the [PostingsMap] by filtering the [PostingsMap] entries for [DocPostingsMapEntry]
 /// elements with the same identifier [docId] as the document.
 abstract class Document {
   //

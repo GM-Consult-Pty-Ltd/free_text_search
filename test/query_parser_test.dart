@@ -21,7 +21,8 @@ void main() {
 
     test('QueryParser: Test Modifiers', () async {
       // initialize the QueryParser
-      final queryParser = QueryParser(TextTokenizer.english);
+      final queryParser = QueryParser(
+          tokenizer: TextTokenizer.english, nGramRange: NGramRange(1, 3));
       // parse the phrase
       final query = await queryParser.parseQuery(phraseWithModifiers);
 

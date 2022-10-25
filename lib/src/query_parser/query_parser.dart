@@ -32,21 +32,29 @@ abstract class QueryParser {
   Future<FreeTextQuery> parseQuery(String phrase);
 
   /// Instantiates a [QueryParser] instance with a [tokenizer].
-  factory QueryParser(TextTokenizer tokenizer) => _QueryParserImpl(tokenizer);
+  factory QueryParser(
+          {required TextTokenizer tokenizer,
+          NGramRange nGramRange = const NGramRange(1, 1)}) =>
+      _QueryParserImpl(tokenizer, nGramRange);
 
   /// Instantiates a [QueryParser] instance associated with the [index].
   factory QueryParser.index(InvertedIndex index) =>
-      _QueryParserImpl(index.tokenizer);
+      _QueryParserImpl(index.tokenizer, index.nGramRange);
 }
 
 class _QueryParserImpl extends QueryParserBase {
+  //
+
   @override
   final TextTokenizer tokenizer;
 
-  const _QueryParserImpl(this.tokenizer);
+  @override
+  final NGramRange nGramRange;
+
+  const _QueryParserImpl(this.tokenizer, this.nGramRange);
 }
 
-/// Abstract base class implementation of [QueryParser] with [QueryParserMixin].
+/// Abstract base class implementation of [QueryParser] with [nGramRange].
 ///
 /// Provides an unnamed const default generative constructor for sub-classes.
 abstract class QueryParserBase with QueryParserMixin {
@@ -58,8 +66,12 @@ abstract class QueryParserBase with QueryParserMixin {
 abstract class QueryParserMixin implements QueryParser {
   //
 
-  /// A TextAnalyzer used to tokenize the query phrase.
+  /// A [TextAnalyzer] used to tokenize the query phrase. The tokenizer should
+  /// be the same as that used to create the index being queried.
   TextTokenizer get tokenizer;
+
+  /// The length of phrases in the queried index.
+  NGramRange get nGramRange;
 
   /// Shortcut to tokenizer.termSplitter
   TermSplitter get _termSplitter => tokenizer.analyzer.termSplitter;
@@ -71,20 +83,23 @@ abstract class QueryParserMixin implements QueryParser {
     return query;
   }
 
-  /// Returns all the terms or phrases in double quotes as QueryTerm instances
+  /// Returns all the terms or phrases in double quotes as [QueryTerm] instances
   /// with the [QueryTermModifier.EXACT].  These phrases are also given
   /// a term position of 0 to give them the highest weighting in scoring.
   Future<List<QueryTerm>> _exactMatchPhrases(String phrase) async {
     // - initialize the return value;
     final retVal = <QueryTerm>[];
     // - inditialize a term counter
-    final exactTerms = RegExp(_rInDoubleQuotes)
-        .allMatches(phrase)
-        .map((e) => e.group(0)?.replaceAll('"', ''));
+    final exactTerms = RegExp(_rInDoubleQuotes).allMatches(phrase).map((e) =>
+        e.group(0)?.replaceAll('"', '').replaceAll(RegExp(r'\s+'), ' ').trim());
     for (final e in exactTerms) {
-      if (e != null) {
-        final qt = QueryTerm(e, QueryTermModifier.EXACT, 0);
-        retVal.add(qt);
+      if (e != null && e.trim().isNotEmpty) {
+        final n = e.n;
+        final terms =
+            (await tokenizer.tokenize(e, nGramRange: NGramRange(n, n))).terms;
+        terms.add(e);
+        retVal.addAll(terms.map(
+            (e) => QueryTerm(e, QueryTermModifier.EXACT, 0, terms.length)));
       }
     }
     return retVal;
@@ -103,134 +118,128 @@ abstract class QueryParserMixin implements QueryParser {
     //
     // - initialize the return value, front-load it with all the exact-matches
     final retVal = await _exactMatchPhrases(phrase);
-    // - keep a record of the exactmatches
-    final exactPhrases = retVal.terms;
+    // // - keep a record of the exactmatches
+
     // - replace the modifiers with tokens;
     phrase = phrase.replaceModifiers();
-    // - tokenize the phrase;
+    // - split the phrase;
     final terms = _termSplitter(phrase);
-    // - intitialize a term position counter
-    var termPosition = 0;
+    if (!terms.containsModifiers()) {
+      return (await tokenizer.tokenize(phrase))
+          .map((e) =>
+              QueryTerm(e.term, QueryTermModifier.AND, e.termPosition, e.n))
+          .toList();
+    }
+
     // - inditialize a term counter
-    var termIndex = 0;
+    var i = 0;
     // - initialize a placeholder for the search term, in case we need to
     // concatenate words that are part of an exact match phrase.
-    var rawTermOrPhrase = '';
-    var previousParsedTerm = '';
-    await Future.forEach(terms, (String term) async {
-      // get the previous term if this is not the first term
-      final previous = terms.previous(termIndex);
-      // get the next term if this is not the last term
-      final next = terms.next(termIndex);
-      // check if the current term is a modifier or a search term
-      if (!term.isModifier) {
-        // ok, not a modifier, so let's turn it into a QueryTerm
-        //
-        // if rawTermOrPhrase is not empty this is a second or later term in an
-        //  exact match phrase
-        final modifier = rawTermOrPhrase.isEmpty
-            // infer the modifier for the term from the previous term, or
-            ? term.modifier(previous, next)
-            // if this is a term in an exact phrase, set it to EXACT
-            : QueryTermModifier.AND;
-        // concatenate rawTermOrPhrase and term, inserting a space if rawTermOrPhrase
-        // already contains a word.
-        rawTermOrPhrase =
-            rawTermOrPhrase.isEmpty ? term : '$rawTermOrPhrase $term';
-        // check modifier is not EXACT or else the next term is "EXACTEND":
-        if (modifier != QueryTermModifier.EXACT || next == 'EXACTEND') {
-          // if we're here it means we can add the term to the return value
-          // because it is either:
-          //  - NOT an exact match term, or
-          //  - the last word in an exact match phrase
-          //
-          // let's initialize a collection to hold the exact term/phrase and any
-          // child words of a phrase or a stemmed version of the term.
-          var searchTerms = <String>[];
-
-          // check if we are dealing with an exact term or phrase
-          if (modifier == QueryTermModifier.EXACT) {
-            // ok it's the end of an exact match phrase
-            //
-            // searchTerms = <String>[rawTermOrPhrase];
-            previousParsedTerm = rawTermOrPhrase;
-            // now split the phrase at whitespace into its component words
-            final subterms = rawTermOrPhrase.split(RegExp(r'\s+'));
-            // let's iterate through the subTerms and add them to searchTerms
-            var previousSubTerm = '';
-            for (var subTerm in subterms) {
-              // first check the subTerm is not empty
-              if (subTerm.isNotEmpty) {
-                // not an empty subTerm, so let's tokenize it
-                final filteredTerms = (await tokenizer.tokenize(subTerm)).terms;
-                // now iterate through whatever we got back from the tokenizer
-                for (final e in filteredTerms) {
-                  // check the term is not already in the list
-                  if (!searchTerms.contains(e)) {
-                    // it's a new term, let's add it to searchTerms
-                    searchTerms.add(e);
-                  }
-                }
-                // add a paired term for the exact terms
-                final newSubterm =
-                    filteredTerms.length == 1 ? filteredTerms.first : subTerm;
-                if (previousSubTerm.isNotEmpty && newSubterm.isNotEmpty) {
-                  searchTerms.add('$previousSubTerm $newSubterm');
-                }
-                previousSubTerm = newSubterm;
-              }
-            }
-          } else {
-            // not an EXACT match term, so tokenize it and add to searchTerms
-            final tokens = (await tokenizer.tokenize(rawTermOrPhrase)).terms;
-            searchTerms.addAll(tokens);
-            searchTerms.add(rawTermOrPhrase);
-            final newParsedTerm =
-                tokens.length != 1 ? rawTermOrPhrase : tokens.first;
-            if (previousParsedTerm.isNotEmpty &&
-                newParsedTerm.isNotEmpty &&
-                modifier != QueryTermModifier.NOT) {
-              searchTerms.add('$previousParsedTerm $newParsedTerm');
-            }
-            previousParsedTerm =
-                next != 'OR' ? newParsedTerm : previousParsedTerm;
+    final List<MapEntry<String, QueryTermModifier>> termToModifierList =
+        terms.toTermModifiersList();
+    final List<MapEntry<Set<String>, QueryTermModifier>> andNotTermSetsList =
+        await _andNotTermSetsList(termToModifierList);
+    final nGramTerms = <Set<String>>[];
+    for (final e in andNotTermSetsList) {
+      final modifier = e.value;
+      final termSet = e.key;
+      if (termSet.isNotEmpty) {
+        if (modifier == QueryTermModifier.NOT) {
+          retVal.addAll(termSet.map((e) => QueryTerm(e, modifier, i, 1)));
+        } else {
+          nGramTerms.add(termSet);
+          if (nGramTerms.length > nGramRange.max) {
+            nGramTerms.removeAt(0);
           }
-          // Let's get rid of duplicates.
-          searchTerms = Set<String>.from(searchTerms).toList();
-          // initialize a counter for the QueryTerms
-          var queryTermIndex = 0;
-          // let's iterate through the unique terms/phrases
-          for (final qt in searchTerms) {
-            if (qt.isNotEmpty && !exactPhrases.contains(qt)) {
-              // add a QueryTerm to the return value
-              retVal.add(QueryTerm(
-                  qt,
-                  // if this is the second or later term at this position set its
-                  // modifier to OR, unless this is a NOT modified term
-                  modifier == QueryTermModifier.EXACT
-                      ? QueryTermModifier.OR
-                      : queryTermIndex == 0 ||
-                              modifier == QueryTermModifier.NOT ||
-                              (modifier == QueryTermModifier.IMPORTANT &&
-                                  !qt.contains(' '))
-                          ? modifier
-                          : QueryTermModifier.OR,
-                  // the QueryTerms all have the same position
-                  termPosition));
-            }
-            // increment the queryTermIndex
-            queryTermIndex++;
-          }
-
-          // reset the rawTermOrPhrase
-          rawTermOrPhrase = '';
-          // and increment the termPosition counter
-          termPosition++;
+          retVal.addAll(_getNGrams(nGramTerms, nGramRange, i, modifier));
         }
       }
-      // increment the termIndex
-      termIndex++;
+      i++;
+    }
+    return retVal;
+  }
+
+  Iterable<QueryTerm> _getNGrams(List<Set<String>> nGramTerms,
+      NGramRange nGramRange, int termPosition, QueryTermModifier modifier) {
+    if (nGramTerms.length > nGramRange.max) {
+      nGramTerms = nGramTerms.sublist(nGramTerms.length - nGramRange.max);
+    }
+    if (nGramTerms.length < nGramRange.min) {
+      return <QueryTerm>[];
+    }
+    final nGrams = <List<String>>[];
+    var n = 0;
+
+    for (var i = nGramTerms.length - 1; i >= 0; i--) {
+      final param = <List<String>>[];
+      param.addAll(nGrams
+          .where((element) => element.length == n)
+          .map((e) => List<String>.from(e)));
+      final newNGrams = _prefixWordsTo(param, nGramTerms[i]);
+      nGrams.addAll(newNGrams);
+      n++;
+    }
+    final tokenGrams = nGrams.where((element) =>
+        element.length >= nGramRange.min && element.length <= nGramRange.max);
+
+    final tokens = <QueryTerm>[];
+    for (final e in tokenGrams) {
+      final n = e.length;
+      final term = e.join(' ');
+      tokens.add(QueryTerm(term, modifier, n, termPosition));
+    }
+    return tokens;
+  }
+
+  static Iterable<List<String>> _prefixWordsTo(
+      Iterable<List<String>> nkGrams, Iterable<String> words) {
+    final nGrams = List<List<String>>.from(nkGrams);
+    words = words.map((e) => e.trim()).where((element) => element.isNotEmpty);
+    final retVal = <List<String>>[];
+    if (nGrams.isEmpty) {
+      retVal.addAll(words.map((e) => [e]));
+    }
+    for (final word in words) {
+      for (final nGram in nGrams) {
+        final newNGram = List<String>.from(nGram);
+        newNGram.insert(0, word);
+        retVal.add(newNGram);
+      }
+    }
+    return retVal;
+  }
+
+  Future<List<MapEntry<Set<String>, QueryTermModifier>>> _andNotTermSetsList(
+      List<MapEntry<String, QueryTermModifier>> termToModifierList) async {
+    final List<MapEntry<Set<String>, QueryTermModifier>> retVal = [];
+    final orSet = <String>{};
+    var i = 0;
+    var effectiveModifier = QueryTermModifier.AND;
+    await Future.forEach(termToModifierList,
+        (MapEntry<String, QueryTermModifier> e) async {
+      final term = e.key;
+      final modifier = e.value;
+      effectiveModifier =
+          modifier == QueryTermModifier.OR ? effectiveModifier : modifier;
+      final nextModifier = i < termToModifierList.length - 1
+          ? termToModifierList[i + 1].value
+          : null;
+      final versions = await _getAllVersions(term);
+      orSet.addAll(versions);
+      if (modifier != QueryTermModifier.OR ||
+          nextModifier != QueryTermModifier.OR) {
+        retVal.add(MapEntry(Set<String>.from(orSet), effectiveModifier));
+        orSet.clear();
+      }
+      i++;
     });
+    return retVal;
+  }
+
+  Future<Set<String>> _getAllVersions(String term) async {
+    final retVal = <String>{};
+    retVal.addAll(
+        (await tokenizer.tokenize(term, nGramRange: NGramRange(1, 1))).terms);
     return retVal;
   }
 
@@ -246,27 +255,60 @@ abstract class QueryParserMixin implements QueryParser {
   static const _rImportant = r'(?<=^|\s)\+(?="|\w)';
 }
 
+extension _StringExtension on String {
+  //
+  int get n => RegExp(r'\s+').allMatches(this).length + 1;
+}
+
 extension _TermsListExtension on List<Term> {
   //
+
+  bool containsModifiers() {
+    return toSet().intersection(_kModifierNames).isNotEmpty;
+  }
+
+  List<MapEntry<String, QueryTermModifier>> toTermModifiersList() {
+    final List<MapEntry<String, QueryTermModifier>> retVal = [];
+    // - inditialize a term counter
+    final terms = List<String>.from(this);
+    var termIndex = 0;
+    for (final term in terms) {
+      // get the previous term if this is not the first term
+      final previous = terms.previous(termIndex);
+      // get the next term if this is not the last term
+      final next = terms.next(termIndex);
+      // check if the current term is a modifier or a search term
+      if (!term.isModifier) {
+        // ok, not a modifier, so let's turn it into a QueryTerm
+        final modifier = term.modifier(previous, next);
+        retVal.add(MapEntry(term, modifier));
+      }
+      // increment the termIndex
+      termIndex++;
+    }
+    return retVal;
+  }
 
   String? previous(int index) => index == 0 ? null : this[index - 1];
 
   String? next(int index) => index < length - 1 ? this[index + 1] : null;
 }
 
+const _kModifierNames = {
+  'AND',
+  'OR',
+  'NOT',
+  'IMPORTANT',
+  'EXACTSTART',
+  'EXACTEND'
+};
+
 extension _QueryModifierReplacementExtension on Term {
   //
 
   /// Returns true if the trimmed String is equal to any of:
   /// - ('AND', 'OR', 'NOT', 'EXACTSTART', 'EXACTEND').
-  bool get isModifier => [
-        'AND',
-        'OR',
-        'NOT',
-        'IMPORTANT',
-        'EXACTSTART',
-        'EXACTEND'
-      ].contains(trim());
+  bool get isModifier => _kModifierNames.contains(trim());
 
   QueryTermModifier modifier(Term? precedingTerm, Term? followingTerm) {
     switch (precedingTerm) {
@@ -276,8 +318,6 @@ extension _QueryModifierReplacementExtension on Term {
         return QueryTermModifier.NOT;
       case 'IMPORTANT':
         return QueryTermModifier.IMPORTANT;
-      case 'EXACTSTART':
-        return QueryTermModifier.EXACT;
       default:
         return followingTerm == 'OR'
             ? QueryTermModifier.OR
@@ -295,16 +335,16 @@ extension _QueryModifierReplacementExtension on Term {
   String important() =>
       replaceAll(RegExp(QueryParserMixin._rImportant), 'IMPORTANT ');
 
-  /// Matches words or phrases enclosed with double quotes and replaces the
-  /// leading quote with 'EXACTSTART' and the ending quote with 'EXACTEND'.
+  /// Matches words or phrases enclosed with double quotes and removes the
+  /// quotes.
   String exact() =>
       replaceAllMapped(RegExp(QueryParserMixin._rInDoubleQuotes), (match) {
-        String phrase = match.group(0) ?? '';
+        final phrase = match.group(0) ?? '';
         if (phrase.length > 2 &&
             phrase.startsWith(r'"') &&
             phrase.endsWith(r'"')) {
-          phrase = phrase.substring(1, phrase.length - 1);
-          return 'EXACTSTART $phrase EXACTEND';
+          return phrase.substring(1, phrase.length - 1);
+          // return 'EXACTSTART $phrase EXACTEND';
         }
         return phrase;
       });

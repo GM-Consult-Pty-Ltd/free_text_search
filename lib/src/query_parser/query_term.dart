@@ -17,9 +17,8 @@ class QueryTerm extends Token {
   /// - [termPosition] is the zero-based position of the [term] in an ordered
   ///   list of all the terms in the source text; and
   /// - [modifier] is the modifier used for this term.
-  const QueryTerm(String term, this.modifier, int termPosition,
-      [int index = 0, double position = 0.0])
-      : super(term, termPosition);
+  const QueryTerm(String term, this.modifier, int termPosition, int n)
+      : super(term, n, termPosition);
 
   /// The modifier used for this term.
   ///

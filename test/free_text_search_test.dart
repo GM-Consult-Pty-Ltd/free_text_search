@@ -25,7 +25,7 @@ void main() {
     test('FreeTextSearch: TestIndex', () async {
       final indexer = await TestIndex.hydrate();
       // initialize the QueryParser
-      final queryParser = QueryParser(TextTokenizer.english);
+      final queryParser = QueryParser(tokenizer: TextTokenizer.english);
       // parse the phrase
       final query = await queryParser.parseQuery(phrase);
 
@@ -50,7 +50,7 @@ void main() {
       // initialize an in-memory indexer
       final indexer = await TestIndex.hydrate();
       // initialize the QueryParser
-      final queryParser = QueryParser(TextTokenizer.english);
+      final queryParser = QueryParser(tokenizer: TextTokenizer.english);
       // parse the phrase to a query
       final FreeTextQuery query = await queryParser.parseQuery(phrase);
       // get the terms from the query

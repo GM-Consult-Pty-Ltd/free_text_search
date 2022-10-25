@@ -9,8 +9,8 @@ All rights reserved.
 
 ### *New*
 * `ChampionList` definition and extensions.
-* scoring extension `Ft Postings.cFt(term)`;
-* scoring extension `Ft Postings.dFt(term)`; and
+* scoring extension `Ft PostingsMap.cFt(term)`;
+* scoring extension `Ft PostingsMap.dFt(term)`; and
 - scoring extension `Ft DocumentPostingsEntry.tfIdf(idFt)`.
 
 ### *Updated*
@@ -24,7 +24,7 @@ All rights reserved.
 
 ### *New*
 * interface `Document`.
-* `Ft Postings.tFt(Term)` and `Ft Postings.dFt(Term)` methods.
+* `Ft PostingsMap.tFt(Term)` and `Ft PostingsMap.dFt(Term)` methods.
 * `Ft DocumentPostingsEntry.tFt` getter.
 
 ### *Updated*
