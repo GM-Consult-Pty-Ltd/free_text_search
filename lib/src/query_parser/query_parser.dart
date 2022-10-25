@@ -78,7 +78,11 @@ abstract class QueryParserMixin implements QueryParser {
 
   @override
   Future<FreeTextQuery> parseQuery(String phrase) async {
-    final queryTerms = await _parseToTerms(phrase);
+    // initialize the queryTerms, front-load it with all the exact-matches
+    final queryTerms = await _exactMatchPhrases(phrase);
+    // add all the query terms with their modifiers
+    queryTerms.addAll(await _toQueryTerms(phrase, queryTerms.length));
+    queryTerms.unique();
     final query = FreeTextQuery(phrase: phrase, queryTerms: queryTerms);
     return query;
   }
@@ -114,11 +118,11 @@ abstract class QueryParserMixin implements QueryParser {
   ///   child words of exact phrases; and
   /// - derived versions of all words always have the [QueryTermModifier.OR]
   ///   unless they are already marked [QueryTermModifier.NOT].
-  Future<List<QueryTerm>> _parseToTerms(String phrase) async {
+  Future<List<QueryTerm>> _toQueryTerms(String phrase, int startAt) async {
     //
-    // - initialize the return value, front-load it with all the exact-matches
+
     final retVal = await _exactMatchPhrases(phrase);
-    // // - keep a record of the exactmatches
+    // // - keep a record of the terms processed
 
     // - replace the modifiers with tokens;
     phrase = phrase.replaceModifiers();
@@ -132,7 +136,7 @@ abstract class QueryParserMixin implements QueryParser {
     }
 
     // - inditialize a term counter
-    var i = 0;
+    var i = startAt;
     // - initialize a placeholder for the search term, in case we need to
     // concatenate words that are part of an exact match phrase.
     final List<MapEntry<String, QueryTermModifier>> termToModifierList =
@@ -186,7 +190,7 @@ abstract class QueryParserMixin implements QueryParser {
     for (final e in tokenGrams) {
       final n = e.length;
       final term = e.join(' ');
-      tokens.add(QueryTerm(term, modifier, n, termPosition));
+      tokens.add(QueryTerm(term, modifier, termPosition - n, n));
     }
     return tokens;
   }
@@ -224,7 +228,7 @@ abstract class QueryParserMixin implements QueryParser {
       final nextModifier = i < termToModifierList.length - 1
           ? termToModifierList[i + 1].value
           : null;
-      final versions = await _getAllVersions(term);
+      final versions = await _tokenize(term);
       orSet.addAll(versions);
       if (modifier != QueryTermModifier.OR ||
           nextModifier != QueryTermModifier.OR) {
@@ -236,7 +240,8 @@ abstract class QueryParserMixin implements QueryParser {
     return retVal;
   }
 
-  Future<Set<String>> _getAllVersions(String term) async {
+  /// Uses the tokenizer to get the tokenized version(s) of [term].
+  Future<Set<String>> _tokenize(String term) async {
     final retVal = <String>{};
     retVal.addAll(
         (await tokenizer.tokenize(term, nGramRange: NGramRange(1, 1))).terms);

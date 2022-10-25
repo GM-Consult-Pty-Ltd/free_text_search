@@ -26,12 +26,58 @@ class QueryTerm extends Token {
   /// modifier.
   final QueryTermModifier modifier;
 
+  /// Compares whether:
+  /// - [other] is [QueryTerm];
+  /// - [modifier] == [other].modifier;
+  /// - [term] == [other].term; and
+  /// - [termPosition] == [other].termPosition.
+  /// Does not compare [zone] as it is always null or [termPosition] as we only
+  /// want to retain one element for a term/modifier combination.
+  @override
+  bool operator ==(Object other) =>
+      other is QueryTerm && term == other.term && modifier == other.modifier;
+
+  @override
+  int get hashCode => Object.hash(term, modifier, termPosition);
+
   //
+}
+
+///
+extension QueryTermListExtension on List<QueryTerm> {
+  //
+
+  /// Returns a list of [QueryTerm] objects that are unique for the combination
+  /// of term/modifier. Iterates from the end of the collection to
+  void unique() {
+    final Map<String, QueryTerm> retVal = {};
+    for (var i = length - 1; i > -1; i--) {
+      final qt = this[i];
+      final key = '${qt.term}::%${qt.modifier.toString()}%';
+      retVal[key] = qt;
+    }
+    clear();
+    addAll(retVal.values);
+    sort(((a, b) => a.termPosition.compareTo(b.termPosition)));
+  }
 }
 
 ///
 extension QueryTermCollectionExtension on Iterable<QueryTerm> {
   //
+
+  /// Returns a list of [QueryTerm] objects that are unique for the combination
+  /// of term/modifier. Iterates from the end of the collection to
+  List<QueryTerm> unique() {
+    final list = toList();
+    final Map<String, QueryTerm> retVal = {};
+    for (var i = list.length - 1; i > -1; i--) {
+      final qt = list[i];
+      final key = '${qt.term}::%${qt.modifier.toString()}%';
+      retVal[key] = qt;
+    }
+    return retVal.values.toList();
+  }
 
   /// Returns the [QueryTerm] elements where [QueryTerm.modifier] is equal to:
   /// [QueryTermModifier.EXACT]; or

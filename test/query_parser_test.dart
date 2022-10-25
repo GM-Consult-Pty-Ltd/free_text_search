@@ -12,7 +12,7 @@ void main() {
   //
 
   const phraseWithModifiers =
-      '"athletics running track" +surfaced arena OR stadium "Launceston" -hobart NOT help-me';
+      '"athletics running track" +surfaced arena OR stadium "Launceston" -hobart NOT help-me south launceston';
 
   group('QueryParser', () {
     setUp(() {

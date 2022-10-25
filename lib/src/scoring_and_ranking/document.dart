@@ -11,7 +11,7 @@ typedef TermFrequencyMap = Map<Term, Ft>;
 /// its indexed terms in an inverted positional index.
 ///
 /// The [Document] properties are stored in the [PostingsMap] of the index,
-/// distributed over the vocabulary terms.  [Document]s are extracted from
+/// distributed over the vocabulary terms. [Document]s are extracted from
 /// the [PostingsMap] by filtering the [PostingsMap] entries for [DocPostingsMapEntry]
 /// elements with the same identifier [docId] as the document.
 abstract class Document {
