@@ -22,11 +22,12 @@ void main() {
     test('QueryParser: Test Modifiers', () async {
       // initialize the QueryParser
       final queryParser = QueryParser(
-          tokenizer: TextTokenizer.english, nGramRange: NGramRange(1, 3));
+          tokenizer: TextTokenizer.english, nGramRange: NGramRange(1, 2));
       // parse the phrase
       final query = await queryParser.parseQuery(phraseWithModifiers);
 
       final queryTerms = query.queryTerms;
+      print(phraseWithModifiers);
       // print the terms and their modifiers
       TestIndex.printQueryTerms(queryTerms);
 

@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
-  <meta name="description" content="API docs for the FreeTextSearch constructor from Class FreeTextSearch from the free_text_search library, for the Dart programming language.">
-  <title>FreeTextSearch constructor - FreeTextSearch - free_text_search library - Dart API</title>
+  <meta name="description" content="API docs for the index property from the FreeTextSearch class, for the Dart programming language.">
+  <title>index property - FreeTextSearch class - free_text_search library - Dart API</title>
 
 
   
@@ -32,9 +32,9 @@
     <li><a href="../../index.html">free_text_search</a></li>
     <li><a href="../../free_text_search/free_text_search-library.html">free_text_search</a></li>
     <li><a href="../../free_text_search/FreeTextSearch-class.html">FreeTextSearch</a></li>
-    <li class="self-crumb">FreeTextSearch factory constructor</li>
+    <li class="self-crumb">index property</li>
   </ol>
-  <div class="self-name">FreeTextSearch</div>
+  <div class="self-name">index</div>
   <form class="search navbar-right" role="search">
     <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
   </form>
@@ -45,33 +45,33 @@
 
   <div id="dartdoc-main-content" class="main-content">
       <div>
-<h1><span class="kind-constructor">FreeTextSearch</span> constructor 
+<h1><span class="kind-property">index</span> property 
     <a href="https://dart.dev/null-safety" class="feature feature-null-safety" title="Supports the null safety language feature.">Null safety</a>
 </h1></div>
 
-    <section class="multi-line-signature">
-      <span class="name ">FreeTextSearch</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="-param-index"><span class="type-annotation"><a href="https://pub.dev/documentation/text_indexing/0.20.0/text_indexing/InvertedIndex-class.html">InvertedIndex</a></span> <span class="parameter-name">index</span></span></li>
-</ol>)
-    </section>
 
-    
-<section class="desc markdown">
-  <p>Hydrate a <a href="../../free_text_search/FreeTextSearch-class.html">FreeTextSearch</a> instance:</p>
-<ul>
-<li><code>index</code> is an inverted, positional, zoned index on a collection of
-documents that is queried; and</li>
-<li><a href="../../free_text_search/FreeTextSearch/queryParser.html">queryParser</a> returns a <code>FreeTextQuery</code> from a searh phrase.</li>
-</ul>
+        
+<section id="getter">
+
+<section class="multi-line-signature">
+  <span class="returntype"><a href="https://pub.dev/documentation/text_indexing/0.20.0/text_indexing/InvertedIndex-class.html">InvertedIndex</a></span>
+  <span class="name ">index</span>
+  
+
 </section>
 
 
-    
+<section class="desc markdown">
+  <p>An an inverted, positional, zoned index on a collection of documents that
+is queried.</p>
+</section>
+
+
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">factory FreeTextSearch(InvertedIndex index) {
-  final queryParser = QueryParser(tokenizer: index.tokenizer);
-  return _FreeTextSearchImpl(index, queryParser);
-}</code></pre>
+  <pre class="language-dart"><code class="language-dart">InvertedIndex get index;</code></pre>
+</section>
+
 </section>
 
 
@@ -88,7 +88,7 @@ documents that is queried; and</li>
   <li><a href="../../index.html">free_text_search</a></li>
   <li><a href="../../free_text_search/free_text_search-library.html">free_text_search</a></li>
   <li><a href="../../free_text_search/FreeTextSearch-class.html">FreeTextSearch</a></li>
-  <li class="self-crumb">FreeTextSearch factory constructor</li>
+  <li class="self-crumb">index property</li>
 </ol>
 
 
@@ -120,7 +120,7 @@ documents that is queried; and</li>
 
 </ol>
 
-  </div><!--/.sidebar-offcanvas-left-->
+  </div><!--/.sidebar-offcanvas-->
 
   <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
   </div><!--/.sidebar-offcanvas-->

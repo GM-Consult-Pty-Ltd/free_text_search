@@ -121,7 +121,7 @@ abstract class QueryParserMixin implements QueryParser {
   Future<List<QueryTerm>> _toQueryTerms(String phrase, int startAt) async {
     //
 
-    final retVal = await _exactMatchPhrases(phrase);
+    final retVal = <QueryTerm>[];
     // // - keep a record of the terms processed
 
     // - replace the modifiers with tokens;
@@ -129,7 +129,8 @@ abstract class QueryParserMixin implements QueryParser {
     // - split the phrase;
     final terms = _termSplitter(phrase);
     if (!terms.containsModifiers()) {
-      return (await tokenizer.tokenize(phrase))
+      return (await tokenizer.tokenize(phrase,
+              strategy: TokenizingStrategy.all))
           .map((e) =>
               QueryTerm(e.term, QueryTermModifier.AND, e.termPosition, e.n))
           .toList();

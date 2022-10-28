@@ -50,7 +50,7 @@ Copyright (c) 2022, GM Consult Pty Ltd
 All rights reserved. 
 -->
 <h1 id="free_text_search">free_text_search</h1>
-<p>Search an inverted positional index and return ranked references to documents relevant to the search phrase.</p>
+<p>Search a text index and return ranked references to documents relevant to a search phrase.</p>
 <p><em>THIS PACKAGE IS IN BETA DEVELOPMENT AND SUBJECT TO DAILY BREAKING CHANGES.</em></p>
 <p>Skip to section:</p>
 <ul>
@@ -62,16 +62,96 @@ All rights reserved.
 <li><a href="#issues">Issues</a></li>
 </ul>
 <h2 id="overview">Overview</h2>
-<p>The components of this library:</p>
+<p>This library is intended for applications that are part of an information retrieval system with the following components:</p>
 <ul>
-<li>parse a free-text phrase with <a href="#querytermmodifier-enumeration">query modifiers</a> to a query;</li>
-<li>search the <code>dictionary</code> and <code>postings</code> of a text <code>index</code> for the query <a href="#queryterm-class">terms</a>;</li>
-<li>perform iterative scoring and ranking of the returned dictionary entries and postings; and</li>
-<li>return ranked references to documents relevant to the search phrase.</li>
+<li>a <a href="https://pub.dev/packages/text_analysis">text analyzer</a> that extracts tokens from text for use in full-text search queries and indexes (<code>tokenizer</code>);</li>
+<li>a <a href="https://pub.dev/packages/text_indexing">text indexer</a> that creates an <a href="https://pub.dev/packages/text_indexing">inverted positional index</a> for a collection of text documents (the <code>inverted index</code>);</li>
+<li>a <a href="#queryparser">query parser</a> that parses a free text query into tokens using a <code>tokenizer</code> while extracting the <code>query term modifiers</code> for each token;</li>
+<li>tools for performing <a href="#index-elimination">index elimination</a> to reduce the number of results returned from the <code>index</code> (if too many results are found);</li>
+<li><code>query expansion functions</code> to increase the number of search results by including synonyms for terms and correcting the spelling of misspelt terms; and</li>
+<li>a <code>scoring and ranking</code> tool that iterates over the results to compute a score for each document that enumerates how well it matches the search phrase.</li>
 </ul>
-<p>Query phrases can include <a href="#query-modifiers">modifiers</a> broadly consistent with Google search modifiers.</p>
-<p><img src="https://github.com/GM-Consult-Pty-Ltd/free_text_search/raw/main/assets/images/free_text_search.png?raw=true?raw=true" alt="Free text search overview" title="Free text search overview"></p>
+<p>This library provides the <a href="#queryparser">query parser</a>, <a href="#index-elimination">index elimination tools</a>, <code>query expansion functions</code> and a <a href="#scoring-and-ranking">scoring and ranking module</a>.</p>
 <p>Refer to the <a href="#references">references</a> to learn more about information retrieval systems and the theory behind this library.</p>
+<h3 id="free-text-search-workflow">Free Text Search Workflow</h3>
+<p>The free-text search workflow consists of:</p>
+<ul>
+<li>a <a href="#the-query-phrase">query phrase</a> is presented to the search engine;</li>
+<li>the <a href="#the-query-parser">query parser</a> splits the <a href="#the-query-phrase">query phrase</a> into query terms, each with a modifier and position information. The <a href="#the-query-phrase">query parser</a> applies <code>query expansion</code> techniques to add synonyms to the terms, apply a spell checker and compose phrases from adjacent terms;</li>
+<li>the <code>postings</code> in an inverted index is then queried, retrieving all postings for the terms (or phrases) in the query;</li>
+<li>if the number of returned postings is greater than required (e.g. the number of document summaries that can be displayed on a list of search results), a process of <a href="#index-elimination">index elimination</a> culls the postings to the those most likely to match the query.</li>
+<li>the <a href="#scoring-and-ranking">scoring and ranking engine</a> is now applied to the remaining postings candidates, returning a ranked and scored set of <a href="#query-results">query results</a>.</li>
+</ul>
+<p><img src="https://github.com/GM-Consult-Pty-Ltd/free_text_search/raw/main/dev/images/free_text_search.png?raw=true?raw=true" alt="Free text search overview" title="Free text search overview"></p>
+<h3 id="the-query-phrase">The Query Phrase</h3>
+<p>A free-text query is usually a small number of key terms, possibly also including one or more query term modifiers. The objective is to find from the <code>corpus</code> a subset of documents that have the best match with the query.</p>
+<p>This library implements query term modifiers broadly consistent with those used in the <a href="https://support.google.com/websearch/answer/2466433?hl=en">Google</a> the search engine:</p>
+<ul>
+<li>terms or phrases can be wrapped in double quotes to find an exact match;</li>
+<li>terms preceded by <code>"OR"</code> are alternatives to the preceding term;</li>
+<li>if terms are preceded by <code>"NOT" or "-"</code> documents including these terms are excluded from results; and</li>
+<li>query results that contain terms preceded by plus sign <code>"+"</code> or the upper-case word <code>"IMPORTANT"</code> are ranked higher.</li>
+</ul>
+<h3 id="the-query-parser">The Query Parser</h3>
+<p>The query parser converts a free-text query into a collection of <a href="#queryterm-class">QueryTerm</a> objects, each with its term, position in the query phrase and any modifiers.</p>
+<p><img src="https://github.com/GM-Consult-Pty-Ltd/free_text_search/raw/main/dev/images/query_parser.png?raw=true?raw=true" alt="Query Parser" title="Query Parser"></p>
+<p>The <a href="#querytermparser-class">term parser</a> first:</p>
+<ul>
+<li>extracts any words or phrases in double quotes and adds them to the query terms collection at position 0; then</li>
+<li>replaces all modifier tokens and characters with special tokens; before</li>
+<li>calling the the tokenizer for the index that is queried to tokenize the phrase; then</li>
+<li>iterates over the tokens to map terms to <a href="#queryterm-class">QueryTerm</a>s each with a position and modifier. 
+Phrases are composed using adjacent terms. The phrase length is limited to the phrase length limit of the index.</li>
+</ul>
+<p>The search phrase and final query terms are used to return a <a href="#freetextquery-class">FreeTextQuery</a>.</p>
+<p>An extension method on <a href="https://pub.dev/documentation/text_analysis/latest/text_analysis/Token-class.html">Token</a>, [Set<kgram> kGrams(<code>int k = 3</code>)](<a href="https://pub.dev/documentation/text_analysis/latest/text_analysis/KGramParserExtension/kGrams.html">https://pub.dev/documentation/text_analysis/latest/text_analysis/KGramParserExtension/kGrams.html</a>) is used to the <code>k-grams</code> in the query tokens.</kgram></p>
+<p>If a query does not return the expected number of search results from the index (see <a href="#index-elimination">index elimination</a>) the collection of query terms can be <a href="#query-expansion">expanded</a>.</p>
+<h3 id="query-expansion">Query Expansion</h3>
+<p>If a query does not return the expected number of search results from the index (see <a href="#index-elimination">index elimination</a>) the collection of query terms can be expanded:</p>
+<ul>
+<li>synonyms may be retrieved from a synonym index or a lexical (dictionary/thesaurus) service; and</li>
+<li>terms that are not found in the index can bassed to a spelling correction callback appropriate to the index.</li>
+</ul>
+<h3 id="index-elimination">Index Elimination</h3>
+<p><code>Index elimination</code> is the process of extracting a subset of the index postings for the likely highest scoring documents against the query phrase (<code>inexact top K document retrieval</code>). In this library, <code>index elimination</code> is an iterative process:</p>
+<ul>
+<li>calculate the number of documents (<code>K</code>) that would return a set of search results with high precision while maintaining performance;</li>
+<li>query the index <code>postings</code> for all the terms in the <a href="#freetextquery-class">FreeTextQuery.queryTerms</a>;</li>
+<li>expand the collection of query terms if too few results are returned or important or exact terms return no results from the index;</li>
+<li>if the number of returned <code>postings</code> is less than K, return proceed to <a href="#scoring-and-ranking">scoring and ranking</a>; else</li>
+<li>iteratively create consecutive tiered indexes and add the postings for each tiered index to the results set until it has grown to K, or all steps have been completed.</li>
+</ul>
+<p>The tiered indexes are created as follows:</p>
+<ul>
+<li><code>exact terms index</code> contains only those postings for <code>"exact match"</code> modified query terms;</li>
+<li><code>phrase index</code> contains only those postings for query sub-phrases (i.e. more than one word); and</li>
+<li><code>champion lists</code> are postings for documents with the highest term frequencies for each term.</li>
+</ul>
+<p><img src="https://github.com/GM-Consult-Pty-Ltd/free_text_search/raw/main/dev/images/index_elimination.png?raw=true?raw=true" alt="Index Elimination" title="Index Elimination"></p>
+<h3 id="scoring-and-ranking">Scoring and Ranking</h3>
+<h4 id="champion-lists">Champion Lists</h4>
+<h4 id="static-quality-scoring">Static Quality Scoring</h4>
+<h4 id="impact-ordering">Impact Ordering</h4>
+<h4 id="vector-space-model">Vector Space Model</h4>
+<h3 id="query-results">Query Results</h3>
+<p>Usually the number of returned documents is limited to what can be displayed on one page of a list of search results, say in the range of 20 - 50.</p>
+<p>The workflow for performing a free-text search implemented in this library has the following steps:
+*</p>
+<ul>
+<li>
+<p>parse a free-text phrase with <a href="#querytermmodifier-enumeration">query modifiers</a> to a query;</p>
+</li>
+<li>
+<p>retrieves <code>postings</code> for the query <a href="#queryterm-class">terms</a> from an inverted index;</p>
+</li>
+<li>
+<p>perform iterative scoring and ranking of the returned dictionary entries and postings; and</p>
+</li>
+<li>
+<p>return ranked references to documents relevant to the search phrase.</p>
+</li>
+</ul>
+<h3 id="scoring-and-ranking-2">Scoring and Ranking</h3>
 <h2 id="usage">Usage</h2>
 <p>In the <code>pubspec.yaml</code> of your flutter project, add the <code>free_text_search</code> dependency.</p>
 <pre class="language-yaml"><code class="language-yaml">dependencies:
@@ -104,7 +184,7 @@ All rights reserved.
 </code></pre>
 <p>The <a href="https://pub.dev/packages/free_text_search/example">examples</a> demonstrate the use of the <a href="#queryparser-class">QueryParser</a> and <a href="#persistedindexer-class">PersistedIndexer</a>.</p>
 <h2 id="api">API</h2>
-<p>To maximise performance the API manipulates nested hashmaps of DART core types <code>int</code>, <code>double</code> and <code>String</code> rather than defining strongly typed object models. To improve code legibility and maintainability the API makes use of <a href="#type-aliases">type aliases</a> throughout.</p>
+<p>To maximise performance, the API manipulates nested hashmaps of DART core types <code>int</code>, <code>double</code> and <code>String</code> rather than defining strongly typed object models. To improve code legibility and maintainability the API makes use of <a href="#type-aliases">type aliases</a> throughout.</p>
 <h3 id="type-aliases">Type Aliases</h3>
 <p>The following type definitions are defined in this library to complement the type definitions imported from the <code>text_analysis</code> and <code>text_indexing</code> packages.</p>
 <ul>
@@ -115,19 +195,32 @@ All rights reserved.
 <h3 id="freetextsearch-class">FreeTextSearch class</h3>
 <p>The <code>FreeTextSearch</code> class exposes the <code>search</code> method that returns a list of <a href="#searchresult-class">SearchResult</a> instances in descending order of relevance.</p>
 <p>The length of the returned collection of <a href="#searchresult-class">SearchResult</a> can be limited by passing a limit parameter to <code>search</code>. The default limit is 20.</p>
-<p>After parsing the phrase to terms, the <code>Postings</code> and <code>Dictionary</code> for the query terms are asynchronously retrieved from the index:</p>
+<p>After parsing the phrase to terms, the <code>PostingsMap</code> and <code>Dictionary</code> for the query terms are asynchronously retrieved from the index:</p>
 <ul>
 <li><code>FreeTextSearch.dictionaryLoader</code> retrieves <code>Dictionary</code>;</li>
-<li><code>FreeTextSearch.postingsLoader</code> retrieves <code>Postings</code>;</li>
+<li><code>FreeTextSearch.postingsLoader</code> retrieves <code>PostingsMap</code>;</li>
 <li><code>FreeTextSearch.configuration</code> is used to tokenize the query phrase (defaults to <code>English.configuration</code>); and</li>
 <li>provide a custom <code>tokenFilter</code> if you want to manipulate tokens or restrict tokenization to tokens that meet specific criteria (default is <code>TextAnalyzer.defaultTokenFilter</code>.</li>
 </ul>
 <p>Ensure that the <code>FreeTextSearch.configuration</code> and <code>FreeTextSearch.tokenFilter</code> match the <code>TextAnalyzer</code> used to construct the index on the target collection that will be searched.</p>
+<h3 id="freetextquery-class">FreeTextQuery class</h3>
+<p>The <code>FreeTextQuery</code> enumerates the properties of a text search query:</p>
+<ul>
+<li><code>FreeTextQuery.phrase</code> is the unmodified search phrase, including all modifiers and tokens; and</li>
+<li><code>FreeTextQuery.terms</code> is the ordered list of all terms extracted from the <code>phrase</code> used to look up results in an inverted index.</li>
+</ul>
 <h3 id="searchresult-class">SearchResult class</h3>
 <p>The <code>SearchResult</code> model represents a ranked search result of a query against a text index:</p>
 <ul>
 <li><code>SearchResult.docId</code> is the unique identifier of the document result in the corpus; and</li>
 <li><code>SearchResult.relevance</code> is the relevance score awarded to the document by the scoring and ranking  algorithm. Higher scores indicate increased relevance of the document.</li>
+</ul>
+<h3 id="queryterm-class">QueryTerm class</h3>
+<p>The <code>QueryTerm</code> object extends <code>Token</code>, and enumerates the properties of a term in a free text query phrase:</p>
+<ul>
+<li><code>QueryTerm.term</code> is the term that will be looked up in the index;</li>
+<li><code>QueryTerm.termPosition</code> is the zero-based position of the <code>term</code> in an ordered list of all the terms in the source text; and</li>
+<li><code>FreeTextQuery.modifier</code> is the <a href="#querytermmodifier-enumeration">QueryTermModifier</a> applied for this term. The default modifier<code>is</code>QueryTermModifier.AND`.</li>
 </ul>
 <h3 id="queryparser-class">QueryParser class</h3>
 <p>The <code>QueryParser</code> parses free text queries, returning a collection of <a href="#queryterm-class">QueryTerm</a> objects that enumerate each term and its <a href="#querytermmodifier-enumeration">QueryTermModifier</a>.</p>
@@ -138,20 +231,7 @@ All rights reserved.
 <li>derived versions of all words returned by the <code>QueryParser.configuration.termFilter</code>, including child words and stems or lemmas of exact phrases; and</li>
 </ul>
 <p>A <a href="#queryterm-class">QueryTerm</a> for a derived version of a term always has its <code>QueryTerm.modifier</code> property set to <code>QueryTermModifier.OR</code>, unless the term was marked <code>QueryTermModifier.NOT</code> in the query phrase.</p>
-<h3 id="freetextquery-class">FreeTextQuery class</h3>
-<p>The <code>FreeTextQuery</code> enumerates the properties of a text search query:</p>
-<ul>
-<li><code>FreeTextQuery.phrase</code> is the unmodified search phrase, including all modifiers and tokens; and</li>
-<li><code>FreeTextQuery.terms</code> is the ordered list of all terms extracted from the <code>phrase</code> used to look up results in an inverted index.</li>
-</ul>
-<h3 id="queryterm-class">QueryTerm class</h3>
-<p>The <code>QueryTerm</code> object extends <code>Token</code>, and enumerates the properties of a term in a free text query phrase:</p>
-<ul>
-<li><code>QueryTerm.term</code> is the term that will be looked up in the index;</li>
-<li><code>QueryTerm.termPosition</code> is the zero-based position of the <code>term</code> in an ordered list of all the terms in the source text; and</li>
-<li><code>FreeTextQuery.modifier</code> is the <a href="#querytermmodifier-enumeration">QueryTermModifier</a> applied for this term. The default modifier<code>is</code>QueryTermModifier.AND`.</li>
-</ul>
-<h3 id="querytermmodifier-enumeration">QueryTermModifier Enumeration</h3>
+<h3 id="querytermmodifier-enumeration">QueryTermModifier enumeration</h3>
 <p>The phrase can include the following modifiers to guide the the search results scoring/ranking algorithm:</p>
 <ul>
 <li>terms or phrases wrapped in double quotes will be marked <code>QueryTermModifier.EXACT</code> (e.g.<code>"athletics track"</code>);</li>
@@ -160,6 +240,8 @@ All rights reserved.
 <li>terms following the plus sign <code>"+"</code> are marked <code>QueryTermModifier.IMPORTANT</code> to rank results that include these terms higher; and</li>
 <li>all other terms are marked as <code>QueryTermModifier.AND</code>.</li>
 </ul>
+<h3 id="querytermparser-class">QueryTermParser class</h3>
+<h3 id="querytermexpander-class">QueryTermExpander class</h3>
 <h2 id="definitions">Definitions</h2>
 <p>The following definitions are used throughout the <a href="https://pub.dev/documentation/free_text_search/latest/">documentation</a>:</p>
 <ul>
@@ -167,7 +249,8 @@ All rights reserved.
 <li><code>dictionary</code> - is a hash of <code>terms</code> (<code>vocabulary</code>) to the frequency of occurence in the <code>corpus</code> documents.</li>
 <li><code>document</code> - a record in the <code>corpus</code>, that has a unique identifier (<code>docId</code>) in the <code>corpus</code>'s primary key and that contains one or more text fields that are indexed.</li>
 <li><code>index</code> - an <a href="https://en.wikipedia.org/wiki/Inverted_index">inverted index</a> used to look up <code>document</code> references from the <code>corpus</code> against a <code>vocabulary</code> of <code>terms</code>. The implementation in this library relies on a positional inverted index, that also includes the positions of the indexed <code>term</code> in each <code>document</code>.</li>
-<li><code>postings</code> - a separate index that records which <code>documents</code> the <code>vocabulary</code> occurs in. .</li>
+<li><code>index-elimination</code> - extracting a subset of the index postings for the likely highest scoring documents against the query phrase (<code>inexact top K document retrieval</code>).</li>
+<li><code>postings</code> - a separate index that records which <code>documents</code> the <code>vocabulary</code> occurs in.</li>
 <li><code>postings list</code> - a record of the positions of a <code>term</code> in a <code>document</code> and its fields. A position of a <code>term</code> refers to the index of the <code>term</code> in an array that contains all the <code>terms</code> in the <code>text</code>.</li>
 <li><code>term</code> - a word or phrase that is indexed from the <code>corpus</code>. The <code>term</code> may differ from the actual word used in the corpus depending on the <code>tokenizer</code> used.</li>
 <li><code>text</code> - the indexable content of a <code>document</code>.</li>

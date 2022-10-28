@@ -13,6 +13,7 @@ class TestIndex extends TextIndexerBase {
       dictionary: {},
       postings: {},
       tokenizer: TextTokenizer.english,
+      keywordExtractor: English.analyzer.keywordExtractor,
       zones: zoneMap);
   static Future<TestIndex> hydrate() async {
     final indexer = TestIndex._();
