@@ -34,30 +34,30 @@ abstract class FreeTextSearch {
   /// is queried.
   InvertedIndex get index;
 
-  /// Returns a list of [SearchResult] instances in descending order of
-  /// relevance to [phrase].
-  ///
-  /// The returned collection of [SearchResult] will be limited to the [limit]
-  /// most relevant results. The default [limit] is 20.
-  Future<List<SearchResult>> search(String phrase, [int limit = 20]);
+  // /// Returns a list of [SearchResult] instances in descending order of
+  // /// relevance to [phrase].
+  // ///
+  // /// The returned collection of [SearchResult] will be limited to the [limit]
+  // /// most relevant results. The default [limit] is 20.
+  // Future<List<SearchResult>> search(String phrase, [int limit = 20]);
 }
 
 class _FreeTextSearchImpl implements FreeTextSearch {
   _FreeTextSearchImpl(this.index, this.queryParser);
 
-  @override
-  Future<List<SearchResult>> search(String phrase, [int limit = 20]) async {
-    final query = await queryParser.parseQuery(phrase);
-    final terms = query.uniqueTerms;
-    // final dictionary = await dictionaryLoader(terms);
-    final postings = await index.getPostings(terms);
-    final scorer = SearchResultScorer(
-        query: query,
-        dictionary: await index.getDictionary(terms),
-        postings: postings);
-    final retVal = scorer.results(limit);
-    return retVal;
-  }
+  // @override
+  // Future<List<SearchResult>> search(String phrase, [int limit = 20]) async {
+  //   final query = await queryParser.parseQuery(phrase);
+  //   final terms = query.uniqueTerms;
+  //   // final dictionary = await dictionaryLoader(terms);
+  //   final postings = await index.getPostings(terms);
+  //   final scorer = SearchResultScorer(
+  //       query: query,
+  //       dictionary: await index.getDictionary(terms),
+  //       postings: postings);
+  //   final retVal = scorer.results(limit);
+  //   return retVal;
+  // }
 
   @override
   final InvertedIndex index;

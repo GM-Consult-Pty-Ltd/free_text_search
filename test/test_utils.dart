@@ -8,13 +8,19 @@ import 'data/sample_news.dart';
 class TestIndex extends TextIndexerBase {
   TestIndex._(); // : super(analyzer: TextAnalyzer());
 
+  static const kCollection = sampleNews;
+
   @override
   final index = InMemoryIndex(
       dictionary: {},
       postings: {},
+      keywordPostings: {},
+      collectionSize: kCollection.length,
       tokenizer: TextTokenizer.english,
       keywordExtractor: English.analyzer.keywordExtractor,
-      zones: zoneMap);
+      zones: zoneMap,
+      strategy: TokenizingStrategy.all);
+
   static Future<TestIndex> hydrate() async {
     final indexer = TestIndex._();
     await indexer.indexCollection(indexer.collection);
@@ -24,10 +30,13 @@ class TestIndex extends TextIndexerBase {
   /// The in-memory term dictionary for the indexer.
   DftMap get dictionary => (index as InMemoryIndex).dictionary;
 
+  KeywordPostingsMap get keywordPostings =>
+      (index as InMemoryIndex).keywordPostings;
+
   /// The in-memory postings hashmap for the indexer.
   PostingsMap get postings => (index as InMemoryIndex).postings;
 
-  final JsonCollection collection = sampleNews;
+  final JsonCollection collection = kCollection;
 
   static const zoneMap = {'name': 1.0, 'description': 0.5, 'hashTags': 2.0};
 
@@ -57,6 +66,4 @@ class TestIndex extends TextIndexerBase {
     print('=================================================================='
         '==================================================================');
   }
-
-
 }

@@ -67,17 +67,25 @@ extension QueryTermCollectionExtension on Iterable<QueryTerm> {
   //
 
   /// Returns a list of [QueryTerm] objects that are unique for the combination
-  /// of term/modifier. Iterates from the end of the collection to
+  /// of term/modifier. Iterates from the end of the collection to retain the
+  /// term with the lowest term position.
   List<QueryTerm> unique() {
-    final list = toList();
+    // final list = toList();
     final Map<String, QueryTerm> retVal = {};
-    for (var i = list.length - 1; i > -1; i--) {
-      final qt = list[i];
+    for (final qt in this) {
       final key = '${qt.term}::%${qt.modifier.toString()}%';
-      retVal[key] = qt;
+      if (!retVal.keys.contains(key)) {
+        retVal[key] = qt;
+      }
     }
-    return retVal.values.toList();
+    final list = retVal.values.toList()
+      ..sort(((a, b) => a.termPosition.compareTo(b.termPosition)));
+    return list;
   }
+
+  /// Filters the collection by [modifier] and returns a
+  List<QueryTerm> filterByModifier(QueryTermModifier modifier) =>
+      where((element) => element.modifier == modifier).unique();
 
   /// Returns the [QueryTerm] elements where [QueryTerm.modifier] is equal to:
   /// [QueryTermModifier.EXACT]; or
@@ -86,13 +94,13 @@ extension QueryTermCollectionExtension on Iterable<QueryTerm> {
   List<QueryTerm> get andTerms => where((element) =>
       element.modifier == QueryTermModifier.EXACT ||
       element.modifier == QueryTermModifier.AND ||
-      element.modifier == QueryTermModifier.IMPORTANT).toList();
+      element.modifier == QueryTermModifier.IMPORTANT).unique();
 
   /// A list of all the [Term]s in the collection that contain white-space.
   List<String> get phrases =>
       uniqueTerms.where((element) => element.contains(' ')).toList();
 
-  /// A list of the unique [Term]s in the collection  in the same order
+  /// A list of the unique [Term]s in the collection in the same order
   /// as they occur in the source text.
   Set<Term> get uniqueTerms => allTerms.toSet();
 }

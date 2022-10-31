@@ -20,7 +20,8 @@ enum SearchResultTier {
   /// Results that contain terms marked with [QueryTermModifier.IMPORTANT].
   important,
 
-  /// Results with a high term frequency for the search term(s) or n-grams
+  /// Results with a high term frequency or keyword score for the search
+  /// term(s) or n-grams
   championList,
 
   /// Results that contain terms marked with [QueryTermModifier.NOT].

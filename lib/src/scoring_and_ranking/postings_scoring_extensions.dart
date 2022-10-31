@@ -9,7 +9,7 @@ import 'dart:math';
 extension FieldPostingsExtension on ZonePostingsMap {
   //
 
-  /// Returns the term frequncy in a [ZonePostingsMap] instance.
+  /// Returns the term frequency in a [ZonePostingsMap] instance.
   Ft get tFt {
     var tFt = 0;
     for (final entry in values) {

@@ -29,7 +29,6 @@ void main() {
       // parse the phrase
       final query = await queryParser.parseQuery(phrase);
 
-    
       // print the terms and their modifiers
       TestIndex.printQueryTerms(query.queryTerms);
       // create the in-memory dictionary and postings for sampleNews
@@ -38,9 +37,33 @@ void main() {
       final dictionaryTerms = indexer.dictionary.terms;
 
       final andTerms = query.queryTerms.andTerms;
-      // Get the document ids of those postings that contain ANY of the terms.
-      indexer
-          .printDocuments(indexer.postings.containsAny(query.queryTerms.terms));
+
+      final terms = andTerms.map((e) => e.term).toSet();
+
+      // // Get the document ids of those postings that contain ANY of the terms.
+      // indexer
+      //     .printDocuments(indexer.postings.containsAny(query.queryTerms.terms));
+
+      final searchPostings = indexer.postings.containsAny(terms);
+
+      final keywordPostings = indexer.keywordPostings.containsAny(terms);
+
+      final dftMap = <String, int>{}..addEntries(indexer.dictionary.entries
+          .where((element) => terms.contains(element.key)));
+
+      final docIds = keywordPostings.union(searchPostings);
+
+      final docCount = indexer.collection.length;
+      final searchResults = <SearchResult>[];
+      for (final docId in docIds) {
+        searchResults.add(SearchResult(
+            docId: docId,
+            docCount: docCount,
+            postings: indexer.postings.getPostings(terms),
+            dFtMap: dftMap.getEntries(terms),
+            keyWordPostings:
+                indexer.keywordPostings.getKeywordsPostings(terms)));
+      }
 
       // Get the document ids of those postings that contain ALL the terms.
       indexer.printDocuments(indexer.postings.containsAll(andTerms.terms));

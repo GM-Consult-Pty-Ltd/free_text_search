@@ -115,7 +115,7 @@ class SearchResultScorer {
   Future<List<SearchResult>> results(int limit) async {
     // - initialize the return value;
     final retVal = <SearchResult>[];
-    retVal.sort(((a, b) => b.relevance.compareTo(a.relevance)));
+    // retVal.sort(((a, b) => b.relevance.compareTo(a.relevance)));
     // - return the ranked [SearchResult], limiting the length of the return
     //   value to [limit];
     return retVal.length > limit ? retVal.sublist(0, limit) : retVal;

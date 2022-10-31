@@ -3,4 +3,5 @@
 // All rights reserved
 
 /// Barrel file for src/ folder.
-export 'index_tier.dart';
+export 'search_result_tier.dart';
+export 'search_result.dart';
