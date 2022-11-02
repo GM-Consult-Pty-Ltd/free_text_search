@@ -6,37 +6,40 @@ import 'package:free_text_search/src/_index.dart';
 import 'data/sample_news.dart';
 
 class TestIndex extends TextIndexerBase {
-  TestIndex._(); // : super(analyzer: TextAnalyzer());
+  TestIndex._(
+      this.index, this.collection); // : super(analyzer: TextAnalyzer());
 
-  static const kCollection = sampleNews;
+  // static const kCollection = sampleNews;
 
   @override
-  final index = InMemoryIndex(
+  final InMemoryIndex index;
+
+  static Future<TestIndex> hydrate(
+      [Map<String, Map<String, Object>> collection = sampleNews]) async {
+    final index = InMemoryIndex(
       dictionary: {},
       postings: {},
       keywordPostings: {},
-      collectionSize: kCollection.length,
+        collectionSize: collection.length,
       tokenizer: TextTokenizer.english,
       keywordExtractor: English.analyzer.keywordExtractor,
       zones: zoneMap,
       strategy: TokenizingStrategy.all);
-
-  static Future<TestIndex> hydrate() async {
-    final indexer = TestIndex._();
+    final indexer = TestIndex._(index, collection);
     await indexer.indexCollection(indexer.collection);
     return indexer;
   }
 
   /// The in-memory term dictionary for the indexer.
-  DftMap get dictionary => (index as InMemoryIndex).dictionary;
+  DftMap get dictionary => index.dictionary;
 
   KeywordPostingsMap get keywordPostings =>
-      (index as InMemoryIndex).keywordPostings;
+      index.keywordPostings;
 
   /// The in-memory postings hashmap for the indexer.
-  PostingsMap get postings => (index as InMemoryIndex).postings;
+  PostingsMap get postings => index.postings;
 
-  final JsonCollection collection = kCollection;
+  final JsonCollection collection;
 
   static const zoneMap = {'name': 1.0, 'description': 0.5, 'hashTags': 2.0};
 

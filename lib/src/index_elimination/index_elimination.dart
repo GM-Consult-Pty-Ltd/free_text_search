@@ -4,13 +4,12 @@
 
 // import 'dart:math';
 import 'package:free_text_search/src/_index.dart';
-import 'package:text_analysis/extensions.dart';
-// import 'package:collection/collection.dart';
 
 ///
 class IndexSearch {
 //
 
+  /// The query executed by the [IndexSearch] instance.
   final FreeTextQuery query;
 
   /// The [InvertedIndex] that contains the indexes for the collection.
@@ -39,19 +38,22 @@ class IndexSearch {
     // get the postings for the query
     final PostingsMap postings = await _addPostingsForAllModifiers(queryTerms);
     // get the postings for unmatched terms
-    postings.addAll(
-        await _addPostingsForAllModifiers(await _unmatchedTerms(postings)));
+
+    final unMatchedTerms = await _unmatchedTerms(postings);
+    queryTerms.addAll(unMatchedTerms);
+    postings.addAll(await _addPostingsForAllModifiers(unMatchedTerms));
 
     // Map the postings to a hashmap of docid to SearchResult
-    final retVal = await _postingsToSearchResults(postings);
+    final retVal = await _postingsToSearchResults(postings, queryTerms);
 
     // return the results and proceed to scoring and ranking
     return retVal;
   }
 
   Future<Map<String, SearchResult>> _postingsToSearchResults(
-      PostingsMap postings) async {
-    final terms = postings.keys;
+      PostingsMap postings, Iterable<QueryTerm> queryTerms) async {
+    final qt = queryTerms.map((e) => e.term).toSet();
+    final terms = postings.keys.where((element) => qt.contains(element));
     final dfTMap = await index.getDictionary(terms);
     final keywordPostings = await index.getKeywordPostings(terms);
     final docCount = await index.getCollectionSize();
@@ -118,13 +120,15 @@ class IndexSearch {
     }
   }
 
-  /// Queries the index k-gram index for terms similar to [terms] and then
+  /// Queries the k-gram index for terms similar to [queryTerm] and then
   /// returns the top [limit] matches as [QueryTerm] instances.
   Future<Set<QueryTerm>> _expandQuery(QueryTerm queryTerm, int limit) async {
-    final kGrams = queryTerm.term.kGrams(index.k);
-    final candidates = (await index.getKGramIndex(kGrams)).terms;
-    final matches =
-        queryTerm.term.matches(candidates, limit: limit, k: index.k);
+    final term =
+        queryTerm.term.trim().toLowerCase().replaceAll(RegExp(r'\s+'), '');
+    final candidates = await index.getKGramIndex(term.kGrams(index.k));
+    final terms = candidates.terms.toList();
+    final suggestions = term.getSuggestions(terms, limit: limit, k: index.k);
+    final matches = suggestions.map((e) => e.term);
     return matches
         .map((e) => QueryTerm(e, QueryTermModifier.AND, queryTerm.termPosition,
             e.split(' ').length))

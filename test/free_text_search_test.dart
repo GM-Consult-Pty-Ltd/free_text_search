@@ -7,6 +7,8 @@
 // ignore: unused_import
 import 'package:free_text_search/free_text_search.dart';
 import 'package:free_text_search/src/_index.dart';
+import 'package:free_text_search/src/index_elimination/index_elimination.dart';
+import 'package:gmconsult_dev/gmconsult_dev.dart';
 import 'package:test/test.dart';
 import 'test_utils.dart';
 
@@ -86,6 +88,43 @@ void main() {
 
       scorer.getChampionLists();
       print(scorer.low.length);
+    });
+
+    test('IndexSearch.search', () async {
+      // initialize an in-memory indexer
+      final indexer = await TestIndex.hydrate();
+      // initialize the QueryParser
+      final queryParser = QueryParser(tokenizer: TextTokenizer.english);
+      // parse the phrase to a query
+      final FreeTextQuery query = await queryParser.parseQuery('ev "bateries"');
+      // get the terms from the query
+      final terms = query.queryTerms.uniqueTerms;
+
+      final indexSearch = IndexSearch(indexer.index, query);
+
+      var results = (await indexSearch.search()).entries.toList();
+      results
+          .sort(((a, b) => b.value.tfIdfScore.compareTo(a.value.tfIdfScore)));
+
+      results = results.length > 5 ? results.sublist(0, 5) : results;
+      final JsonCollection jsonResults = {};
+      for (final e in results) {
+        final doc = indexer.collection[e.key];
+        if (doc != null) {
+          var name = (doc['name'] as String?) ?? '';
+          name = name.length > 40 ? name.substring(0, 40) : name;
+          jsonResults[e.key] = {
+            'Title': name,
+            'tf-Idf Score': e.value.tfIdfVector
+          };
+        }
+      }
+
+      Console.out(
+          maxColWidth: 80,
+          title: 'SEARCH RESULTS for "${query.phrase}"',
+          results: jsonResults.values);
+      // print(results.length);
     });
 
     //

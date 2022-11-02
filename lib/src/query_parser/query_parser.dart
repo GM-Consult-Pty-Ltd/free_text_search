@@ -101,7 +101,6 @@ abstract class QueryParserMixin implements QueryParser {
         final n = e.n;
         final terms =
             (await tokenizer.tokenize(e, nGramRange: NGramRange(n, n))).terms;
-        terms.add(e);
         retVal.addAll(terms.map(
             (e) => QueryTerm(e, QueryTermModifier.EXACT, 0, terms.length)));
       }
