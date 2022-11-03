@@ -29,7 +29,9 @@ void main() {
       // initialize the QueryParser
       final queryParser = QueryParser(tokenizer: TextTokenizer.english);
       // parse the phrase
-      final query = await queryParser.parseQuery(phrase);
+      final queryTerms = await queryParser.parseQuery(phrase);
+
+      final query = FreeTextQuery(phrase: phrase, queryTerms: queryTerms);
 
       // print the terms and their modifiers
       TestIndex.printQueryTerms(query.queryTerms);
@@ -58,49 +60,44 @@ void main() {
       final docCount = indexer.collection.length;
       final searchResults = <SearchResult>[];
       for (final docId in docIds) {
-        searchResults.add(SearchResult(
+        final result = SearchResult.fromPostings(
             docId: docId,
+            query: query,
             docCount: docCount,
             postings: indexer.postings.getPostings(terms),
             dFtMap: dftMap.getEntries(terms),
             keyWordPostings:
-                indexer.keywordPostings.getKeywordsPostings(terms)));
+                indexer.keywordPostings.getKeywordsPostings(terms));
+        if (result != null) {
+          searchResults.add(result);
+        }
       }
 
       // Get the document ids of those postings that contain ALL the terms.
       indexer.printDocuments(indexer.postings.containsAll(andTerms.terms));
     });
 
-    test('SearchResultScorer: championList', () async {
-      // initialize an in-memory indexer
-      final indexer = await TestIndex.hydrate();
-      // initialize the QueryParser
-      final queryParser = QueryParser(tokenizer: TextTokenizer.english);
-      // parse the phrase to a query
-      final FreeTextQuery query = await queryParser.parseQuery(phrase);
-      // get the terms from the query
-      final terms = query.queryTerms.uniqueTerms;
-
-      final scorer = SearchResultScorer(
-          query: query,
-          dictionary: await indexer.index.getDictionary(terms.toSet()),
-          postings: await indexer.index.getPostings(terms.toSet()));
-
-      scorer.getChampionLists();
-      print(scorer.low.length);
-    });
-
     test('IndexSearch.search', () async {
+      // final phrase = '5g modem';
       // initialize an in-memory indexer
       final indexer = await TestIndex.hydrate();
       // initialize the QueryParser
       final queryParser = QueryParser(tokenizer: TextTokenizer.english);
       // parse the phrase to a query
-      final FreeTextQuery query = await queryParser.parseQuery('ev "bateries"');
+      final queryTerms = (await queryParser.parseQuery(phrase)).toList();
+      // define the document field weights
+      final ZoneWeightMap zoneWeigths = {'name': 1.0, 'description': 0.25};
+
+      /// initialize a query
+      final query = FreeTextQuery(
+          phrase: phrase,
+          iDfThreshold: 0.0,
+          queryTerms: queryTerms,
+          weightingStrategy: WeightingStrategy(zoneWeights: zoneWeigths));
       // get the terms from the query
       final terms = query.queryTerms.uniqueTerms;
 
-      final indexSearch = IndexSearch(indexer.index, query);
+      final indexSearch = IndexSearch(index: indexer.index, query: query);
 
       var results = (await indexSearch.search()).entries.toList();
       results
@@ -112,16 +109,16 @@ void main() {
         final doc = indexer.collection[e.key];
         if (doc != null) {
           var name = (doc['name'] as String?) ?? '';
-          name = name.length > 40 ? name.substring(0, 40) : name;
+          name = name.length > 120 ? name.substring(0, 120) : name;
           jsonResults[e.key] = {
             'Title': name,
-            'tf-Idf Score': e.value.tfIdfVector
+            'tf-Idf Score': e.value.tfIdfScore
           };
         }
       }
 
       Console.out(
-          maxColWidth: 80,
+          maxColWidth: 120,
           title: 'SEARCH RESULTS for "${query.phrase}"',
           results: jsonResults.values);
       // print(results.length);

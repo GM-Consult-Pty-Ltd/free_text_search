@@ -4,6 +4,7 @@
 
 // ignore_for_file: constant_identifier_names
 
+//TODO: remove this enum
 import 'package:free_text_search/src/_index.dart';
 
 /// Enumerates the tier of a search result.

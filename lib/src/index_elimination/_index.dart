@@ -5,3 +5,4 @@
 /// Barrel file for src/ folder.
 export 'search_result_tier.dart';
 export 'search_result.dart';
+export 'weighting_strategy.dart';

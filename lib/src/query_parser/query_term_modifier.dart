@@ -26,6 +26,9 @@ enum QueryTermModifier {
   IMPORTANT,
 
   /// Terms enclosed in double "quotes", are marked [EXACT].
-  EXACT
+  EXACT,
+
+  // /// A concatenation of two or more adjacent terms into a phrase.
+  // PHRASE,
 }
 

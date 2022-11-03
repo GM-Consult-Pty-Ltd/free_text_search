@@ -6,66 +6,97 @@
 import 'package:free_text_search/src/_index.dart';
 
 ///
-class IndexSearch {
-//
+abstract class IndexSearch {
+  ///
+  factory IndexSearch(
+          {required InvertedIndex index,
+          required FreeTextQuery query,
+          WeightingStrategy weightingStrategy = WeightingStrategy.simple}) =>
+      _IndexSearchImpl(index, query);
 
   /// The query executed by the [IndexSearch] instance.
-  final FreeTextQuery query;
+  FreeTextQuery get query;
 
   /// The [InvertedIndex] that contains the indexes for the collection.
-  final InvertedIndex index;
-
-  /// Hydrates a [IndexSearch] instance with the [index].
-  const IndexSearch(this.index, this.query);
+  InvertedIndex get index;
 
   /// Iteratively searches the index for the [query] terms until the minimum
   /// result set size is achieved or no more results are returned.
+  Future<Map<String, SearchResult>> search();
+}
+
+///
+abstract class IndexSearchMixin implements IndexSearch {
+  //
+
+  @override
   Future<Map<String, SearchResult>> search() async {
     // map the queryTerm objects to a list of strings
     if (query.queryTerms.isEmpty) {
       // return an empty collection if no query terms are supplied
       return {};
     }
-    // make a copy of the query terms in case the query terms is not a
-    // growable list
-    final queryTerms = List<QueryTerm>.from(query.queryTerms);
     // check if the query is maybe a predictive text query (single term of
     // 1 to 3 characters length)
-    if (queryTerms.length == 1 && queryTerms.first.term.length < 4) {
-      queryTerms.addAll(await _expandQuery(queryTerms.first, 5));
+    if (query.queryTerms.length == 1 &&
+        query.queryTerms.first.term.length < 4) {
+      query.expandTerms({
+        query.queryTerms.first.term:
+            await _expandQuery(query.queryTerms.first, 5)
+      });
     }
-
+    final docCount = await index.getCollectionSize();
+    var terms = query.queryTerms.terms;
+    var dfTMap = await index.getDictionary(terms);
+    query.purgeTerms(dfTMap, docCount);
+    terms = query.queryTerms.terms;
     // get the postings for the query
-    final PostingsMap postings = await _addPostingsForAllModifiers(queryTerms);
+    final PostingsMap postings =
+        await _addPostingsForAllModifiers(query.queryTerms);
     // get the postings for unmatched terms
 
     final unMatchedTerms = await _unmatchedTerms(postings);
-    queryTerms.addAll(unMatchedTerms);
-    postings.addAll(await _addPostingsForAllModifiers(unMatchedTerms));
-
+    query.expandTerms(unMatchedTerms);
+    dfTMap = await index.getDictionary(terms);
+    query.purgeTerms(dfTMap, docCount);
+    if (query.allTerms.toSet().union(terms).length != terms.length) {
+      final List<QueryTerm> newEntries = [];
+      for (final e in unMatchedTerms.values) {
+        newEntries.addAll(e);
+      }
+      postings.addAll(await _addPostingsForAllModifiers(newEntries));
+    }
     // Map the postings to a hashmap of docid to SearchResult
-    final retVal = await _postingsToSearchResults(postings, queryTerms);
+    final retVal = await _postingsToSearchResults(
+        postings, query.queryTerms, dfTMap, docCount);
 
     // return the results and proceed to scoring and ranking
     return retVal;
   }
 
   Future<Map<String, SearchResult>> _postingsToSearchResults(
-      PostingsMap postings, Iterable<QueryTerm> queryTerms) async {
+      PostingsMap postings,
+      Iterable<QueryTerm> queryTerms,
+      DftMap dfTMap,
+      int docCount) async {
     final qt = queryTerms.map((e) => e.term).toSet();
     final terms = postings.keys.where((element) => qt.contains(element));
-    final dfTMap = await index.getDictionary(terms);
+
     final keywordPostings = await index.getKeywordPostings(terms);
-    final docCount = await index.getCollectionSize();
+
     final docIds = postings.docIds;
     final searchResults = <String, SearchResult>{};
     for (final docId in docIds) {
-      searchResults[docId] = SearchResult(
+      final value = SearchResult.fromPostings(
           docId: docId,
+          query: query,
           docCount: docCount,
           postings: postings,
           dFtMap: dfTMap,
           keyWordPostings: keywordPostings);
+      if (value != null && value.tfIdfScore > 0) {
+        searchResults[docId] = value;
+      }
     }
     return searchResults;
   }
@@ -96,13 +127,14 @@ class IndexSearch {
     return postings;
   }
 
-  Future<Iterable<QueryTerm>> _unmatchedTerms(PostingsMap postings) async {
+  Future<Map<String, Iterable<QueryTerm>>> _unmatchedTerms(
+      PostingsMap postings) async {
     final found = postings.keys.toSet();
-    final List<QueryTerm> retVal = [];
+    final Map<String, Set<QueryTerm>> retVal = {};
     final unmatched =
         query.queryTerms.where((element) => !found.contains(element.term));
     for (final e in unmatched) {
-      retVal.addAll(await _expandQuery(e, 5));
+      retVal[e.term] = await _expandQuery(e, 5);
     }
     return retVal;
   }
@@ -134,4 +166,24 @@ class IndexSearch {
             e.split(' ').length))
         .toSet();
   }
+}
+
+///
+abstract class IndexSearchBase with IndexSearchMixin {
+  ///
+  const IndexSearchBase();
+}
+
+///
+class _IndexSearchImpl extends IndexSearchBase {
+//
+
+  @override
+  final FreeTextQuery query;
+
+  @override
+  final InvertedIndex index;
+
+  /// Hydrates a [IndexSearch] instance with the [index].
+  const _IndexSearchImpl(this.index, this.query);
 }

@@ -29,7 +29,7 @@ abstract class QueryParser {
   ///   child words of exact phrases; and
   /// - derived versions of all words always have the [QueryTermModifier.OR]
   ///   unless they are already marked [QueryTermModifier.NOT].
-  Future<FreeTextQuery> parseQuery(String phrase);
+  Future<Iterable<QueryTerm>> parseQuery(String phrase);
 
   /// Instantiates a [QueryParser] instance with a [tokenizer].
   factory QueryParser(
@@ -77,14 +77,14 @@ abstract class QueryParserMixin implements QueryParser {
   TermSplitter get _termSplitter => tokenizer.analyzer.termSplitter;
 
   @override
-  Future<FreeTextQuery> parseQuery(String phrase) async {
+  Future<Iterable<QueryTerm>> parseQuery(String phrase) async {
     // initialize the queryTerms, front-load it with all the exact-matches
     final queryTerms = await _exactMatchPhrases(phrase);
+
     // add all the query terms with their modifiers
     queryTerms.addAll(await _toQueryTerms(phrase, queryTerms.length));
     queryTerms.unique();
-    final query = FreeTextQuery(phrase: phrase, queryTerms: queryTerms);
-    return query;
+    return queryTerms;
   }
 
   /// Returns all the terms or phrases in double quotes as [QueryTerm] instances
@@ -94,6 +94,28 @@ abstract class QueryParserMixin implements QueryParser {
     // - initialize the return value;
     final retVal = <QueryTerm>[];
     // - inditialize a term counter
+
+    final notExactTerms =
+        RegExp(_rInDoubleQuotesNotNOT).allMatches(phrase).map((e) {
+      final match = e.group(0);
+
+      if (match != null) {
+        phrase = phrase.replaceAll(match, '');
+        return match
+            .replaceAll(RegExp(r'\-"|"'), '')
+            .replaceAll(RegExp(r'\s+'), ' ')
+            .trim();
+      }
+    });
+    for (final e in notExactTerms) {
+      if (e != null && e.trim().isNotEmpty) {
+        final n = e.n;
+        final terms =
+            (await tokenizer.tokenize(e, nGramRange: NGramRange(n, n))).terms;
+        retVal.add(
+            QueryTerm(terms.join(' '), QueryTermModifier.NOT, 0, terms.length));
+      }
+    }
     final exactTerms = RegExp(_rInDoubleQuotes).allMatches(phrase).map((e) =>
         e.group(0)?.replaceAll('"', '').replaceAll(RegExp(r'\s+'), ' ').trim());
     for (final e in exactTerms) {
@@ -101,8 +123,10 @@ abstract class QueryParserMixin implements QueryParser {
         final n = e.n;
         final terms =
             (await tokenizer.tokenize(e, nGramRange: NGramRange(n, n))).terms;
-        retVal.addAll(terms.map(
-            (e) => QueryTerm(e, QueryTermModifier.EXACT, 0, terms.length)));
+        retVal.add(QueryTerm(
+            terms.join(' '), QueryTermModifier.EXACT, 0, terms.length));
+        // retVal.addAll(terms.map(
+        //     (e) => QueryTerm(e, QueryTermModifier.EXACT, 0, terms.length)));
       }
     }
     return retVal;
@@ -119,6 +143,13 @@ abstract class QueryParserMixin implements QueryParser {
   ///   unless they are already marked [QueryTermModifier.NOT].
   Future<List<QueryTerm>> _toQueryTerms(String phrase, int startAt) async {
     //
+    phrase = phrase
+        .replaceAll(RegExp('$_rInDoubleQuotesNotNOT|$_rInDoubleQuotes'), '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    if (phrase.isEmpty) {
+      return [];
+    }
 
     final retVal = <QueryTerm>[];
     // // - keep a record of the terms processed
@@ -190,6 +221,11 @@ abstract class QueryParserMixin implements QueryParser {
     for (final e in tokenGrams) {
       final n = e.length;
       final term = e.join(' ');
+      // modifier = (modifier == QueryTermModifier.AND ||
+      //             modifier == QueryTermModifier.OR) &&
+      //         n > 1
+      //     ? QueryTermModifier.PHRASE
+      //     : modifier;
       tokens.add(QueryTerm(term, modifier, termPosition - n, n));
     }
     return tokens;
@@ -250,6 +286,9 @@ abstract class QueryParserMixin implements QueryParser {
 
   /// Matches all phrases included in quotes.
   static const _rInDoubleQuotes = r'"\w[^"]+\w"';
+
+  /// Matches all phrases included in quotes.
+  static const _rInDoubleQuotesNotNOT = r'\-"\w[^"]+\w"';
 
   /// Matches '-' where preceded by white-space or the start of the string AND
   /// followed by a double quote or word character.

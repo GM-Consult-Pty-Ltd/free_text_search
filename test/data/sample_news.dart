@@ -4,7 +4,14 @@ const sampleNews = {
     "avatarImageUrl":
         "https://firebasestorage.googleapis.com/v0/b/buysellhold-322d1.appspot.com/o/logos%2FAAPL%3AXNGS.png?alt=media&token=fb44cde6-4552-42e7-b1b0-7eddc92b1dfc",
     "description":
-        "Apple's (AAPL) efforts to replace Qualcomm (QCOM) as a supplier of 5G modem chips for its iPhone have hit a developmental snag, a prominent Apple stock analyst said Tuesday. Qualcomm stock rose on the news. In a Twitter thread, TF International Securities analyst Ming-Chi Kuo said Apple appears to have \"failed\" in its internal development of a 5G modem chip. That means Qualcomm will remain the exclusive supplier of 5G iPhone modem chips through the second half of 2023, he said. Qualcomm had previously estimated that it would supply just 20% of those iPhone chips in late 2023. Apple did not respond to a request for comment on the report. \"I believe Apple will continue to develop its own 5G chips,\" Kuo said. \"But by the time Apple succeeds and can replace Qualcomm, Qualcomm's other new businesses should have grown enough to significantly offset the negative impacts caused by the order loss of iPhone 5G chips.\" On the stock market today, Qualcomm stock rose 3.5% to close at 131.60. Apple stock dropped 3% to 137.44 in an overall down day for stocks.",
+        "Apple's (AAPL) efforts to replace Qualcomm (QCOM) as a supplier of 5G "
+            "modem chips for its iPhone have hit a developmental snag, a prominent "
+            "Apple stock analyst said Tuesday. Qualcomm stock rose on the news. "
+            "In a Twitter thread, TF International Securities analyst Ming-Chi "
+            "Kuo said Apple appears to have \"failed\" in its internal "
+            "development of a 5G modem chip. That means Qualcomm will remain "
+            "the exclusive supplier of 5G iPhone modem chips through the second "
+            "half of 2023, he said. Qualcomm had previously estimated that it would supply just 20% of those iPhone chips in late 2023. Apple did not respond to a request for comment on the report. \"I believe Apple will continue to develop its own 5G chips,\" Kuo said. \"But by the time Apple succeeds and can replace Qualcomm, Qualcomm's other new businesses should have grown enough to significantly offset the negative impacts caused by the order loss of iPhone 5G chips.\" On the stock market today, Qualcomm stock rose 3.5% to close at 131.60. Apple stock dropped 3% to 137.44 in an overall down day for stocks.",
     "descriptions": {
       "en_US":
           "Apple's (AAPL) efforts to replace Qualcomm (QCOM) as a supplier of 5G modem chips for its iPhone have hit a developmental snag, a prominent Apple stock analyst said Tuesday. Qualcomm stock rose on the news. In a Twitter thread, TF International Securities analyst Ming-Chi Kuo said Apple appears to have \"failed\" in its internal development of a 5G modem chip. That means Qualcomm will remain the exclusive supplier of 5G iPhone modem chips through the second half of 2023, he said. Qualcomm had previously estimated that it would supply just 20% of those iPhone chips in late 2023. Apple did not respond to a request for comment on the report. \"I believe Apple will continue to develop its own 5G chips,\" Kuo said. \"But by the time Apple succeeds and can replace Qualcomm, Qualcomm's other new businesses should have grown enough to significantly offset the negative impacts caused by the order loss of iPhone 5G chips.\" On the stock market today, Qualcomm stock rose 3.5% to close at 131.60. Apple stock dropped 3% to 137.44 in an overall down day for stocks."
@@ -144,7 +151,9 @@ const sampleNews = {
     "avatarImageUrl":
         "https://firebasestorage.googleapis.com/v0/b/buysellhold-322d1.appspot.com/o/logos%2FTSLA%3AXNGS.png?alt=media&token=c365db47-9482-4237-9267-82f72854d161",
     "description":
-        "The U.S. economy made a strong recovery from the COVID-19 pandemic. But according to Tesla CEO and billionaire Elon Musk, the good times might be over pretty soon.",
+        "The U.S. economy made a strong recovery from the COVID-19 pandemic. "
+            "But according to Tesla CEO and billionaire Elon Musk, the good times "
+            "might be over pretty soon.",
     "descriptions": {
       "en_US":
           "The U.S. economy made a strong recovery from the COVID-19 pandemic. But according to Tesla CEO and billionaire Elon Musk, the good times might be over pretty soon."
@@ -157,7 +166,9 @@ const sampleNews = {
         "https://finance.yahoo.com/news/recession-inevitable-elon-musk-now-120000885.html",
     "locale": "Locale.en_US",
     "name":
-        "Recession is inevitable Elon Musk now thinks there s a greater than 50-50 chance that the economy will decline Here are 3 simple ways to protect your money",
+        "Recession is inevitable Elon Musk now thinks there' s a greater than "
+        "50-50 chance that the economy will decline Here are 3 simple ways to "
+        "protect your money",
     "names": {
       "en_US":
           "Recession is inevitable Elon Musk now thinks there s a greater than 50-50 chance that the economy will decline Here are 3 simple ways to protect your money"
@@ -171,10 +182,18 @@ const sampleNews = {
     "avatarImageUrl":
         "https://firebasestorage.googleapis.com/v0/b/buysellhold-322d1.appspot.com/o/logos%2FTSLA%3AXNGS.png?alt=media&token=c365db47-9482-4237-9267-82f72854d161",
     "description":
-        "The smooth acceleration shown by Tesla in the past two years faltered in the second quarter. Chief Executive Elon Musk has offered hints that the problems run deeper than lockdowns in Shanghai. On Saturday, Tesla reported quarterly deliveries of 254,695, down from 310,048 in the first three months of the year. The news came as no great surprise given the pandemic-related shutdowns that affected its Shanghai factory in April and May. The final tally was slightly below consensus expectations of 264,000, according to FactSet.",
+        "The smooth acceleration shown by Tesla in the past two years faltered "
+        "in the second quarter. Chief Executive Elon Musk has offered hints "
+        "that the problems run deeper than lockdowns in Shanghai. On Saturday, "
+        "Tesla reported quarterly deliveries of 254,695, down from 310,048 in "
+        "the first three months of the year. The news came as no great surprise "
+        "given the pandemic-related shutdowns that affected its Shanghai "
+        "factory in April and May. The final tally was slightly below consensus "
+        "expectations of 264,000, according to FactSet.",
     "descriptions": {
       "en_US":
-          "The smooth acceleration shown by Tesla in the past two years faltered in the second quarter. Chief Executive Elon Musk has offered hints that the problems run deeper than lockdowns in Shanghai. On Saturday, Tesla reported quarterly deliveries of 254,695, down from 310,048 in the first three months of the year. The news came as no great surprise given the pandemic-related shutdowns that affected its Shanghai factory in April and May. The final tally was slightly below consensus expectations of 264,000, according to FactSet."
+          "The smooth acceleration shown by Tesla in the past two years faltered "
+              "in the second quarter. Chief Executive Elon Musk has offered hints that the problems run deeper than lockdowns in Shanghai. On Saturday, Tesla reported quarterly deliveries of 254,695, down from 310,048 in the first three months of the year. The news came as no great surprise given the pandemic-related shutdowns that affected its Shanghai factory in April and May. The final tally was slightly below consensus expectations of 264,000, according to FactSet."
     },
     "entityType": "NewsItem",
     "hashTags": ["#Tesla"],
@@ -201,7 +220,35 @@ const sampleNews = {
     "avatarImageUrl":
         "https://firebasestorage.googleapis.com/v0/b/buysellhold-322d1.appspot.com/o/logos%2FAAPL%3AXNGS.png?alt=media&token=fb44cde6-4552-42e7-b1b0-7eddc92b1dfc",
     "description":
-        "Now that Q2 has come to end, the focus on Wall Street will turn to the second quarter results. In Apple’s (AAPL) case, the past 3 months have been defined by the Covid lockdowns in China which will adversely affect revenue by between \$4 billion and \$8 billion. “As of now we believe iPhone demand is holding up slightly better than expected (despite the various supply issues that have plagued Apple and the rest of the tech sector),” the 5-star analyst noted. “That said, the Street is well aware of weakness this quarter and we believe ultimately is looking past June numbers to the September and December quarters with all eyes on the iPhone 14 production/demand cycle for the Fall.” Ives thinks initial expectations for the latest model of Apple’s flagship product are “flat to slightly higher” compared to the iPhone 13, which indicates that despite the “jittery macro,” Apple is still confident demand for the latest version remains healthy. In fact, Ives thinks Apple’s “unparalleled” installed base of 1 billion iPhones is not properly appreciated and provides the company with a big advantage over other tech giants. The analyst is of the mind investors are underestimating the “stickiness” of the iPhone upgrade cycle and estimates that around 240 million of the 1 billion iPhones have yet to upgrade to a new smartphone over the past 3.5 years. “This importantly speaks to the Apple growth path over the next 12 to 18 months as iPhone 14 is set to be unveiled in the September timeframe,” Ives confidently wrapped up. All in all, Ives maintained an Outperform (i.e., Buy) rating on Apple shares, while his \$200 price targe tindicates room for 45% upside by this time next year. (To watch Ives’ track record, click here) So, that’s the Wedbush view, what does the rest of the Street think? Most agree with Ives’ stance although not all are on board; however, despite 6 fencesitters, with 21 positive reviews, the stock boasts a Strong Buy consensus rating. Shares are expected to...",
+        "Now that Q2 has come to end, the focus on Wall Street will turn to the "
+        "second quarter results. In Apple’s (AAPL) case, the past 3 months have "
+        "been defined by the Covid lockdowns in China which will adversely "
+        "affect revenue by between \$4 billion and \$8 billion. “As of now "
+        "we believe iPhone demand is holding up slightly better than expected "
+        "(despite the various supply issues that have plagued Apple and the rest "
+        "of the tech sector),” the 5-star analyst noted. “That said, the "
+        "Street is well aware of weakness this quarter and we believe "
+        "ultimately is looking past June numbers to the September and "
+        "December quarters with all eyes on the iPhone 14 production/demand "
+        "cycle for the Fall.” Ives thinks initial expectations for the latest "
+        "model of Apple’s flagship product are “flat to slightly higher” "
+        "compared to the iPhone 13, which indicates that despite the “jittery "
+        "macro,” Apple is still confident demand for the latest version remains "
+        "healthy. In fact, Ives thinks Apple’s “unparalleled” installed base of "
+        "1 billion iPhones is not properly appreciated and provides the company "
+        "with a big advantage over other tech giants. The analyst is of the mind "
+        "investors are underestimating the “stickiness” of the iPhone upgrade "
+        "cycle and estimates that around 240 million of the 1 billion iPhones "
+        "have yet to upgrade to a new smartphone over the past 3.5 years. “This "
+        "importantly speaks to the Apple growth path over the next 12 to 18 "
+        "months as iPhone 14 is set to be unveiled in the September timeframe,” "
+        "Ives confidently wrapped up. All in all, Ives maintained an Outperform "
+        "(i.e., Buy) rating on Apple shares, while his \$200 price target "
+        "indicates room for 45% upside by this time next year. (To watch Ives’ "
+        "track record, click here) So, that’s the Wedbush view, what does the "
+        "rest of the Street think? Most agree with Ives’ stance although not all "
+        "are on board; however, despite 6 fencesitters, with 21 positive reviews, "
+        "the stock boasts a Strong Buy consensus rating. Shares are expected to...",
     "descriptions": {
       "en_US":
           "Now that Q2 has come to end, the focus on Wall Street will turn to the second quarter results. In Apple’s (AAPL) case, the past 3 months have been defined by the Covid lockdowns in China which will adversely affect revenue by between \$4 billion and \$8 billion. “As of now we believe iPhone demand is holding up slightly better than expected (despite the various supply issues that have plagued Apple and the rest of the tech sector),” the 5-star analyst noted. “That said, the Street is well aware of weakness this quarter and we believe ultimately is looking past June numbers to the September and December quarters with all eyes on the iPhone 14 production/demand cycle for the Fall.” Ives thinks initial expectations for the latest model of Apple’s flagship product are “flat to slightly higher” compared to the iPhone 13, which indicates that despite the “jittery macro,” Apple is still confident demand for the latest version remains healthy. In fact, Ives thinks Apple’s “unparalleled” installed base of 1 billion iPhones is not properly appreciated and provides the company with a big advantage over other tech giants. The analyst is of the mind investors are underestimating the “stickiness” of the iPhone upgrade cycle and estimates that around 240 million of the 1 billion iPhones have yet to upgrade to a new smartphone over the past 3.5 years. “This importantly speaks to the Apple growth path over the next 12 to 18 months as iPhone 14 is set to be unveiled in the September timeframe,” Ives confidently wrapped up. All in all, Ives maintained an Outperform (i.e., Buy) rating on Apple shares, while his \$200 price targe tindicates room for 45% upside by this time next year. (To watch Ives’ track record, click here) So, that’s the Wedbush view, what does the rest of the Street think? Most agree with Ives’ stance although not all are on board; however, despite 6 fencesitters, with 21 positive reviews, the stock boasts a Strong Buy consensus rating. Shares are expected to..."
@@ -560,7 +607,35 @@ const sampleNews = {
     "avatarImageUrl":
         "https://firebasestorage.googleapis.com/v0/b/buysellhold-322d1.appspot.com/o/logos%2FTSLA%3AXNGS.png?alt=media&token=c365db47-9482-4237-9267-82f72854d161",
     "description":
-        "Tesla  (TSLA) - Get Tesla Inc. Report completely dominates the electric vehicle market.  Newcomers like Rivian  (RIVN) - Get Rivian Automotive Inc. Report and Lucid  (LCID) - Get Lucid Group Inc. Report with a market cap of \$26.06 billion and \$32.03 billion, respectively, don't even appear in Tesla's rearview mirror. In addition to investors, the Texan vehicle manufacturer is winning its bet to become the brand to turn to when you want to buy an electric vehicle despite strong competition. This year, most automakers in the US market started producing new models to compete with its Model 3 and Model S sedans and its Model Y and Model X SUVs/crossovers. But so far Tesla is still managing to keep ahead. However, a rival is emerging and it is not the one we believe. Indeed, this rival is not GM, which has promised to produce over one million electric vehicles per year by 2025. Nor is it Ford and Volkswagen  (VLKAF) , which have made Tesla their main target and are in a phase of announcements and production of new models to seduce deep America. Ford is counting in particular on the F-150 Lightning, the version of the legendary F-150 pickup. Tesla's rival does not make a lot of noise and Elon Musk, the whimsical and charismatic CEO of Tesla, himself noticed it. This is the South Korean vehicle manufacturer Hyundai  (HYMLF) . Sawyer Merritt, a Musk fan and Tesla investor, recently shared a screenshot showing the top 5 automakers by market share in the electrical sector in the United States. In this ranking, Tesla is well ahead in first place with 75.8% of the market share, followed by Hyundai with 9%, followed by Volkswagen with 4.6% and Ford 4.5%. The rest of the manufacturers complete the ranking with a combined 6.1%. Musk, who is known for rarely uttering the names of Tesla rivals, commented on the post. He seems to have taken note of the progress made by Hyundai.",
+        "Tesla  (TSLA) - Get Tesla Inc. Report completely dominates the electric vehicle "
+        "market.  Newcomers like Rivian  (RIVN) - Get Rivian Automotive Inc. "
+        "Report and Lucid  (LCID) - Get Lucid Group Inc. Report with a market "
+        "cap of \$26.06 billion and \$32.03 billion, respectively, don't even "
+        "appear in Tesla's rearview mirror. In addition to investors, the "
+        "Texan vehicle manufacturer is winning its bet to become the brand "
+        "to turn to when you want to buy an electric vehicle despite strong "
+        "competition. This year, most automakers in the US market started "
+        "producing new models to compete with its Model 3 and Model S sedans a"
+        "nd its Model Y and Model X SUVs/crossovers. But so far Tesla is "
+        "still managing to keep ahead. However, a rival is emerging and it is "
+        "not the one we believe. Indeed, this rival is not GM, which has "
+        "promised to produce over one million electric vehicles per year by "
+        "2025. Nor is it Ford and Volkswagen  (VLKAF) , which have made "
+        "Tesla their main target and are in a phase of announcements and "
+        "production of new models to seduce deep America. Ford is counting "
+        "in particular on the F-150 Lightning, the version of the legendary "
+        "F-150 pickup. Tesla's rival does not make a lot of noise and "
+        "Elon Musk, the whimsical and charismatic CEO of Tesla, himself "
+        "noticed it. This is the South Korean vehicle manufacturer Hyundai  "
+        "(HYMLF) . Sawyer Merritt, a Musk fan and Tesla investor, recently "
+        "shared a screenshot showing the top 5 automakers by market share in "
+        "the electrical sector in the United States. In this ranking, Tesla is "
+        "well ahead in first place with 75.8% of the market share, followed by "
+        "Hyundai with 9%, followed by Volkswagen with 4.6% and Ford 4.5%. "
+        "The rest of the manufacturers complete the ranking with a combined "
+        "6.1%. Musk, who is known for rarely uttering the names of Tesla "
+        "rivals, commented on the post. He seems to have taken note of the "
+        "progress made by Hyundai.",
     "descriptions": {
       "en_US":
           "Tesla  (TSLA) - Get Tesla Inc. Report completely dominates the electric vehicle market.  Newcomers like Rivian  (RIVN) - Get Rivian Automotive Inc. Report and Lucid  (LCID) - Get Lucid Group Inc. Report with a market cap of \$26.06 billion and \$32.03 billion, respectively, don't even appear in Tesla's rearview mirror. In addition to investors, the Texan vehicle manufacturer is winning its bet to become the brand to turn to when you want to buy an electric vehicle despite strong competition. This year, most automakers in the US market started producing new models to compete with its Model 3 and Model S sedans and its Model Y and Model X SUVs/crossovers. But so far Tesla is still managing to keep ahead. However, a rival is emerging and it is not the one we believe. Indeed, this rival is not GM, which has promised to produce over one million electric vehicles per year by 2025. Nor is it Ford and Volkswagen  (VLKAF) , which have made Tesla their main target and are in a phase of announcements and production of new models to seduce deep America. Ford is counting in particular on the F-150 Lightning, the version of the legendary F-150 pickup. Tesla's rival does not make a lot of noise and Elon Musk, the whimsical and charismatic CEO of Tesla, himself noticed it. This is the South Korean vehicle manufacturer Hyundai  (HYMLF) . Sawyer Merritt, a Musk fan and Tesla investor, recently shared a screenshot showing the top 5 automakers by market share in the electrical sector in the United States. In this ranking, Tesla is well ahead in first place with 75.8% of the market share, followed by Hyundai with 9%, followed by Volkswagen with 4.6% and Ford 4.5%. The rest of the manufacturers complete the ranking with a combined 6.1%. Musk, who is known for rarely uttering the names of Tesla rivals, commented on the post. He seems to have taken note of the progress made by Hyundai."
@@ -696,7 +771,36 @@ const sampleNews = {
     "avatarImageUrl":
         "https://firebasestorage.googleapis.com/v0/b/buysellhold-322d1.appspot.com/o/logos%2FTSLA%3AXNGS.png?alt=media&token=c365db47-9482-4237-9267-82f72854d161",
     "description":
-        "Some storm clouds are appearing on the horizon for Tesla bulls after a respectable second quarter. \"The elephant in the room for Tesla (and the broader market) is with dark economic storm clouds on the horizon and Musk himself thinking recession risk is imminent, what does this mean for Tesla's demand story going forward?\" Wedbush Wedbush Senior Equity Research Analyst Dan Ives stated in a new note to clients. \"In a nutshell, while June delivery numbers were ugly and nothing to write home about, the Street will be focused on the trajectory for the second half... and the overall demand picture staying firm.\" The electric vehicle maker said over the weekend that second quarter deliveries tallied 254,695. While that represented about 27% year over year growth, it fell short of analyst estimates for 256,520. In a note, Citi Itay Michaeli pinned the miss on a shortfall in deliveries of Tesla's Model 3 and Model Y. Tesla's second quarter suggests demand hasn't begun to reflect consumer concerns around a recession. In fact, it's reasonable to say Tesla's results would have been stronger if not for supply chain challenges constraining demand. But analysts generally agree that if demand were to slow noticeably in the second half of the year, it could add pressure to Tesla's bottom line at a time of high costs. That would likely hit the stock, which is down 35% so far in 2022. \"We suspect that the interplay of price and cost may matter most for Tesla earnings this year,\" JP Morgan analyst Ryan Brinkman said in a note to clients. \"This interplay we believe presents downside risk to 2Q, given that Tesla experienced sharp battery metals inflation (as well as higher other commodity and non-commodity supply chain costs) but the price hikes of upwards of \$10K it announced across its lineup generally apply only to new orders and not to existing reservations (as Rivian tried unsuccessfully earlier this year); however, as the year progresses, this pricing tailwind — should it...",
+        "Some storm clouds are appearing on the horizon for Tesla bulls after a "
+        "respectable second quarter. \"The elephant in the room for Tesla (and "
+        "the broader market) is with dark economic storm clouds on the horizon "
+        "and Musk himself thinking recession risk is imminent, what does this "
+        "mean for Tesla's demand story going forward?\" Wedbush Wedbush Senior "
+        "Equity Research Analyst Dan Ives stated in a new note to clients. "
+        "\"In a nutshell, while June delivery numbers were ugly and nothing to "
+        "write home about, the Street will be focused on the trajectory for "
+        "the second half... and the overall demand picture staying firm.\" The "
+        "electric vehicle maker said over the weekend that second quarter "
+        "deliveries tallied 254,695. While that represented about 27% year over "
+        "year growth, it fell short of analyst estimates for 256,520. In a note, "
+        "Citi Itay Michaeli pinned the miss on a shortfall in deliveries of Tesla's "
+        "Model 3 and Model Y. Tesla's second quarter suggests demand hasn't "
+        "begun to reflect consumer concerns around a recession. In fact, it's "
+        "reasonable to say Tesla's results would have been stronger if not for "
+        "supply chain challenges constraining demand. But analysts generally "
+        "agree that if demand were to slow noticeably in the second half of the "
+        "year, it could add pressure to Tesla's bottom line at a time of high "
+        "costs. That would likely hit the stock, which is down 35% so far in "
+        "2022. \"We suspect that the interplay of price and cost may matter "
+        "most for Tesla earnings this year,\" JP Morgan analyst Ryan Brinkman "
+        "said in a note to clients. \"This interplay we believe presents "
+        "downside risk to 2Q, given that Tesla experienced sharp battery "
+        "metals inflation (as well as higher other commodity and non-commodity "
+        "supply chain costs) but the price hikes of upwards of \$10K it "
+        "announced across its lineup generally apply only to new orders and "
+        "not to existing reservations (as Rivian tried unsuccessfully earlier "
+        "this year); however, as the year progresses, this pricing tailwind — "
+        "should it...",
     "descriptions": {
       "en_US":
           "Some storm clouds are appearing on the horizon for Tesla bulls after a respectable second quarter. \"The elephant in the room for Tesla (and the broader market) is with dark economic storm clouds on the horizon and Musk himself thinking recession risk is imminent, what does this mean for Tesla's demand story going forward?\" Wedbush Wedbush Senior Equity Research Analyst Dan Ives stated in a new note to clients. \"In a nutshell, while June delivery numbers were ugly and nothing to write home about, the Street will be focused on the trajectory for the second half... and the overall demand picture staying firm.\" The electric vehicle maker said over the weekend that second quarter deliveries tallied 254,695. While that represented about 27% year over year growth, it fell short of analyst estimates for 256,520. In a note, Citi Itay Michaeli pinned the miss on a shortfall in deliveries of Tesla's Model 3 and Model Y. Tesla's second quarter suggests demand hasn't begun to reflect consumer concerns around a recession. In fact, it's reasonable to say Tesla's results would have been stronger if not for supply chain challenges constraining demand. But analysts generally agree that if demand were to slow noticeably in the second half of the year, it could add pressure to Tesla's bottom line at a time of high costs. That would likely hit the stock, which is down 35% so far in 2022. \"We suspect that the interplay of price and cost may matter most for Tesla earnings this year,\" JP Morgan analyst Ryan Brinkman said in a note to clients. \"This interplay we believe presents downside risk to 2Q, given that Tesla experienced sharp battery metals inflation (as well as higher other commodity and non-commodity supply chain costs) but the price hikes of upwards of \$10K it announced across its lineup generally apply only to new orders and not to existing reservations (as Rivian tried unsuccessfully earlier this year); however, as the year progresses, this pricing tailwind — should it..."
@@ -810,10 +914,42 @@ const sampleNews = {
     "avatarImageUrl":
         "https://firebasestorage.googleapis.com/v0/b/buysellhold-322d1.appspot.com/o/logos%2FTSLA%3AXNGS.png?alt=media&token=c365db47-9482-4237-9267-82f72854d161",
     "description":
-        "BYD, the Chinese electric vehicle firm partly owned by Warren Buffett's Berkshire Hathaway, became the world’s largest electric vehicle maker in the first half of 2022, wrestling the title from Elon Musk's EV giant Tesla in another sign of the Chinese automaker's resilience in the face of COVID-inflicted disruptions that plagued its rivals this year. BYD sold 641,350 new electric vehicles in the first half of this year, compared to Tesla's 564,743, company filings show. Sales at BYD are also growing at a faster pace than at its American counterpart. In the first six months of 2022, BYD sold 486,771 more cars than it did in the first half of 2021, representing an increase of 315%. Tesla, meanwhile, sold 178,693 more vehicles in the first half of this year compared to last, a 46% year-on-year bump. However, the companies' sales don't represent an apples-to-apples comparison. Many of BYD's car sales are plug-in hybrids and use gasoline engines to supplement battery power. Tesla, on the other hand, exclusively sells fully electric cars. China counts both types of vehicles as \"zero-emission.\" BYD's stock price in Hong Kong has barely budged since the firm released the sales figures earlier this week. But investors have been high on BYD since the start of this year despite the bear market in the U.S. and a challenging environment in China. BYD's stock price has risen nearly 25% since the start of this year. In that same timeframe, Tesla's stock price in New York has dropped 42%. Musk, meanwhile, was an early doubter of BYD. “Have you seen their car?” the Tesla CEO told Bloomberg News in 2011. “I don’t think they have a great product.” Tesla has attributed its sluggish growth early this year to COVID-19 lockdowns in Shanghai that disrupted production at its gigafactory near the city. \"We [lost] a lot of important days of production. And there are sort of upstream supplier challenges where a lot of suppliers also lost many days of production,\" Musk said in a quarterly...",
+        "BYD, the Chinese electric vehicle firm partly owned by Warren "
+        "Buffett's Berkshire Hathaway, became the world’s largest electric "
+        "vehicle maker in the first half of 2022, wrestling the title from "
+        "Elon Musk's EV giant Tesla in another sign of the Chinese automaker's "
+        "resilience in the face of COVID-inflicted disruptions that plagued its "
+        "rivals this year. BYD sold 641,350 new electric vehicles in the first "
+        "half of this year, compared to Tesla's 564,743, company filings show. "
+        "Sales at BYD are also growing at a faster pace than at its American "
+        "counterpart. In the first six months of 2022, BYD sold 486,771 more "
+        "cars than it did in the first half of 2021, representing an increase "
+        "of 315%. Tesla, meanwhile, sold 178,693 more vehicles in the first "
+        "half of this year compared to last, a 46% year-on-year bump. However, "
+        "the companies' sales don't represent an apples-to-apples comparison. "
+        "Many of BYD's car sales are plug-in hybrids and use gasoline engines "
+        "to supplement battery power. Tesla, on the other hand, exclusively "
+        "sells fully electric cars. China counts both types of vehicles as "
+        "\"zero-emission.\" BYD's stock price in Hong Kong has barely budged "
+        "since the firm released the sales figures earlier this week. But "
+        "investors have been high on BYD since the start of this year despite "
+        "the bear market in the U.S. and a challenging environment in China. "
+        "BYD's stock price has risen nearly 25% since the start of this year. "
+        "In that same timeframe, Tesla's stock price in New York has dropped "
+        "42%. Musk, meanwhile, was an early doubter of BYD. “Have you seen "
+        "their car?” the Tesla CEO told Bloomberg News in 2011. “I don’t think "
+        "they have a great product.” Tesla has attributed its sluggish growth "
+        "early this year to COVID-19 lockdowns in Shanghai that disrupted "
+        "production at its gigafactory near the city. \"We [lost] a lot of "
+        "important days of production. And there are sort of upstream "
+        "supplier challenges where a lot of suppliers also lost many days of "
+        "production,\" Musk said in a quarterly...",
     "descriptions": {
       "en_US":
-          "BYD, the Chinese electric vehicle firm partly owned by Warren Buffett's Berkshire Hathaway, became the world’s largest electric vehicle maker in the first half of 2022, wrestling the title from Elon Musk's EV giant Tesla in another sign of the Chinese automaker's resilience in the face of COVID-inflicted disruptions that plagued its rivals this year. BYD sold 641,350 new electric vehicles in the first half of this year, compared to Tesla's 564,743, company filings show. Sales at BYD are also growing at a faster pace than at its American counterpart. In the first six months of 2022, BYD sold 486,771 more cars than it did in the first half of 2021, representing an increase of 315%. Tesla, meanwhile, sold 178,693 more vehicles in the first half of this year compared to last, a 46% year-on-year bump. However, the companies' sales don't represent an apples-to-apples comparison. Many of BYD's car sales are plug-in hybrids and use gasoline engines to supplement battery power. Tesla, on the other hand, exclusively sells fully electric cars. China counts both types of vehicles as \"zero-emission.\" BYD's stock price in Hong Kong has barely budged since the firm released the sales figures earlier this week. But investors have been high on BYD since the start of this year despite the bear market in the U.S. and a challenging environment in China. BYD's stock price has risen nearly 25% since the start of this year. In that same timeframe, Tesla's stock price in New York has dropped 42%. Musk, meanwhile, was an early doubter of BYD. “Have you seen their car?” the Tesla CEO told Bloomberg News in 2011. “I don’t think they have a great product.” Tesla has attributed its sluggish growth early this year to COVID-19 lockdowns in Shanghai that disrupted production at its gigafactory near the city. \"We [lost] a lot of important days of production. And there are sort of upstream supplier challenges where a lot of suppliers also lost many days of production,\" Musk said in a quarterly..."
+          "BYD, the Chinese electric vehicle firm partly owned by Warren "
+          "Buffett's Berkshire Hathaway, became the world’s largest electric "
+          "vehicle maker in the first half of 2022, wrestling the title from "
+          "Elon Musk's EV giant Tesla in another sign of the Chinese automaker's resilience in the face of COVID-inflicted disruptions that plagued its rivals this year. BYD sold 641,350 new electric vehicles in the first half of this year, compared to Tesla's 564,743, company filings show. Sales at BYD are also growing at a faster pace than at its American counterpart. In the first six months of 2022, BYD sold 486,771 more cars than it did in the first half of 2021, representing an increase of 315%. Tesla, meanwhile, sold 178,693 more vehicles in the first half of this year compared to last, a 46% year-on-year bump. However, the companies' sales don't represent an apples-to-apples comparison. Many of BYD's car sales are plug-in hybrids and use gasoline engines to supplement battery power. Tesla, on the other hand, exclusively sells fully electric cars. China counts both types of vehicles as \"zero-emission.\" BYD's stock price in Hong Kong has barely budged since the firm released the sales figures earlier this week. But investors have been high on BYD since the start of this year despite the bear market in the U.S. and a challenging environment in China. BYD's stock price has risen nearly 25% since the start of this year. In that same timeframe, Tesla's stock price in New York has dropped 42%. Musk, meanwhile, was an early doubter of BYD. “Have you seen their car?” the Tesla CEO told Bloomberg News in 2011. “I don’t think they have a great product.” Tesla has attributed its sluggish growth early this year to COVID-19 lockdowns in Shanghai that disrupted production at its gigafactory near the city. \"We [lost] a lot of important days of production. And there are sort of upstream supplier challenges where a lot of suppliers also lost many days of production,\" Musk said in a quarterly..."
     },
     "entityType": "NewsItem",
     "hashTags": ["#Tesla"],
@@ -823,7 +959,8 @@ const sampleNews = {
         "https://finance.yahoo.com/news/warren-buffett-backed-byd-surpasses-073803913.html",
     "locale": "Locale.en_US",
     "name":
-        "Warren Buffett backed BYD surpasses Tesla in global EV sales a decade after Elon Musk doubted the Chinese company s technology",
+        "Warren Buffett backed BYD surpasses Tesla in global EV sales a decade "
+            "after Elon Musk doubted the Chinese company's technology",
     "names": {
       "en_US":
           "Warren Buffett backed BYD surpasses Tesla in global EV sales a decade after Elon Musk doubted the Chinese company s technology"
@@ -837,7 +974,31 @@ const sampleNews = {
     "avatarImageUrl":
         "https://firebasestorage.googleapis.com/v0/b/buysellhold-322d1.appspot.com/o/logos%2FGE%3AXNYS.png?alt=media&token=75d8022b-3111-4de4-80fe-cf649b2a2ed6",
     "description":
-        "GE Aviation is set to undergo a series of leadership changes as its parent company, General Electric Co., works to spin off its health care and energy businesses into their own publicly traded companies. On Monday, the company announced GE CEO H. Lawrence Culp Jr. will take over as CEO of GE Aviation effective immediately. He replaces John Slattery, who was named CEO in June 2020. Slattery will now be executive vice president and chief commercial officer of the aviation business, which is based in Evendale. The change up comes roughly eight months after Boston-based GE announced plans to split itself into three different public companies: health care, energy and aviation. The health care and energy spin offs are expected to take place in 2023 and 2024 respectively, leaving General Electric itself as an aviation-focused company. GE Aviation, Greater Cincinnati's third-largest manufacturer, has about 9,000 employees in the Cincinnati region, between its headquarters in Evendale, manufacturing facility, support and services in Hebron, and a testing site in Peebles. A spokeswoman was not immediately available to clarify whether Culp would remain based in Boston or if he would move to the Cincinnati region as part of the transition. In a statement, Culp said: “There is tremendous opportunity in aviation over the coming years, and the board and I decided it is the right time for me to take on this expanded role and work even more closely with the team to support our customers, meet the unprecedented demand ramp, and prepare for GE Aviation’s future as an independent public company.”",
+        "GE Aviation is set to undergo a series of leadership changes as its "
+        "parent company, General Electric Co., works to spin off its health "
+        "care and energy businesses into their own publicly traded companies. "
+        "On Monday, the company announced GE CEO H. Lawrence Culp Jr. will "
+        "take over as CEO of GE Aviation effective immediately. He replaces "
+        "John Slattery, who was named CEO in June 2020. Slattery will now be "
+        "executive vice president and chief commercial officer of the aviation "
+        "business, which is based in Evendale. The change up comes roughly "
+        "eight months after Boston-based GE announced plans to split itself "
+        "into three different public companies: health care, energy and "
+        "aviation. The health care and energy spin offs are expected to "
+        "take place in 2023 and 2024 respectively, leaving General Electric "
+        "itself as an aviation-focused company. GE Aviation, "
+        "Greater Cincinnati's third-largest manufacturer, has about 9,000 "
+        "employees in the Cincinnati region, between its headquarters in "
+        "Evendale, manufacturing facility, support and services in Hebron, "
+        "and a testing site in Peebles. A spokeswoman was not immediately "
+        "available to clarify whether Culp would remain based in Boston or "
+        "if he would move to the Cincinnati region as part of the transition. "
+        "In a statement, Culp said: “There is tremendous opportunity in "
+        "aviation over the coming years, and the board and I decided it is "
+        "the right time for me to take on this expanded role and work even more "
+        "closely with the team to support our customers, meet the unprecedented "
+        "demand ramp, and prepare for GE Aviation’s future as an independent "
+        "public company.”",
     "descriptions": {
       "en_US":
           "GE Aviation is set to undergo a series of leadership changes as its parent company, General Electric Co., works to spin off its health care and energy businesses into their own publicly traded companies. On Monday, the company announced GE CEO H. Lawrence Culp Jr. will take over as CEO of GE Aviation effective immediately. He replaces John Slattery, who was named CEO in June 2020. Slattery will now be executive vice president and chief commercial officer of the aviation business, which is based in Evendale. The change up comes roughly eight months after Boston-based GE announced plans to split itself into three different public companies: health care, energy and aviation. The health care and energy spin offs are expected to take place in 2023 and 2024 respectively, leaving General Electric itself as an aviation-focused company. GE Aviation, Greater Cincinnati's third-largest manufacturer, has about 9,000 employees in the Cincinnati region, between its headquarters in Evendale, manufacturing facility, support and services in Hebron, and a testing site in Peebles. A spokeswoman was not immediately available to clarify whether Culp would remain based in Boston or if he would move to the Cincinnati region as part of the transition. In a statement, Culp said: “There is tremendous opportunity in aviation over the coming years, and the board and I decided it is the right time for me to take on this expanded role and work even more closely with the team to support our customers, meet the unprecedented demand ramp, and prepare for GE Aviation’s future as an independent public company.”"
