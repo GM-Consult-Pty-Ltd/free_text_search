@@ -5,7 +5,7 @@
 part of 'search_result.dart';
 
 /// Private extension methods on [PostingsMap].
-extension _IndexEliminationPostingsMapExtension on PostingsMap {
+extension _IndexSearchPostingsMapExtension on PostingsMap {
 //
 
   /// Returns a hashmap of term to zone postings for docId from the
@@ -21,7 +21,7 @@ extension _IndexEliminationPostingsMapExtension on PostingsMap {
 }
 
 /// Private extension methods on [KeywordPostingsMap].
-extension _IndexEliminationKeywordPostingsExtension on KeywordPostingsMap {
+extension _IndexSearchKeywordPostingsExtension on KeywordPostingsMap {
 //
 
   /// Returns a hashmap of term to keyword score for keywords in the document.
@@ -35,7 +35,7 @@ extension _IndexEliminationKeywordPostingsExtension on KeywordPostingsMap {
 }
 
 /// Private extension methods on [DftMap].
-extension _IndexEliminationDftMapExtension on DftMap {
+extension _IndexSearchDftMapExtension on DftMap {
 //
 
   /// Returns the inverse document frequency of the [term] for a corpus of size
@@ -50,7 +50,7 @@ extension _IndexEliminationDftMapExtension on DftMap {
 }
 
 /// Private extension methods on `Map<String, ZonePostingsMap>`.
-extension _IndexEliminationTermPostingsExtension
+extension _IndexSearchTermPostingsExtension
     on Map<String, ZonePostingsMap> {
 //
 

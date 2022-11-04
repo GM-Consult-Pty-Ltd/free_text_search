@@ -6,7 +6,7 @@ import 'dart:math';
 import 'package:free_text_search/src/_index.dart';
 import 'package:collection/collection.dart';
 
-part 'index_elimination_extensions.dart';
+part 'index_search_extensions.dart';
 
 /// Object model for a search result of a query against a text index.
 /// - [docId] is the identifier of the document result in the corpus.

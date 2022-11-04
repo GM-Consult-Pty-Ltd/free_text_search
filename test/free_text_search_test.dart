@@ -7,7 +7,6 @@
 // ignore: unused_import
 import 'package:free_text_search/free_text_search.dart';
 import 'package:free_text_search/src/_index.dart';
-import 'package:free_text_search/src/index_elimination/index_elimination.dart';
 import 'package:gmconsult_dev/gmconsult_dev.dart';
 import 'package:test/test.dart';
 import 'test_utils.dart';
@@ -78,7 +77,7 @@ void main() {
     });
 
     test('IndexSearch.search', () async {
-      // final phrase = '5g modem';
+      final phrase = 'dan ives wedbush';
       // initialize an in-memory indexer
       final indexer = await TestIndex.hydrate();
       // initialize the QueryParser
@@ -91,7 +90,7 @@ void main() {
       /// initialize a query
       final query = FreeTextQuery(
           phrase: phrase,
-          iDfThreshold: 0.0,
+          iDfThreshold: 2.5,
           queryTerms: queryTerms,
           weightingStrategy: WeightingStrategy(zoneWeights: zoneWeigths));
       // get the terms from the query

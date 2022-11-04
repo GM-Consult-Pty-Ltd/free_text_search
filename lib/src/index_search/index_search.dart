@@ -36,40 +36,36 @@ abstract class IndexSearchMixin implements IndexSearch {
       // return an empty collection if no query terms are supplied
       return {};
     }
-    // check if the query is maybe a predictive text query (single term of
-    // 1 to 3 characters length)
-    if (query.queryTerms.length == 1 &&
-        query.queryTerms.first.term.length < 4) {
-      query.expandTerms({
-        query.queryTerms.first.term:
-            await _expandQuery(query.queryTerms.first, 5)
-      });
-    }
+    // get N from the index collection
     final docCount = await index.getCollectionSize();
+    // initialize a collection for the terms (strings) in the query
     var terms = query.queryTerms.terms;
-    var dfTMap = await index.getDictionary(terms);
-    query.purgeTerms(dfTMap, docCount);
-    terms = query.queryTerms.terms;
-    // get the postings for the query
-    final PostingsMap postings =
-        await _addPostingsForAllModifiers(query.queryTerms);
-    // get the postings for unmatched terms
-
-    final unMatchedTerms = await _unmatchedTerms(postings);
+    // get the document frequencies for the terms
+    final dfTMap = await index.getDictionary(terms);
+    // expand the terms if not all terms were found in the dictionary
+    final unMatchedTerms = await _unmatchedTerms(dfTMap);
+    // expand the query (replace unmatched terms with expanded ones)
     query.expandTerms(unMatchedTerms);
-    dfTMap = await index.getDictionary(terms);
-    query.purgeTerms(dfTMap, docCount);
+    // check for any additional terms and add them to the doc frequency map
     if (query.allTerms.toSet().union(terms).length != terms.length) {
       final List<QueryTerm> newEntries = [];
       for (final e in unMatchedTerms.values) {
         newEntries.addAll(e);
       }
-      postings.addAll(await _addPostingsForAllModifiers(newEntries));
+      final newDfTMap = await index.getDictionary(
+          newEntries.terms.where((e) => !dfTMap.keys.contains(e)));
+      dfTMap.addAll(newDfTMap);
     }
+    // now discard any terms that have a inverse doc frequency below the threshold
+    query.purgeTerms(dfTMap, docCount);
+    // update the terms collection
+    terms = query.queryTerms.terms;
+    // get the postings for the query
+    final PostingsMap postings =
+        await _addPostingsForAllModifiers(query.queryTerms);
     // Map the postings to a hashmap of docid to SearchResult
     final retVal = await _postingsToSearchResults(
         postings, query.queryTerms, dfTMap, docCount);
-
     // return the results and proceed to scoring and ranking
     return retVal;
   }
@@ -128,13 +124,13 @@ abstract class IndexSearchMixin implements IndexSearch {
   }
 
   Future<Map<String, Iterable<QueryTerm>>> _unmatchedTerms(
-      PostingsMap postings) async {
+      Map<String, dynamic> postings) async {
     final found = postings.keys.toSet();
     final Map<String, Set<QueryTerm>> retVal = {};
     final unmatched =
         query.queryTerms.where((element) => !found.contains(element.term));
     for (final e in unmatched) {
-      retVal[e.term] = await _expandQuery(e, 5);
+      retVal[e.term] = await _expandQuery(e, 2);
     }
     return retVal;
   }
@@ -156,10 +152,16 @@ abstract class IndexSearchMixin implements IndexSearch {
   /// returns the top [limit] matches as [QueryTerm] instances.
   Future<Set<QueryTerm>> _expandQuery(QueryTerm queryTerm, int limit) async {
     final term =
-        queryTerm.term.trim().toLowerCase().replaceAll(RegExp(r'\s+'), '');
+        queryTerm.term.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
     final candidates = await index.getKGramIndex(term.kGrams(index.k));
     final terms = candidates.terms.toList();
-    final suggestions = term.getSuggestions(terms, limit: limit, k: index.k);
+    if (term.length < 4) {}
+    var suggestions = (term.length < 4)
+        ? term.startsWithSimilarities(terms)
+        : term.getSuggestions(terms, limit: limit, k: index.k);
+    suggestions = suggestions.length > limit
+        ? suggestions.sublist(0, limit)
+        : suggestions;
     final matches = suggestions.map((e) => e.term);
     return matches
         .map((e) => QueryTerm(e, QueryTermModifier.AND, queryTerm.termPosition,
