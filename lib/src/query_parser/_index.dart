@@ -2,7 +2,6 @@
 // BSD 3-Clause License
 // All rights reserved
 
-/// Barrel file for src/ folder.
 export 'query_parser.dart';
 export 'free_text_query.dart';
 export 'query_term_modifier.dart';

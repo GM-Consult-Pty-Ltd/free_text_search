@@ -2,12 +2,19 @@
 // BSD 3-Clause License
 // All rights reserved
 
-// import 'dart:math';
 import 'package:free_text_search/src/_index.dart';
 
+/// A utility class that runs a [query] on [index].
 ///
+/// Call the [search] method to return the query results.
 abstract class QuerySearch {
-  ///
+  //
+
+  /// Factory constructor that returns a [QuerySearch] with the [query] and
+  /// [index].
+  /// - [index] is the [InvertedIndex] that contains the indexes for the
+  ///   collection.
+  /// - [query] is the [FreeTextQuery] executed by the [QuerySearch] instance.
   factory QuerySearch(
           {required InvertedIndex index,
           required FreeTextQuery query,
@@ -20,14 +27,13 @@ abstract class QuerySearch {
   /// The [InvertedIndex] that contains the indexes for the collection.
   InvertedIndex get index;
 
-  /// Iteratively searches the index for the [query] terms until the minimum
-  /// result set size is achieved or no more results are returned.
+  /// Searches the index for the [query] terms.
   Future<Map<String, QuerySearchResult>> search();
 
-  ///
+  //
 }
 
-///
+/// Abstract mixin class that implements [QuerySearch.search].
 abstract class QuerySearchMixin implements QuerySearch {
   //
 
@@ -44,21 +50,25 @@ abstract class QuerySearchMixin implements QuerySearch {
     var terms = query.queryTerms.terms;
     // get the document frequencies for the terms
     final dfTMap = await index.getDictionary(terms);
-    // expand the terms if not all terms were found in the dictionary
-    final unMatchedTerms = await _unmatchedTerms(dfTMap);
-    // expand the query (replace unmatched terms with expanded ones)
-    query.expandTerms(unMatchedTerms);
-    // check for any additional terms and add them to the doc frequency map
-    if (query.allTerms.toSet().union(terms).length != terms.length) {
-      final List<QueryTerm> newEntries = [];
-      for (final e in unMatchedTerms.values) {
-        newEntries.addAll(e);
+    // Check if query.expand flag is set.
+    if (query.expand) {
+      // expand the terms if not all terms were found in the dictionary
+      final unMatchedTerms = await _unmatchedTerms(dfTMap);
+      // expand the query (replace unmatched terms with expanded ones)
+      query.expandTerms(unMatchedTerms);
+
+      // check for any additional terms and add them to the doc frequency map
+      if (query.allTerms.toSet().union(terms).length != terms.length) {
+        final List<QueryTerm> newEntries = [];
+        for (final e in unMatchedTerms.values) {
+          newEntries.addAll(e);
+        }
+        final newDfTMap = await index.getDictionary(
+            newEntries.terms.where((e) => !dfTMap.keys.contains(e)));
+        dfTMap.addAll(newDfTMap);
       }
-      final newDfTMap = await index.getDictionary(
-          newEntries.terms.where((e) => !dfTMap.keys.contains(e)));
-      dfTMap.addAll(newDfTMap);
     }
-    // now discard any terms that have a inverse doc frequency below the threshold
+    // discard any terms that have an inverse doc frequency below the threshold
     query.purgeTerms(dfTMap, docCount);
     // update the terms collection
     terms = query.queryTerms.terms;
@@ -72,6 +82,7 @@ abstract class QuerySearchMixin implements QuerySearch {
     return retVal;
   }
 
+  /// Worker method that maps postings to search result objects.
   Future<Map<String, QuerySearchResult>> _postingsToSearchResults(
       PostingsMap postings,
       Iterable<QueryTerm> queryTerms,
@@ -79,9 +90,7 @@ abstract class QuerySearchMixin implements QuerySearch {
       int docCount) async {
     final qt = queryTerms.map((e) => e.term).toSet();
     final terms = postings.keys.where((element) => qt.contains(element));
-
     final keywordPostings = await index.getKeywordPostings(terms);
-
     final docIds = postings.docIds;
     final searchResults = <String, QuerySearchResult>{};
     for (final docId in docIds) {
@@ -99,6 +108,7 @@ abstract class QuerySearchMixin implements QuerySearch {
     return searchResults;
   }
 
+  /// Worker methods retunrs the postings for the query terms from the index.
   Future<PostingsMap> _addPostingsForAllModifiers(
       Iterable<QueryTerm> queryTerms) async {
     if (queryTerms.isEmpty) {
@@ -125,6 +135,8 @@ abstract class QuerySearchMixin implements QuerySearch {
     return postings;
   }
 
+  /// Worker method finds unmatched query terms and then attempts expansion
+  /// using the [_expandQuery] method for unmatched terms only.
   Future<Map<String, Iterable<QueryTerm>>> _unmatchedTerms(
       Map<String, dynamic> postings) async {
     final found = postings.keys.toSet();
@@ -172,13 +184,17 @@ abstract class QuerySearchMixin implements QuerySearch {
   }
 }
 
+/// Abstract implementation base class that mixes in [QuerySearchMixin].
 ///
+/// Provides a const default generative constructor for sub-classes.
 abstract class QuerySearchBase with QuerySearchMixin {
-  ///
+  //
+
+  /// A const default generative constructor for sub-classes.
   const QuerySearchBase();
 }
 
-///
+/// Implementation class for [QuerySearch] unnamed factory.
 class _QuerySearchImpl extends QuerySearchBase {
 //
 

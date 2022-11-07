@@ -4,7 +4,6 @@
 
 // ignore: unused_import
 import 'package:free_text_search/free_text_search.dart';
-import 'package:free_text_search/src/_index.dart';
 import 'package:test/test.dart';
 import 'test_utils.dart';
 

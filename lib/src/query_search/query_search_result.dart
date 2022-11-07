@@ -171,7 +171,7 @@ abstract class QuerySearchResult {
 }
 
 /// Mixin class that implements [QuerySearchResult].
-abstract class SearchResultMixin implements QuerySearchResult {
+abstract class QuerySearchResultMixin implements QuerySearchResult {
 //
 
   @override
@@ -188,18 +188,18 @@ abstract class SearchResultMixin implements QuerySearchResult {
 //
 }
 
-/// Base class that implements [QuerySearchResult] and mixes in [SearchResultMixin].
+/// Base class that implements [QuerySearchResult] and mixes in [QuerySearchResultMixin].
 ///
 /// Provides a const default generative constructor for sub-classes.
-abstract class SearchResultBase with SearchResultMixin {
+abstract class QuerySearchResultBase with QuerySearchResultMixin {
   //
 
   /// A const default generative constructor for sub-classes.
-  const SearchResultBase();
+  const QuerySearchResultBase();
 }
 
 /// Implementation class for [QuerySearchResult] factories.
-class _SearchResultImpl extends SearchResultBase {
+class _SearchResultImpl extends QuerySearchResultBase {
   //
 
   // Default generative constructor.

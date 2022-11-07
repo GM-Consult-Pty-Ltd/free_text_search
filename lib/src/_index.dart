@@ -2,11 +2,11 @@
 // BSD 3-Clause License
 // All rights reserved
 
-/// Barrel file for src/ folder.
 export 'free_text_search.dart';
-export 'index_search/_index.dart';
+export 'query_search/_index.dart';
 export 'query_parser/_index.dart';
-export 'scoring_and_ranking/_index.dart';
+export 'starts_with_search/_index.dart';
+
 export 'package:text_indexing/text_indexing.dart';
 export 'package:text_indexing/text_indexing.dart';
 export 'package:text_indexing/type_definitions.dart';
