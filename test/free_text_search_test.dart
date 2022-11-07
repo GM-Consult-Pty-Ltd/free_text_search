@@ -57,9 +57,9 @@ void main() {
       final docIds = keywordPostings.union(searchPostings);
 
       final docCount = indexer.collection.length;
-      final searchResults = <SearchResult>[];
+      final searchResults = <QuerySearchResult>[];
       for (final docId in docIds) {
-        final result = SearchResult.fromPostings(
+        final result = QuerySearchResult.fromPostings(
             docId: docId,
             query: query,
             docCount: docCount,
@@ -76,12 +76,14 @@ void main() {
       indexer.printDocuments(indexer.postings.containsAll(andTerms.terms));
     });
 
-    test('IndexSearch.search', () async {
-      final phrase = 'dan ives wedbush';
+    test('QuerySearch.search', () async {
+      final phrase = 'dan ives wedbush -tesla';
       // initialize an in-memory indexer
       final indexer = await TestIndex.hydrate();
+      final index = indexer.index;
       // initialize the QueryParser
-      final queryParser = QueryParser(tokenizer: TextTokenizer.english);
+      final queryParser = QueryParser(
+          tokenizer: TextTokenizer.english, nGramRange: index.nGramRange);
       // parse the phrase to a query
       final queryTerms = (await queryParser.parseQuery(phrase)).toList();
       // define the document field weights
@@ -90,17 +92,16 @@ void main() {
       /// initialize a query
       final query = FreeTextQuery(
           phrase: phrase,
-          iDfThreshold: 2.5,
           queryTerms: queryTerms,
           weightingStrategy: WeightingStrategy(zoneWeights: zoneWeigths));
       // get the terms from the query
       final terms = query.queryTerms.uniqueTerms;
 
-      final indexSearch = IndexSearch(index: indexer.index, query: query);
+      final indexSearch = QuerySearch(index: indexer.index, query: query);
 
       var results = (await indexSearch.search()).entries.toList();
-      results
-          .sort(((a, b) => b.value.tfIdfScore.compareTo(a.value.tfIdfScore)));
+      results.sort(((a, b) =>
+          b.value.cosineSimilarity.compareTo(a.value.cosineSimilarity)));
 
       results = results.length > 5 ? results.sublist(0, 5) : results;
       final JsonCollection jsonResults = {};
@@ -111,7 +112,8 @@ void main() {
           name = name.length > 120 ? name.substring(0, 120) : name;
           jsonResults[e.key] = {
             'Title': name,
-            'tf-Idf Score': e.value.tfIdfScore
+            'tf-Idf Score': e.value.tfIdfScore,
+            'cosineSimilarity': e.value.cosineSimilarity
           };
         }
       }

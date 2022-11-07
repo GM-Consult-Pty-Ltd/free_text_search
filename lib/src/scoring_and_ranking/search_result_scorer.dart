@@ -5,7 +5,7 @@
 // import 'package:free_text_search/src/_index.dart';
 
 // /// The [SearchResultScorer] exposes the [results] method that returns a
-// /// list of the most relevant [SearchResult] instances in descending order of
+// /// list of the most relevant [QuerySearchResult] instances in descending order of
 // /// relevance after scoring and ranking the results using a vector space model:
 // /// - [query] is the query that was used to obtain the [dictionary] and
 // ///   [postings];
@@ -86,11 +86,11 @@
 //     }
 //   }
 
-//   /// Returns a [List] of [SearchResult]
-//   List<SearchResult> computeScores() {
+//   /// Returns a [List] of [QuerySearchResult]
+//   List<QuerySearchResult> computeScores() {
 //     getChampionLists();
 
-//     final List<SearchResult> results =
+//     final List<QuerySearchResult> results =
 //         []; // TODO: SearchResultScorer.computeScores
 //     return results;
 //   }
@@ -110,13 +110,13 @@
 //   /// The query that was used to obtain the [dictionary] and [postings].
 //   final FreeTextQuery query;
 
-//   /// Returns a list of [SearchResult] instances in descending order of
+//   /// Returns a list of [QuerySearchResult] instances in descending order of
 //   /// relevance.
-//   Future<List<SearchResult>> results(int limit) async {
+//   Future<List<QuerySearchResult>> results(int limit) async {
 //     // - initialize the return value;
-//     final retVal = <SearchResult>[];
+//     final retVal = <QuerySearchResult>[];
 //     // retVal.sort(((a, b) => b.relevance.compareTo(a.relevance)));
-//     // - return the ranked [SearchResult], limiting the length of the return
+//     // - return the ranked [QuerySearchResult], limiting the length of the return
 //     //   value to [limit];
 //     return retVal.length > limit ? retVal.sublist(0, limit) : retVal;
 //   }

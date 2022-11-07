@@ -47,7 +47,7 @@ class QueryTerm extends Token {
 extension QueryTermListExtension on List<QueryTerm> {
   //
 
-  /// Returns a list of [QueryTerm] objects that are unique for the combination
+  /// Returns a subset of the collection that is unique for the combination
   /// of term/modifier. Iterates from the end of the collection to
   void unique() {
     final Map<String, QueryTerm> retVal = {};
@@ -95,6 +95,10 @@ extension QueryTermCollectionExtension on Iterable<QueryTerm> {
       element.modifier == QueryTermModifier.EXACT ||
       element.modifier == QueryTermModifier.AND ||
       element.modifier == QueryTermModifier.IMPORTANT).unique();
+
+/// Returns the [QueryTerm] elements where [QueryTerm.modifier] is equal to
+  /// [QueryTermModifier.NOT].
+  List<QueryTerm> get notTerms => filterByModifier(QueryTermModifier.NOT);
 
   /// A list of all the [Term]s in the collection that contain white-space.
   List<String> get phrases =>

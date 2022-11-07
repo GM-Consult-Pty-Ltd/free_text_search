@@ -3,7 +3,6 @@
 // All rights reserved
 
 /// Barrel file for src/ folder.
-export 'index_search.dart';
-export 'search_result_tier.dart';
-export 'search_result.dart';
+export 'query_search.dart';
+export 'query_search_result.dart';
 export 'weighting_strategy.dart';

@@ -2,10 +2,10 @@
 // BSD 3-Clause License
 // All rights reserved
 
-part of 'search_result.dart';
+part of 'query_search_result.dart';
 
 /// Private extension methods on [PostingsMap].
-extension _IndexSearchPostingsMapExtension on PostingsMap {
+extension _QuerySearchPostingsMapExtension on PostingsMap {
 //
 
   /// Returns a hashmap of term to zone postings for docId from the
@@ -21,7 +21,7 @@ extension _IndexSearchPostingsMapExtension on PostingsMap {
 }
 
 /// Private extension methods on [KeywordPostingsMap].
-extension _IndexSearchKeywordPostingsExtension on KeywordPostingsMap {
+extension _QuerySearchKeywordPostingsExtension on KeywordPostingsMap {
 //
 
   /// Returns a hashmap of term to keyword score for keywords in the document.
@@ -35,7 +35,7 @@ extension _IndexSearchKeywordPostingsExtension on KeywordPostingsMap {
 }
 
 /// Private extension methods on [DftMap].
-extension _IndexSearchDftMapExtension on DftMap {
+extension _QuerySearchDftMapExtension on DftMap {
 //
 
   /// Returns the inverse document frequency of the [term] for a corpus of size
@@ -50,8 +50,7 @@ extension _IndexSearchDftMapExtension on DftMap {
 }
 
 /// Private extension methods on `Map<String, ZonePostingsMap>`.
-extension _IndexSearchTermPostingsExtension
-    on Map<String, ZonePostingsMap> {
+extension _QuerySearchTermPostingsExtension on Map<String, ZonePostingsMap> {
 //
 
   // /// Aggregates the number of postings of each term and maps the total to
@@ -91,7 +90,7 @@ extension _IndexSearchTermPostingsExtension
   }
 }
 
-extension _TermZoneFrequencyExtension on Map<Term, Map<Term, int>> {
+extension _TermZoneFrequencyExtension on Map<Term, Map<Zone, int>> {
   /// Aggregates the term frequencies from all zones to a term frequency for
   /// the document.
   Map<Term, int> termFrequencies(FreeTextQuery query) {
@@ -141,7 +140,51 @@ extension _TermZoneFrequencyExtension on Map<Term, Map<Term, int>> {
 }
 
 /// Extension on vector map.
-extension _TfIdfMapExtensions on Map<String, double> {
+extension _TfIdfMapExtensions on Map<Term, double> {
+  //
+
+  // /// Returns a map of term to weighted term frequency from the term zone
+  // /// frequency map.
+  // Map<Term, double> weightedQueryTermFrequencies(FreeTextQuery query) {
+  //   // final zoneWeights = query.weightingStrategy.zoneWeights;
+  //   final Map<Term, double> retVal = {};
+  //   final qtMap = <String, QueryTerm>{}
+  //     ..addEntries(query.queryTerms.map((e) => MapEntry(e.term, e)));
+  //   for (final e in entries) {
+  //     final term = e.key;
+  //     final qt = qtMap[term];
+  //     if (qt != null) {
+  //       final wM = query.weightingStrategy.getWeight(qt);
+  //       var f = 0.0;
+  //       final zoneEntries = e.value.entries;
+  //       for (final z in zoneEntries) {
+  //         final wZ = zoneWeights == null ? 1 : zoneWeights[z.key] ?? 0;
+  //         f += z.value * wM * wZ;
+  //       }
+  //       retVal[term] = f;
+  //     }
+  //   }
+  //   return retVal;
+  // }
+
+  /// Returns the cosine similarity between this
+  double cosineSimilarity(Map<Term, double> other) {
+    // initialize square of euclidian length for the document.
+    double eLDSq = 0.0;
+    // initialize square of euclidian length for query.
+    double eLQSq = 0.0;
+    double dotProduct = 0.0;
+    final terms = keys.toSet().union(other.keys.toSet());
+    for (final t in terms) {
+      final vQ = other[t] ?? 0.0;
+      final vD = this[t] ?? 0.0;
+      eLQSq = eLQSq + pow(vQ, 2);
+      eLDSq = eLDSq + pow(vD, 2);
+      dotProduct = dotProduct + vQ * vD;
+    }
+    return dotProduct / (sqrt(eLQSq) * sqrt(eLDSq));
+  }
+
   /// Computes a score from the tTfIdfMap and the [weighting].
   double computeTfIdfScore(FreeTextQuery query) {
     var retVal = 0.0;

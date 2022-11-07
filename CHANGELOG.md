@@ -65,7 +65,7 @@ All rights reserved.
 * enum `QueryTermModifier`.
 * class `QueryParser`.
 * stub for class `SearchResultScorer`.
-* object model class `SearchResult`.
+* object model class `QuerySearchResult`.
 * stub for class `VectorSpaceModel`.
 
 Updated dependencies, tests, examples and documentation.

@@ -6,15 +6,15 @@
 import 'package:free_text_search/src/_index.dart';
 
 ///
-abstract class IndexSearch {
+abstract class QuerySearch {
   ///
-  factory IndexSearch(
+  factory QuerySearch(
           {required InvertedIndex index,
           required FreeTextQuery query,
           WeightingStrategy weightingStrategy = WeightingStrategy.simple}) =>
-      _IndexSearchImpl(index, query);
+      _QuerySearchImpl(index, query);
 
-  /// The query executed by the [IndexSearch] instance.
+  /// The query executed by the [QuerySearch] instance.
   FreeTextQuery get query;
 
   /// The [InvertedIndex] that contains the indexes for the collection.
@@ -22,15 +22,17 @@ abstract class IndexSearch {
 
   /// Iteratively searches the index for the [query] terms until the minimum
   /// result set size is achieved or no more results are returned.
-  Future<Map<String, SearchResult>> search();
+  Future<Map<String, QuerySearchResult>> search();
+
+  ///
 }
 
 ///
-abstract class IndexSearchMixin implements IndexSearch {
+abstract class QuerySearchMixin implements QuerySearch {
   //
 
   @override
-  Future<Map<String, SearchResult>> search() async {
+  Future<Map<String, QuerySearchResult>> search() async {
     // map the queryTerm objects to a list of strings
     if (query.queryTerms.isEmpty) {
       // return an empty collection if no query terms are supplied
@@ -63,14 +65,14 @@ abstract class IndexSearchMixin implements IndexSearch {
     // get the postings for the query
     final PostingsMap postings =
         await _addPostingsForAllModifiers(query.queryTerms);
-    // Map the postings to a hashmap of docid to SearchResult
+    // Map the postings to a hashmap of docid to QuerySearchResult
     final retVal = await _postingsToSearchResults(
         postings, query.queryTerms, dfTMap, docCount);
     // return the results and proceed to scoring and ranking
     return retVal;
   }
 
-  Future<Map<String, SearchResult>> _postingsToSearchResults(
+  Future<Map<String, QuerySearchResult>> _postingsToSearchResults(
       PostingsMap postings,
       Iterable<QueryTerm> queryTerms,
       DftMap dfTMap,
@@ -81,9 +83,9 @@ abstract class IndexSearchMixin implements IndexSearch {
     final keywordPostings = await index.getKeywordPostings(terms);
 
     final docIds = postings.docIds;
-    final searchResults = <String, SearchResult>{};
+    final searchResults = <String, QuerySearchResult>{};
     for (final docId in docIds) {
-      final value = SearchResult.fromPostings(
+      final value = QuerySearchResult.fromPostings(
           docId: docId,
           query: query,
           docCount: docCount,
@@ -171,13 +173,13 @@ abstract class IndexSearchMixin implements IndexSearch {
 }
 
 ///
-abstract class IndexSearchBase with IndexSearchMixin {
+abstract class QuerySearchBase with QuerySearchMixin {
   ///
-  const IndexSearchBase();
+  const QuerySearchBase();
 }
 
 ///
-class _IndexSearchImpl extends IndexSearchBase {
+class _QuerySearchImpl extends QuerySearchBase {
 //
 
   @override
@@ -186,6 +188,6 @@ class _IndexSearchImpl extends IndexSearchBase {
   @override
   final InvertedIndex index;
 
-  /// Hydrates a [IndexSearch] instance with the [index].
-  const _IndexSearchImpl(this.index, this.query);
+  /// Hydrates a [QuerySearch] instance with the [index].
+  const _QuerySearchImpl(this.index, this.query);
 }

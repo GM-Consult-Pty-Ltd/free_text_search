@@ -160,6 +160,7 @@ abstract class QueryParserMixin implements QueryParser {
     final terms = _termSplitter(phrase);
     if (!terms.containsModifiers()) {
       return (await tokenizer.tokenize(phrase,
+              nGramRange: nGramRange,
               strategy: TokenizingStrategy.all))
           .map((e) =>
               QueryTerm(e.term, QueryTermModifier.AND, e.termPosition, e.n))
@@ -168,8 +169,6 @@ abstract class QueryParserMixin implements QueryParser {
 
     // - inditialize a term counter
     var i = startAt;
-    // - initialize a placeholder for the search term, in case we need to
-    // concatenate words that are part of an exact match phrase.
     final List<MapEntry<String, QueryTermModifier>> termToModifierList =
         terms.toTermModifiersList();
     final List<MapEntry<Set<String>, QueryTermModifier>> andNotTermSetsList =

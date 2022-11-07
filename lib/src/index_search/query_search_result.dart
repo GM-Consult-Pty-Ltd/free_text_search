@@ -4,9 +4,8 @@
 
 import 'dart:math';
 import 'package:free_text_search/src/_index.dart';
-import 'package:collection/collection.dart';
 
-part 'index_search_extensions.dart';
+part 'query_search_result_extensions.dart';
 
 /// Object model for a search result of a query against a text index.
 /// - [docId] is the identifier of the document result in the corpus.
@@ -14,33 +13,35 @@ part 'index_search_extensions.dart';
 ///   the document.
 /// - [termFrequencies] is a  hashmap of query terms to the number of times
 ///   each term occurs in the document.
+/// - [termZoneFrequencies] is a hashmap of query terms to the frequency of
+///   a term in the zones of the document.
+/// - [weightedTermFrequencies] is a hashmap of query terms to the weighted
+///   frequency of the term in the document.
 /// - [keywordScores] is a hashmap of query terms to keyword scores.
 /// - [tfIdfVector] is a hashmap of query terms to tf-idf for the term in
 ///   the document.
 /// - [tfIdfScore] is the weighted sum of all the tf-idf weights in
 ///   [tfIdfVector].
 /// - [queryTerms] is all the query terms mapped to this document.
-abstract class SearchResult {
+abstract class QuerySearchResult {
   //
-
-  //   @override
-  // final Map<Term, Map<Term, int>> termZoneFrequencies;
-
-  // @override
-  // final Map<Term, double> weightedTermFrequencies;
 
   ///  /// A factory constructor that constructs a search result for a document id.
   /// - [docId] is the identifier of the document result in the corpus.
   /// - [termPostings] is a hashmap of query terms to postings of the term in
   ///   the document.
-  /// - [termFrequencies] is a  hashmap of query terms to the number of times
+  /// - [termFrequencies] is a hashmap of query terms to the number of times
   ///   each term occurs in the document.
+  /// - [termZoneFrequencies] is a hashmap of query terms to the frequency of
+  ///   a term in the zones of the document.
+  /// - [weightedTermFrequencies] is a hashmap of query terms to the weighted
+  ///   frequency of the term in the document.
   /// - [keywordScores] is a hashmap of query terms to keyword scores.
   /// - [tfIdfVector] is a hashmap of query terms to tf-idf for the term in
   ///   the document.
   /// - [tfIdfScore] is the weighted sum of all the tf-idf weights in
   ///   [tfIdfVector].
-  factory SearchResult(
+  factory QuerySearchResult(
           {required String docId,
           required Map<String, double> keywordScores,
           required Map<String, Map<String, List<int>>> termPostings,
@@ -48,7 +49,8 @@ abstract class SearchResult {
           required Map<Term, double> weightedTermFrequencies,
           required Map<String, int> termFrequencies,
           required Map<String, double> tfIdfVector,
-          required double tfIdfScore}) =>
+          required double tfIdfScore,
+          required double cosineSimilarity}) =>
       _SearchResultImpl(
           docId,
           keywordScores,
@@ -57,29 +59,32 @@ abstract class SearchResult {
           tfIdfVector,
           tfIdfScore,
           termZoneFrequencies,
-          weightedTermFrequencies);
+          weightedTermFrequencies,
+          cosineSimilarity);
 
   /// A static factory that constructs a search result for a document id.
+  ///
   /// Returns null if the document contains none of the query terms or only
   /// query terms with the [QueryTermModifier.NOT] modifier.
   /// - [docId] is the unique identifier of the document result in the corpus.
+  /// - [query] is the query that returned the search result. The query
+  ///   [FreeTextQuery.weightingStrategy] is used to build the search result.
   /// - [docCount] is the total number of documents in the corpus, used to
   ///   compute tf-Idf for each term.
-  /// - [postings] is a hashmap of the query terms to the postings for [docId].
   /// - [dFtMap] is the a hashmap of query term to document frequency of the
   ///   term, used to calculate the iDf and tf-Idf values.
+  /// - [postings] is a hashmap of the query terms to the postings for [docId].
   /// - [keyWordPostings] is h hashmap of query terms to keyword score postings
   ///   for the document, from which the keyword scores are extracted for the
   ///   search result/docId.
-  static SearchResult? fromPostings(
-      {required DftMap dFtMap,
-      required int docCount,
+  static QuerySearchResult? fromPostings(
+      {required String docId,
       required FreeTextQuery query,
-      required String docId,
+      required int docCount,
+      required DftMap dFtMap,
       required PostingsMap postings,
       required KeywordPostingsMap keyWordPostings}) {
-    final notQueryTerms =
-        query.queryTerms.filterByModifier(QueryTermModifier.NOT).uniqueTerms;
+    final notQueryTerms = query.queryTerms.notTerms.uniqueTerms;
     final docTermPostings = postings.docTermPostings(docId);
     final docTerms = docTermPostings.keys.toSet();
     if (docTerms.isEmpty ||
@@ -93,7 +98,12 @@ abstract class SearchResult {
         termZoneFrequencies.weightedTermFrequencies(query);
     // docTermPostings.docTermFrequencies(query.weightingStrategy.zoneWeights);
     final tfIdfVector = dFtMap.tfIdfMap(weightedTermFrequencies, docCount);
+    final queryVector = query.tfIdfVector(dFtMap, docCount);
+    final cosineSimilarity = tfIdfVector.cosineSimilarity(queryVector);
     final tfIdfScore = tfIdfVector.computeTfIdfScore(query);
+    if (termFrequencies.isEmpty || cosineSimilarity <= 0) {
+      return null;
+    }
     return _SearchResultImpl(
         docId,
         keywordScores,
@@ -102,7 +112,8 @@ abstract class SearchResult {
         tfIdfVector,
         tfIdfScore,
         termZoneFrequencies,
-        weightedTermFrequencies);
+        weightedTermFrequencies,
+        cosineSimilarity);
   }
 
   /// The unique identifier of the document result in the corpus.
@@ -115,12 +126,16 @@ abstract class SearchResult {
   /// the document.
   Map<Term, Ft> get termFrequencies;
 
-  /// A hashmap of query terms to the number of times each term occurs in
-  /// the document.
+  /// A hashmap of query terms to the weighted frequency of the term in the
+  /// document.
+  ///
+  /// The weight is calculated from both the zone-weight and the modifier
+  /// weight.
   Map<Term, double> get weightedTermFrequencies;
 
-  /// The frequency of a term in the zones of the document.
-  Map<Term, Map<Term, int>> get termZoneFrequencies;
+  /// A hashmap of query terms to the frequency of a term in the zones of the
+  /// document.
+  Map<Term, Map<Zone, int>> get termZoneFrequencies;
 
   /// A hashmap of query terms to keyword scores.
   Map<Term, double> get keywordScores;
@@ -150,20 +165,14 @@ abstract class SearchResult {
 
   /// Returns the cosine similarity of the vector representations of the
   /// tf-idf weights of the terms in [query] and the same terms in the document.
-  double cosineSimilarity(FreeTextQuery query);
+  double get cosineSimilarity;
 
   //
 }
 
-/// Mixin class that implements [SearchResult].
-abstract class SearchResultMixin implements SearchResult {
+/// Mixin class that implements [QuerySearchResult].
+abstract class SearchResultMixin implements QuerySearchResult {
 //
-
-  @override
-  double cosineSimilarity(FreeTextQuery query) {
-    // TODO: implement cosineSimilarity
-    throw UnimplementedError();
-  }
 
   @override
   double tfIdf(Term term) => tfIdfVector[term] ?? 0;
@@ -179,7 +188,7 @@ abstract class SearchResultMixin implements SearchResult {
 //
 }
 
-/// Base class that implements [SearchResult] and mixes in [SearchResultMixin].
+/// Base class that implements [QuerySearchResult] and mixes in [SearchResultMixin].
 ///
 /// Provides a const default generative constructor for sub-classes.
 abstract class SearchResultBase with SearchResultMixin {
@@ -189,7 +198,7 @@ abstract class SearchResultBase with SearchResultMixin {
   const SearchResultBase();
 }
 
-/// Implementation class for [SearchResult] factories.
+/// Implementation class for [QuerySearchResult] factories.
 class _SearchResultImpl extends SearchResultBase {
   //
 
@@ -202,7 +211,8 @@ class _SearchResultImpl extends SearchResultBase {
       this.tfIdfVector,
       this.tfIdfScore,
       this.termZoneFrequencies,
-      this.weightedTermFrequencies);
+      this.weightedTermFrequencies,
+      this.cosineSimilarity);
 
   @override
   final String docId;
@@ -227,6 +237,9 @@ class _SearchResultImpl extends SearchResultBase {
 
   @override
   final Map<Term, double> weightedTermFrequencies;
+
+  @override
+  final double cosineSimilarity;
 
   //
 }

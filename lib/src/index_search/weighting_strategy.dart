@@ -40,7 +40,7 @@ abstract class WeightingStrategy {
 
   /// Default value for [WeightingStrategy.modifierWeights].
   static const kDefaultModifierWeights = {
-    QueryTermModifier.NOT: -4.0,
+    QueryTermModifier.NOT: -20.0,
     QueryTermModifier.AND: 1.0,
     QueryTermModifier.OR: 0.5,
     QueryTermModifier.IMPORTANT: 3.0,

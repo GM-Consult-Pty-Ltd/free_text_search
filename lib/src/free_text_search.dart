@@ -5,12 +5,12 @@
 import 'package:free_text_search/src/_index.dart';
 
 /// The [FreeTextSearch] class exposes the [search] method that returns a list of
-/// [SearchResult] instances in descending order of relevance:
+/// [QuerySearchResult] instances in descending order of relevance:
 /// - [index] is an inverted, positional, zoned index on a collection of
 ///   documents that is queried; and
 /// - [queryParser] returns a [FreeTextQuery] from a searh phrase.
 ///
-/// The length of the returned collection of [SearchResult] can be limited by
+/// The length of the returned collection of [QuerySearchResult] can be limited by
 /// passing a limit parameter to [search]. The default limit is 20.
 ///
 /// After parsing the phrase to terms, the [PostingsMap] and [Dictionary] for the
@@ -34,19 +34,19 @@ abstract class FreeTextSearch {
   /// is queried.
   InvertedIndex get index;
 
-  // /// Returns a list of [SearchResult] instances in descending order of
+  // /// Returns a list of [QuerySearchResult] instances in descending order of
   // /// relevance to [phrase].
   // ///
-  // /// The returned collection of [SearchResult] will be limited to the [limit]
+  // /// The returned collection of [QuerySearchResult] will be limited to the [limit]
   // /// most relevant results. The default [limit] is 20.
-  // Future<List<SearchResult>> search(String phrase, [int limit = 20]);
+  // Future<List<QuerySearchResult>> search(String phrase, [int limit = 20]);
 }
 
 class _FreeTextSearchImpl implements FreeTextSearch {
   _FreeTextSearchImpl(this.index, this.queryParser);
 
   // @override
-  // Future<List<SearchResult>> search(String phrase, [int limit = 20]) async {
+  // Future<List<QuerySearchResult>> search(String phrase, [int limit = 20]) async {
   //   final query = await queryParser.parseQuery(phrase);
   //   final terms = query.uniqueTerms;
   //   // final dictionary = await dictionaryLoader(terms);

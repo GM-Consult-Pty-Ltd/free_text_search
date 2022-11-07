@@ -189,9 +189,9 @@ The following type definitions are defined in this library to complement the typ
 
 ### FreeTextSearch class
 
-The `FreeTextSearch` class exposes the `search` method that returns a list of [SearchResult](#searchresult-class) instances in descending order of relevance.
+The `FreeTextSearch` class exposes the `search` method that returns a list of [QuerySearchResult](#searchresult-class) instances in descending order of relevance.
 
-The length of the returned collection of [SearchResult](#searchresult-class) can be limited by passing a limit parameter to `search`. The default limit is 20.
+The length of the returned collection of [QuerySearchResult](#searchresult-class) can be limited by passing a limit parameter to `search`. The default limit is 20.
 
 After parsing the phrase to terms, the `PostingsMap` and `Dictionary` for the query terms are asynchronously retrieved from the index:
 * `FreeTextSearch.dictionaryLoader` retrieves `Dictionary`; 
@@ -207,11 +207,11 @@ The `FreeTextQuery` enumerates the properties of a text search query:
 * `FreeTextQuery.phrase` is the unmodified search phrase, including all modifiers and tokens; and
 * `FreeTextQuery.terms` is the ordered list of all terms extracted from the `phrase` used to look up results in an inverted index.
 
-### SearchResult class  
+### QuerySearchResult class  
 
- The `SearchResult` model represents a ranked search result of a query against a text index:
- * `SearchResult.docId` is the unique identifier of the document result in the corpus; and
- * `SearchResult.relevance` is the relevance score awarded to the document by the scoring and ranking  algorithm. Higher scores indicate increased relevance of the document.
+ The `QuerySearchResult` model represents a ranked search result of a query against a text index:
+ * `QuerySearchResult.docId` is the unique identifier of the document result in the corpus; and
+ * `QuerySearchResult.relevance` is the relevance score awarded to the document by the scoring and ranking  algorithm. Higher scores indicate increased relevance of the document.
 
 ### QueryTerm class
 
