@@ -166,7 +166,7 @@ abstract class QuerySearchMixin implements QuerySearch {
   /// returns the top [limit] matches as [QueryTerm] instances.
   Future<Set<QueryTerm>> _expandQuery(QueryTerm queryTerm, int limit) async {
     final term =
-        queryTerm.term.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+        queryTerm.term.trim().replaceAll(RegExp(r'\s+'), ' ');
     final candidates = await index.getKGramIndex(term.kGrams(index.k));
     final terms = candidates.terms.toList();
     if (term.length < 4) {}

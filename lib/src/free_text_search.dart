@@ -24,7 +24,10 @@ abstract class FreeTextSearch {
   /// - [queryParser] returns a [FreeTextQuery] from a searh phrase.
   factory FreeTextSearch(InvertedIndex index) {
     final queryParser =
-        QueryParser(tokenizer: index.tokenizer, nGramRange: index.nGramRange);
+        QueryParser(
+      analyzer: index.analyzer,
+      nGramRange: index.nGramRange,
+    );
     return _FreeTextSearchImpl(index, queryParser);
   }
 
@@ -49,8 +52,19 @@ abstract class FreeTextSearch {
       int limit = 20,
       WeightingStrategy weightingStrategy});
 
-  /// Returns a list of document ids in descending order of relevance to terms
-  /// that start with [startsWith].
+  /// Extracts keywords from the JSON [document] and searches the keyword
+  /// [index] for matches for the highest scoring keywords in [zones], returning
+  /// the document ids with the [limit] highest keyword scores.
+  ///
+  /// If [zones] is not null the search results are weighted in accordance with
+  /// the weights in [zones].
+  ///
+  ///  The default [limit] is 20.
+  Future<List<MapEntry<String, double>>> document(JSON document,
+      {int limit = 20, ZoneWeightMap? zones});
+
+  /// Returns a list of document ids from a keyword index in descending order
+  /// of keyword score for keywords that start with [startsWith].
   ///
   /// The returned collection of document ids will be limited to the [limit]
   /// most relevant results. The default [limit] is 20.
@@ -74,15 +88,15 @@ abstract class FreeTextSearch {
 abstract class FreeTextSearchMixin implements FreeTextSearch {
   //
 
-  /// The tokenizer used to parse a phrase to a [FreeTextQuery].
+  /// The analyzer used to parse a phrase to a [FreeTextQuery].
   ///
-  /// Returns [index.tokenizer].
-  TextTokenizer get tokenizer => index.tokenizer;
+  /// Returns [index.analyzer].
+  TextAnalyzer get analyzer => index.analyzer;
 
   /// The n-gram range used to parse a phrase to a [FreeTextQuery].
   ///
   /// Returns [index.nGramRange].
-  NGramRange get nGramRange => index.nGramRange;
+  NGramRange? get nGramRange => index.nGramRange;
 
   @override
   Future<List<QuerySearchResult>> phrase(String phrase,
@@ -123,15 +137,21 @@ abstract class FreeTextSearchMixin implements FreeTextSearch {
   @override
   Future<List<MapEntry<String, double>>> startsWith(String startsWith,
       [int limit = 20]) async {
-    final search = StartsWithSearch(index);
-    return await search.search(startsWith, limit);
+    final search = KeywordSearch(index);
+    return await search.startsWith(startsWith, limit);
   }
+
+  @override
+  Future<List<MapEntry<String, double>>> document(JSON document,
+          {int limit = 20, ZoneWeightMap? zones}) =>
+      KeywordSearch(index)
+          .documentMatches(document, limit: limit, zones: zones);
 
   @override
   Stream<List<MapEntry<String, double>>> suggestionsStream(
           Stream<String> startsWith,
           [int limit = 20]) =>
-      StartsWithSearch(index).suggestionsStream(startsWith, limit);
+      KeywordSearch(index).suggestionsStream(startsWith, limit);
 }
 
 /// Implementation base class that mixes in [FreeTextSearchMixin]. Provides

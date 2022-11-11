@@ -5,7 +5,7 @@
 export 'free_text_search.dart';
 export 'query_search/_index.dart';
 export 'query_parser/_index.dart';
-export 'starts_with_search/_index.dart';
+export 'keyword_search/_index.dart';
 
 export 'package:text_indexing/text_indexing.dart';
 export 'package:text_indexing/text_indexing.dart';

@@ -31,27 +31,27 @@ abstract class QueryParser {
   ///   unless they are already marked [QueryTermModifier.NOT].
   Future<Iterable<QueryTerm>> parseQuery(String phrase);
 
-  /// Instantiates a [QueryParser] instance with a [tokenizer].
+  /// Instantiates a [QueryParser] instance with a [analyzer].
   factory QueryParser(
-          {required TextTokenizer tokenizer,
-          NGramRange nGramRange = const NGramRange(1, 1)}) =>
-      _QueryParserImpl(tokenizer, nGramRange);
+          {required TextAnalyzer analyzer,
+          NGramRange? nGramRange = const NGramRange(1, 1)}) =>
+      _QueryParserImpl(analyzer, nGramRange);
 
   /// Instantiates a [QueryParser] instance associated with the [index].
   factory QueryParser.index(InvertedIndex index) =>
-      _QueryParserImpl(index.tokenizer, index.nGramRange);
+      _QueryParserImpl(index.analyzer, index.nGramRange);
 }
 
 class _QueryParserImpl extends QueryParserBase {
   //
 
   @override
-  final TextTokenizer tokenizer;
+  final TextAnalyzer analyzer;
 
   @override
-  final NGramRange nGramRange;
+  final NGramRange? nGramRange;
 
-  const _QueryParserImpl(this.tokenizer, this.nGramRange);
+  const _QueryParserImpl(this.analyzer, this.nGramRange);
 }
 
 /// Abstract base class implementation of [QueryParser] with [nGramRange].
@@ -66,15 +66,15 @@ abstract class QueryParserBase with QueryParserMixin {
 abstract class QueryParserMixin implements QueryParser {
   //
 
-  /// A [TextAnalyzer] used to tokenize the query phrase. The tokenizer should
+  /// A [TextAnalyzer] used to tokenize the query phrase. The analyzer should
   /// be the same as that used to create the index being queried.
-  TextTokenizer get tokenizer;
+  TextAnalyzer get analyzer;
 
   /// The length of phrases in the queried index.
-  NGramRange get nGramRange;
+  NGramRange? get nGramRange;
 
-  /// Shortcut to tokenizer.termSplitter
-  TermSplitter get _termSplitter => tokenizer.analyzer.termSplitter;
+  /// Shortcut to analyzer.termSplitter
+  TermSplitter get _termSplitter => analyzer.termSplitter;
 
   @override
   Future<Iterable<QueryTerm>> parseQuery(String phrase) async {
@@ -111,7 +111,7 @@ abstract class QueryParserMixin implements QueryParser {
       if (e != null && e.trim().isNotEmpty) {
         final n = e.n;
         final terms =
-            (await tokenizer.tokenize(e, nGramRange: NGramRange(n, n))).terms;
+            (await analyzer.tokenizer(e, nGramRange: NGramRange(n, n))).terms;
         retVal.add(
             QueryTerm(terms.join(' '), QueryTermModifier.NOT, 0, terms.length));
       }
@@ -122,7 +122,7 @@ abstract class QueryParserMixin implements QueryParser {
       if (e != null && e.trim().isNotEmpty) {
         final n = e.n;
         final terms =
-            (await tokenizer.tokenize(e, nGramRange: NGramRange(n, n))).terms;
+            (await analyzer.tokenizer(e, nGramRange: NGramRange(n, n))).terms;
         retVal.add(QueryTerm(
             terms.join(' '), QueryTermModifier.EXACT, 0, terms.length));
         // retVal.addAll(terms.map(
@@ -159,9 +159,8 @@ abstract class QueryParserMixin implements QueryParser {
     // - split the phrase;
     final terms = _termSplitter(phrase);
     if (!terms.containsModifiers()) {
-      return (await tokenizer.tokenize(phrase,
-              nGramRange: nGramRange,
-              strategy: TokenizingStrategy.all))
+      return (await analyzer.tokenizer(phrase,
+              nGramRange: nGramRange, strategy: TokenizingStrategy.all))
           .map((e) =>
               QueryTerm(e.term, QueryTermModifier.AND, e.termPosition, e.n))
           .toList();
@@ -181,11 +180,13 @@ abstract class QueryParserMixin implements QueryParser {
         if (modifier == QueryTermModifier.NOT) {
           retVal.addAll(termSet.map((e) => QueryTerm(e, modifier, i, 1)));
         } else {
-          nGramTerms.add(termSet);
-          if (nGramTerms.length > nGramRange.max) {
-            nGramTerms.removeAt(0);
+          if (nGramRange != null) {
+            nGramTerms.add(termSet);
+            if (nGramTerms.length > nGramRange!.max) {
+              nGramTerms.removeAt(0);
+            }
+            retVal.addAll(_getNGrams(nGramTerms, nGramRange!, i, modifier));
           }
-          retVal.addAll(_getNGrams(nGramTerms, nGramRange, i, modifier));
         }
       }
       i++;
@@ -275,11 +276,11 @@ abstract class QueryParserMixin implements QueryParser {
     return retVal;
   }
 
-  /// Uses the tokenizer to get the tokenized version(s) of [term].
+  /// Uses the analyzer to get the tokenized version(s) of [term].
   Future<Set<String>> _tokenize(String term) async {
     final retVal = <String>{};
     retVal.addAll(
-        (await tokenizer.tokenize(term, nGramRange: NGramRange(1, 1))).terms);
+        (await analyzer.tokenizer(term, nGramRange: NGramRange(1, 1))).terms);
     return retVal;
   }
 

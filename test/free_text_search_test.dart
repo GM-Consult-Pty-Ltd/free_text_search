@@ -4,6 +4,8 @@
 
 import 'package:free_text_search/free_text_search.dart';
 import 'package:gmconsult_dev/gmconsult_dev.dart';
+import 'package:gmconsult_dev/test_data.dart';
+import 'package:hive/hive.dart';
 import 'package:test/test.dart';
 import 'package:text_indexing/type_definitions.dart';
 import 'test_utils.dart';
@@ -15,6 +17,37 @@ void main() {
     setUp(() {
       // Additional setup goes here.
     });
+
+    test('FreeTextSearch.document', (() async {
+      Hive.init(kPath);
+      final service = await getService('hashtags');
+      // final companyNames = await HashTagAnalyzer.getCompanyNames(service);
+      final index = await hiveIndex(() async => service.dataStore.length);
+      final documents = TestData.stockNews;
+      final zones = {'name': 1.0, 'hashTags': 1.0};
+      for (final e in documents.entries) {
+        final document = e.value;
+        final name = document['name'];
+        final results = await FreeTextSearch(index)
+            .document(document, zones: zones, limit: 5);
+        // map the results for printing to console
+        final JsonCollection jsonResults = {};
+        for (final e in results) {
+          final doc = await service.read(e.key);
+          if (doc != null) {
+            var name = (doc['name'] as String?) ?? '';
+            name = name.length > 120 ? name.substring(0, 120) : name;
+            jsonResults[e.key] = {'Title': name, 'Score': e.value};
+          }
+        }
+
+        Console.out(
+            maxColWidth: 120,
+            title: 'SEARCH RESULTS for "$name"',
+            results: jsonResults.values);
+      }
+    }));
+
     test('FreeTextSearch.startsWith', (() async {
       final phrase = 'nv';
 

@@ -143,48 +143,6 @@ extension _TermZoneFrequencyExtension on Map<Term, Map<Zone, int>> {
 extension _TfIdfMapExtensions on Map<Term, double> {
   //
 
-  // /// Returns a map of term to weighted term frequency from the term zone
-  // /// frequency map.
-  // Map<Term, double> weightedQueryTermFrequencies(FreeTextQuery query) {
-  //   // final zoneWeights = query.weightingStrategy.zoneWeights;
-  //   final Map<Term, double> retVal = {};
-  //   final qtMap = <String, QueryTerm>{}
-  //     ..addEntries(query.queryTerms.map((e) => MapEntry(e.term, e)));
-  //   for (final e in entries) {
-  //     final term = e.key;
-  //     final qt = qtMap[term];
-  //     if (qt != null) {
-  //       final wM = query.weightingStrategy.getWeight(qt);
-  //       var f = 0.0;
-  //       final zoneEntries = e.value.entries;
-  //       for (final z in zoneEntries) {
-  //         final wZ = zoneWeights == null ? 1 : zoneWeights[z.key] ?? 0;
-  //         f += z.value * wM * wZ;
-  //       }
-  //       retVal[term] = f;
-  //     }
-  //   }
-  //   return retVal;
-  // }
-
-  /// Returns the cosine similarity between this
-  double cosineSimilarity(Map<Term, double> other) {
-    // initialize square of euclidian length for the document.
-    double eLDSq = 0.0;
-    // initialize square of euclidian length for query.
-    double eLQSq = 0.0;
-    double dotProduct = 0.0;
-    final terms = keys.toSet().union(other.keys.toSet());
-    for (final t in terms) {
-      final vQ = other[t] ?? 0.0;
-      final vD = this[t] ?? 0.0;
-      eLQSq = eLQSq + pow(vQ, 2);
-      eLDSq = eLDSq + pow(vD, 2);
-      dotProduct = dotProduct + vQ * vD;
-    }
-    return dotProduct / (sqrt(eLQSq) * sqrt(eLDSq));
-  }
-
   /// Computes a score from the tTfIdfMap and the [weighting].
   double computeTfIdfScore(FreeTextQuery query) {
     var retVal = 0.0;

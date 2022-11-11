@@ -19,7 +19,7 @@ void main() async {
 /// including any modifiers.
 Future<List<QueryTerm>> _parsePhrase(String phrase) async {
   // initialize the QueryParser
-  final queryParser = QueryParser(tokenizer: TextTokenizer.english);
+  final queryParser = QueryParser(analyzer: English.analyzer);
   // parse the phrase
   final queryTerms = await queryParser.parseQuery(phrase);
 

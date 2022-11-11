@@ -20,7 +20,7 @@ export 'src/_index.dart'
         QuerySearch,
         QuerySearchBase,
         QuerySearchMixin,
-        StartsWithSearch,
+        KeywordSearch,
         StartsWithSearchMixin,
         StartsWithSearchBase,
         FreeTextSearch,
