@@ -20,8 +20,14 @@ void main() {
 
     test('QueryParser: Test Modifiers', () async {
       // initialize the QueryParser
-      final queryParser = QueryParser(
-          analyzer: English.analyzer, nGramRange: NGramRange(1, 2));
+      final index = InMemoryIndex(
+          analyzer: English.analyzer,
+          collectionSize: 1,
+          nGramRange: NGramRange(1, 2),
+          strategy: TokenizingStrategy.all);
+      final queryParser = QueryParser.index(
+        index,
+      );
       // parse the phrase
       final queryTerms = await queryParser.parseQuery(phraseWithModifiers);
 

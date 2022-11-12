@@ -2,12 +2,15 @@
 // BSD 3-Clause License
 // All rights reserved
 
+@Timeout(Duration(minutes: 15))
+
 import 'package:free_text_search/free_text_search.dart';
 import 'package:gmconsult_dev/gmconsult_dev.dart';
 import 'package:gmconsult_dev/test_data.dart';
 import 'package:hive/hive.dart';
 import 'package:test/test.dart';
 import 'package:text_indexing/type_definitions.dart';
+import 'hashtag_analyzer.dart';
 import 'test_utils.dart';
 
 void main() {
@@ -18,26 +21,37 @@ void main() {
       // Additional setup goes here.
     });
 
+    test('Build index', (() async {
+      await HashTagIndex.buildIndex();
+    }));
+
     test('FreeTextSearch.document', (() async {
       Hive.init(kPath);
       final service = await getService('hashtags');
       // final companyNames = await HashTagAnalyzer.getCompanyNames(service);
-      final index = await hiveIndex(() async => service.dataStore.length);
+      final index = await HashTagIndex.hydrate();
+
+      // hiveIndex(() async => service.dataStore.length);
+      // Future<List<Token>> tokenFilter(List<Token> tokens) async {
+      //   final dft = await index.getDictionary(tokens.terms);
+      //   return tokens.where((token) => dft.keys.contains(token.term)).toList();
+      // }
+
       final documents = TestData.stockNews;
-      final zones = {'name': 1.0, 'hashTags': 1.0};
+      final documentZones = {'name': 1.0, 'description': 1.0};
       for (final e in documents.entries) {
         final document = e.value;
         final name = document['name'];
         final results = await FreeTextSearch(index)
-            .document(document, zones: zones, limit: 5);
+            .document(document, documentZones: documentZones, limit: 5);
         // map the results for printing to console
         final JsonCollection jsonResults = {};
         for (final e in results) {
-          final doc = await service.read(e.key);
+          final doc = await service.read(e.docId);
           if (doc != null) {
             var name = (doc['name'] as String?) ?? '';
             name = name.length > 120 ? name.substring(0, 120) : name;
-            jsonResults[e.key] = {'Title': name, 'Score': e.value};
+            jsonResults[e.docId] = {'Title': name, 'Score': e.cosineSimilarity};
           }
         }
 

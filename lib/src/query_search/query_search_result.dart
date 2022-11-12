@@ -2,7 +2,6 @@
 // BSD 3-Clause License
 // All rights reserved
 
-import 'dart:math';
 import 'package:free_text_search/src/_index.dart';
 
 part 'query_search_result_extensions.dart';

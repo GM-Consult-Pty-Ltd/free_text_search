@@ -17,8 +17,9 @@ class QueryTerm extends Token {
   /// - [termPosition] is the zero-based position of the [term] in an ordered
   ///   list of all the terms in the source text; and
   /// - [modifier] is the modifier used for this term.
-  const QueryTerm(String term, this.modifier, int termPosition, int n)
-      : super(term, n, termPosition);
+  const QueryTerm(String term, this.modifier, int termPosition, int n,
+      [String? zone])
+      : super(term, n, termPosition, zone);
 
   /// The modifier used for this term.
   ///
@@ -31,11 +32,15 @@ class QueryTerm extends Token {
   /// - [modifier] == [other].modifier;
   /// - [term] == [other].term; and
   /// - [termPosition] == [other].termPosition.
-  /// Does not compare [zone] as it is always null or [termPosition] as we only
-  /// want to retain one element for a term/modifier combination.
+  /// Does not compare [termPosition] as we only want to retain one element for a
+  /// term/modifier/zone combination.
   @override
   bool operator ==(Object other) =>
-      other is QueryTerm && term == other.term && modifier == other.modifier;
+      other is QueryTerm &&
+      term == other.term &&
+      modifier == other.modifier &&
+      zone == other.zone &&
+      termPosition != other.termPosition;
 
   @override
   int get hashCode => Object.hash(term, modifier, termPosition);
@@ -96,7 +101,7 @@ extension QueryTermCollectionExtension on Iterable<QueryTerm> {
       element.modifier == QueryTermModifier.AND ||
       element.modifier == QueryTermModifier.IMPORTANT).unique();
 
-/// Returns the [QueryTerm] elements where [QueryTerm.modifier] is equal to
+  /// Returns the [QueryTerm] elements where [QueryTerm.modifier] is equal to
   /// [QueryTermModifier.NOT].
   List<QueryTerm> get notTerms => filterByModifier(QueryTermModifier.NOT);
 

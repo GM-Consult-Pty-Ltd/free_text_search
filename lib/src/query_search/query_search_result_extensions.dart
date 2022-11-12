@@ -34,20 +34,6 @@ extension _QuerySearchKeywordPostingsExtension on KeywordPostingsMap {
   }
 }
 
-/// Private extension methods on [DftMap].
-extension _QuerySearchDftMapExtension on DftMap {
-//
-
-  /// Returns the inverse document frequency of the [term] for a corpus of size
-  /// [n].
-  double idFt(String term, int n) => log(n / getFrequency(term));
-
-  /// Returns a hashmap of term to Tf-idf weight for a document.
-  Map<String, double> tfIdfMap(
-          Map<String, double> weightedTermFrequencies, int n) =>
-      weightedTermFrequencies
-          .map((term, tF) => MapEntry(term, tF * idFt(term, n)));
-}
 
 /// Private extension methods on `Map<String, ZonePostingsMap>`.
 extension _QuerySearchTermPostingsExtension on Map<String, ZonePostingsMap> {

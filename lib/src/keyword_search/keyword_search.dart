@@ -45,82 +45,82 @@ abstract class KeywordSearch {
   /// the weights in [zones].
   ///
   ///  The default [limit] is 20.
-  Future<List<MapEntry<String, double>>> documentMatches(JSON document,
-      {int limit = 20, ZoneWeightMap? zones});
+  // Future<List<MapEntry<String, double>>> documentMatches(JSON document,
+  //     {int limit = 20, ZoneWeightMap? zones});
 }
 
 /// Abstract mixin class that implements [KeywordSearch.startsWith].
 abstract class StartsWithSearchMixin implements KeywordSearch {
 //
 
-  @override
-  Future<List<MapEntry<String, double>>> documentMatches(JSON document,
-      {int limit = 20, ZoneWeightMap? zones}) async {
-    document = zones == null ? {'data': document.toSourceText()} : document;
-    zones = zones ?? {'data': 1.0};
-    final docKeywords = _docKeywords(zones, document);
-    final Map<String, double> retVal = await _keywordDocs(docKeywords);
-    final entries = retVal.entries.toList();
-    entries.sort(((a, b) => b.value.compareTo(a.value)));
-    return entries.length > limit ? entries.sublist(0, limit) : entries;
-  }
+  // @override
+  // Future<List<MapEntry<String, double>>> documentMatches(JSON document,
+  //     {int limit = 20, ZoneWeightMap? zones}) async {
+  //   document = zones == null ? {'data': document.toSourceText()} : document;
+  //   zones = zones ?? {'data': 1.0};
+  //   final docKeywords = _docKeywords(zones, document);
+  //   final Map<String, double> retVal = await _keywordDocs(docKeywords);
+  //   final entries = retVal.entries.toList();
+  //   entries.sort(((a, b) => b.value.compareTo(a.value)));
+  //   return entries.length > limit ? entries.sublist(0, limit) : entries;
+  // }
 
-  /// Retrieves keyword postings for all the keys in [keywords], then iterates
-  /// through the keywords, aggregating the cosine similarity for each document
-  /// by calculating the keyword cosine similarity for each document.
-  Future<Map<String, double>> _keywordDocs(Map<String, double> keywords) async {
-    final Map<String, double> keywordDocs = {};
-    final keywordIndex = await index.getKeywordPostings(keywords.keys);
-    final documentKeyWordVectors = _documentKeywordVectors(keywordIndex);
-    for (final e in documentKeyWordVectors.entries) {
-      final docId = e.key;
-      final similarity = keywords.cosineSimilarity(e.value);
-      keywordDocs[docId] = similarity;
-    }
-    return keywordDocs;
-  }
+  // /// Retrieves keyword postings for all the keys in [keywords], then iterates
+  // /// through the keywords, aggregating the cosine similarity for each document
+  // /// by calculating the keyword cosine similarity for each document.
+  // Future<Map<String, double>> _keywordDocs(Map<String, double> keywords) async {
+  //   final Map<String, double> keywordDocs = {};
+  //   final keywordIndex = await index.getKeywordPostings(keywords.keys);
+  //   final documentKeyWordVectors = _documentKeywordVectors(keywordIndex);
+  //   for (final e in documentKeyWordVectors.entries) {
+  //     final docId = e.key;
+  //     final similarity = keywords.cosineSimilarity(e.value);
+  //     keywordDocs[docId] = similarity;
+  //   }
+  //   return keywordDocs;
+  // }
 
-  Map<String, Map<String, double>> _documentKeywordVectors(
-      Map<String, Map<String, double>> keywordIndex) {
-    final Map<String, Map<String, double>> retVal = {};
-    for (final eKw in keywordIndex.entries) {
-      final keyword = eKw.key;
-      for (final e in eKw.value.entries) {
-        final docId = e.key;
-        final score = e.value;
-        final docEntry = (retVal[docId] ?? <String, double>{});
-        docEntry[keyword] = score;
-        retVal[docId] = docEntry;
-      }
-    }
-    return retVal;
-  }
+  // Map<String, Map<String, double>> _documentKeywordVectors(
+  //     Map<String, Map<String, double>> keywordIndex) {
+  //   final Map<String, Map<String, double>> retVal = {};
+  //   for (final eKw in keywordIndex.entries) {
+  //     final keyword = eKw.key;
+  //     for (final e in eKw.value.entries) {
+  //       final docId = e.key;
+  //       final score = e.value;
+  //       final docEntry = (retVal[docId] ?? <String, double>{});
+  //       docEntry[keyword] = score;
+  //       retVal[docId] = docEntry;
+  //     }
+  //   }
+  //   return retVal;
+  // }
 
-  /// Extracts the keywords from [document] and calculates a weighted
-  /// keyword score for each keyword, using the weights in [zones].
-  ///
-  /// Returns a hashmap of keyword to score for the [document].
-  Map<String, double> _docKeywords(Map<Zone, double> zones, JSON document) {
-    final Map<String, double> docKeywords = {};
-    for (final zone in zones.entries) {
-      final fieldName = zone.key;
-      final wF = zone.value;
-      final text = document[fieldName]?.toString().trim();
-      if (text != null && text.isNotEmpty && wF != 0.0) {
-        final keywords =
-            index.keywordExtractor(text, nGramRange: index.nGramRange);
-        final graph = TermCoOccurrenceGraph(keywords);
-        final zoneKeywordsMap = graph.keywordScores;
-        for (final e in zoneKeywordsMap.entries) {
-          final keyword = e.key;
-          docKeywords[keyword] = (docKeywords[keyword] ?? 0.0) + e.value * wF;
-        }
-      }
-    }
-    final entries = docKeywords.entries.toList();
-    entries.sort(((a, b) => b.value.compareTo(a.value)));
-    return docKeywords;
-  }
+  // /// Extracts the keywords from [document] and calculates a weighted
+  // /// keyword score for each keyword, using the weights in [zones].
+  // ///
+  // /// Returns a hashmap of keyword to score for the [document].
+  // Map<String, double> _docKeywords(Map<Zone, double> zones, JSON document) {
+  //   final Map<String, double> docKeywords = {};
+  //   for (final zone in zones.entries) {
+  //     final fieldName = zone.key;
+  //     final wF = zone.value;
+  //     final text = document[fieldName]?.toString().trim();
+  //     if (text != null && text.isNotEmpty && wF != 0.0) {
+  //       final keywords =
+  //           index.keywordExtractor(text, nGramRange: index.nGramRange);
+  //       final graph = TermCoOccurrenceGraph(keywords);
+  //       final zoneKeywordsMap = graph.keywordScores;
+  //       for (final e in zoneKeywordsMap.entries) {
+  //         final keyword = e.key;
+  //         docKeywords[keyword] = (docKeywords[keyword] ?? 0.0) + e.value * wF;
+  //       }
+  //     }
+  //   }
+  //   final entries = docKeywords.entries.toList();
+  //   entries.sort(((a, b) => b.value.compareTo(a.value)));
+  //   return docKeywords;
+  // }
 
   @override
   Stream<List<MapEntry<String, double>>> suggestionsStream(

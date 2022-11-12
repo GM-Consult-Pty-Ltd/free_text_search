@@ -2,8 +2,12 @@
 // BSD 3-Clause License
 // All rights reserved
 
+import 'package:hive_text_index/hive_text_index.dart';
 import 'package:text_indexing/text_indexing.dart';
 import 'package:text_indexing/type_definitions.dart';
+import 'package:hive/hive.dart';
+import 'package:gmconsult_dev/gmconsult_dev.dart';
+import 'dart:io';
 
 class HashTagAnalyzer extends English {
   static const kZones = {'name': 1.0, 'description': 0.5};
@@ -12,27 +16,33 @@ class HashTagAnalyzer extends English {
 
   static const kStrategy = TokenizingStrategy.keyWords;
 
-  static const kNGramRange = NGramRange(1, 3);
+  static const kNGramRange = NGramRange(1, 1);
 
   static const kIndexName = 'hashtags';
 
+  bool _isSymbol(String term) =>
+      term.toUpperCase() == term ||
+      term.contains(RegExp(r'(?<=\w)[:\-\\\/]+(?=\w)'));
+
   @override
-  TermFilter get termFilter => (term) => super.termFilter(term)
-    ..removeWhere(
-        (element) => termExceptions.containsKey(element.toLowerCase()));
+  TermFilter get termFilter =>
+      (term) => _isSymbol(term) ? {term} : super.termFilter(term)
+        ..removeWhere(
+            (element) => termExceptions.containsKey(element.toLowerCase()));
 
   @override
   Set<String> get stopWords => English.analyzer.stopWords;
 
   @override
-  Stemmer get stemmer =>
-      (term) => term.toLowerCase().replaceAll("'s", '').trim();
+  Stemmer get stemmer => (term) =>
+      _isSymbol(term) ? term : term.toLowerCase().replaceAll("'s", '').trim();
 
   @override
   Map<String, String> get abbreviations => {};
 
-  // @override
-  // CharacterFilter get characterFilter => (term) => term.toLowerCase().trim();
+  @override
+  CharacterFilter get characterFilter =>
+      (term) => _isSymbol(term) ? term : super.characterFilter(term);
 
   @override
   Lemmatizer get lemmatizer => (term) => term;
@@ -43,8 +53,8 @@ class HashTagAnalyzer extends English {
         // '': '',
         // '': '',
         // '': '',
-        // '': '',
-        // '': '',
+        'new york stock': '',
+        'york stock': '',
         'securities listed': '',
         'stock exchange': '',
         'dow jones': '',
@@ -999,4 +1009,96 @@ class HashTagAnalyzer extends English {
   //   'zmw',
   // };
 
+}
+
+/// Hydrates a [JsonDataService] with a large dataset of securities.
+Future<JsonDataService<Box<String>>> get _hashtagsService async {
+  final Box<String> dataStore = await Hive.openBox('hashtags');
+  return HiveJsonService(dataStore);
+}
+
+class HashTagIndex extends HiveTextIndexBase {
+  //
+
+  static String get kPath => '${Directory.current.path}\\dev\\data';
+
+  static Future<void> buildIndex() async {
+    Hive.init(kPath);
+    final service = await _hashtagsService;
+    final index = await HashTagIndex.hydrate();
+    await index.clear();
+    final iMindex = InMemoryIndex(
+        collectionSize: service.dataStore.length,
+        analyzer: index.analyzer,
+        nGramRange: HashTagAnalyzer.kNGramRange,
+        k: HashTagAnalyzer.kK,
+        zones: HashTagAnalyzer.kZones,
+        strategy: HashTagAnalyzer.kStrategy);
+    ;
+    final indexer = TextIndexer(iMindex);
+    final keys = service.dataStore.keys.map((e) => e.toString()).toList();
+    var i = 0;
+    final start = DateTime.now();
+    // keys = keys.sublist(16600);
+    PostingsMap lastPostingsMap = {};
+    await Future.forEach(keys, (String key) async {
+      final json = await service.read(key);
+      if (json != null) {
+        final name = json['name'].toString().toLowerCase();
+        if (name.contains('intel corp')) {
+          print(json);
+        }
+        lastPostingsMap = await indexer.indexJson(key, json);
+      }
+      final l = await iMindex.vocabularyLength;
+
+      i++;
+      if (i.remainder(100) == 0) {
+        final dT = DateTime.now().difference(start).inSeconds;
+        print('Indexed $i hashTags in ${dT.toStringAsFixed(0)} seconds. '
+            'Found $l terms.');
+        print(lastPostingsMap.keys);
+      }
+    });
+
+    await index.upsertDictionary(iMindex.dictionary);
+    await index.upsertPostings(iMindex.postings);
+    await index.upsertKGramIndex(iMindex.kGramIndex);
+    await index.upsertKeywordPostings(iMindex.keywordPostings);
+    await service.close();
+
+    await index.close();
+  }
+
+  static Future<HashTagIndex> hydrate() async {
+    final service = await _hashtagsService;
+    Future<int> collectionSizeLoader() async => service.dataStore.length;
+    final retVal = HashTagIndex._(collectionSizeLoader);
+    await retVal.init('hashtags');
+    return retVal;
+  }
+
+  /// Default constructor
+  HashTagIndex._(this.collectionSizeLoader);
+
+  @override
+  TextAnalyzer get analyzer => HashTagAnalyzer();
+
+  @override
+  final CollectionSizeCallback collectionSizeLoader;
+
+  @override
+  int get k => HashTagAnalyzer.kK;
+
+  @override
+  NGramRange? get nGramRange => HashTagAnalyzer.kNGramRange;
+
+  @override
+  TokenizingStrategy get strategy => HashTagAnalyzer.kStrategy;
+
+  @override
+  TokenFilter? get tokenFilter => null;
+
+  @override
+  ZoneWeightMap get zones => HashTagAnalyzer.kZones;
 }

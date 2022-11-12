@@ -20,6 +20,9 @@ import 'package:free_text_search/src/_index.dart';
 abstract class QueryParser {
   //
 
+  /// The index that will be queried.
+  InvertedIndex get index;
+
   /// Parses a search [phrase] to a [FreeTextQuery].
   ///
   /// The returned [FreeTextQuery.terms] will include:
@@ -31,27 +34,38 @@ abstract class QueryParser {
   ///   unless they are already marked [QueryTermModifier.NOT].
   Future<Iterable<QueryTerm>> parseQuery(String phrase);
 
-  /// Instantiates a [QueryParser] instance with a [analyzer].
-  factory QueryParser(
-          {required TextAnalyzer analyzer,
-          NGramRange? nGramRange = const NGramRange(1, 1)}) =>
-      _QueryParserImpl(analyzer, nGramRange);
+  /// Parses a JSON [document] to a [FreeTextQuery].
+  /// - [documentZones] is a hashmap of the field names (keys) in the [document]
+  ///   that will be parsed to query terms. The values in [documentZones] will
+  ///   be used to weight terms from the different fields when ordering the
+  ///   parsed terms.
+  ///
+  /// The returned [FreeTextQuery.terms] will include:
+  /// - all the original words in the [phrase], except query modifiers
+  ///   ('AND', 'OR', '"', '-', 'NOT);
+  /// - derived versions of all words returned by the [_termFilter], including
+  ///   child words of exact phrases; and
+  /// - derived versions of all words always have the [QueryTermModifier.OR]
+  ///   unless they are already marked [QueryTermModifier.NOT].
+  Future<Iterable<QueryTerm>> parseDocument(
+      JSON document, ZoneWeightMap documentZones,
+      {int limit = 10, TokenFilter? tokenFilter});
 
   /// Instantiates a [QueryParser] instance associated with the [index].
   factory QueryParser.index(InvertedIndex index) =>
-      _QueryParserImpl(index.analyzer, index.nGramRange);
+      _QueryParserImpl(index, index.nGramRange);
 }
 
 class _QueryParserImpl extends QueryParserBase {
   //
 
   @override
-  final TextAnalyzer analyzer;
+  final InvertedIndex index;
 
   @override
   final NGramRange? nGramRange;
 
-  const _QueryParserImpl(this.analyzer, this.nGramRange);
+  const _QueryParserImpl(this.index, this.nGramRange);
 }
 
 /// Abstract base class implementation of [QueryParser] with [nGramRange].
@@ -68,7 +82,7 @@ abstract class QueryParserMixin implements QueryParser {
 
   /// A [TextAnalyzer] used to tokenize the query phrase. The analyzer should
   /// be the same as that used to create the index being queried.
-  TextAnalyzer get analyzer;
+  TextAnalyzer get analyzer => index.analyzer;
 
   /// The length of phrases in the queried index.
   NGramRange? get nGramRange;
@@ -77,10 +91,93 @@ abstract class QueryParserMixin implements QueryParser {
   TermSplitter get _termSplitter => analyzer.termSplitter;
 
   @override
+  Future<Iterable<QueryTerm>> parseDocument(
+      JSON document, ZoneWeightMap documentZones,
+      {int limit = 10, TokenFilter? tokenFilter}) async {
+    // - turn the document into a mini index.
+    final docIndex =
+        await _getDocumentIndex(document, documentZones, tokenFilter);
+    // - get the postings from the index
+    final postings = docIndex.postings;
+    // - get the weighted document term freqeuncies from the postings
+    final weightedDtf =
+        InvertedIndex.docTermFrequencies(postings, documentZones);
+    // - limit the terms to the keys of the weighted document term frequency map
+    final terms = weightedDtf.keys.toSet();
+    // - retrieve the dFtMap for the terms from the index
+    final dFtMap = await index.getDictionary(terms);
+    // - retrieve the corpus size from the index
+    final n = postings.length;
+    // - get the inverse term document frequencies for the terms
+    final idfMap = dFtMap.idFtMap(n);
+    // - get a tf-idft map for the weighted document term frequencies
+    final tfIdftMap = dFtMap.tfIdfMap(weightedDtf, n);
+    // - assign modifiers to terms on basis of weighted tf-idf
+    return _docToQueryTerms(postings, idfMap, tfIdftMap);
+  }
+
+  Set<QueryTerm> _docToQueryTerms(PostingsMap postings,
+      Map<String, double> idfMap, Map<String, double> tfIdftMap) {
+    final queryTerms = <QueryTerm>{};
+    final modifierMap = _modifierMap(tfIdftMap);
+    var termPosition = 0;
+    final entries = tfIdftMap.entries
+        .where((e) => modifierMap.keys.contains(e.key))
+        .toList()
+      ..sort(((a, b) => b.value.compareTo(a.value)));
+    for (final e in entries) {
+      final term = e.key;
+      final modifier = modifierMap[term];
+      if (modifier != null) {
+        queryTerms.add(QueryTerm(term, modifier, termPosition,
+            RegExp(r'\s+').allMatches(term).length + 1));
+      }
+      termPosition++;
+    }
+    return queryTerms;
+  }
+
+  Map<String, QueryTermModifier> _modifierMap(Map<String, double> tfIdftMap) {
+    if (tfIdftMap.isEmpty) {
+      return {};
+    }
+    final max =
+        (tfIdftMap.values.toList()..sort(((a, b) => b.compareTo(a)))).first;
+    final retVal = tfIdftMap.map((k, v) {
+      final normalized = v / max;
+      final value = normalized > 0.9
+          ? QueryTermModifier.EXACT
+          : normalized > 0.75
+              ? QueryTermModifier.IMPORTANT
+              : normalized > 0.5
+                  ? QueryTermModifier.AND
+                  : QueryTermModifier.NOT;
+      return MapEntry(k, value);
+    });
+    retVal.removeWhere((key, value) => value == QueryTermModifier.NOT);
+    return retVal;
+  }
+
+  /// Turn the document into a mini index.
+  Future<InMemoryIndex> _getDocumentIndex(JSON document,
+      ZoneWeightMap documentZones, TokenFilter? tokenFilter) async {
+    final docIndex = InMemoryIndex(
+        tokenFilter: tokenFilter,
+        zones: documentZones,
+        analyzer: analyzer,
+        collectionSize: 1,
+        k: index.k,
+        nGramRange: index.nGramRange,
+        strategy: index.strategy);
+    final indexer = TextIndexer(docIndex);
+    await indexer.indexJson('docId', document);
+    return docIndex;
+  }
+
+  @override
   Future<Iterable<QueryTerm>> parseQuery(String phrase) async {
     // initialize the queryTerms, front-load it with all the exact-matches
     final queryTerms = await _exactMatchPhrases(phrase);
-
     // add all the query terms with their modifiers
     queryTerms.addAll(await _toQueryTerms(phrase, queryTerms.length));
     queryTerms.unique();
@@ -144,8 +241,11 @@ abstract class QueryParserMixin implements QueryParser {
   Future<List<QueryTerm>> _toQueryTerms(String phrase, int startAt) async {
     //
     phrase = phrase
+        // remove the phrases in double quotes
         .replaceAll(RegExp('$_rInDoubleQuotesNotNOT|$_rInDoubleQuotes'), '')
+        // replace multiple spaces with single spaces
         .replaceAll(RegExp(r'\s+'), ' ')
+        // trim whitespace from start and end
         .trim();
     if (phrase.isEmpty) {
       return [];

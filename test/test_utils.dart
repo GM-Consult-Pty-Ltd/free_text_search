@@ -42,7 +42,6 @@ class TestIndex extends TextIndexerBase {
         keywordPostings: {},
         collectionSize: collection.length,
         analyzer: HashTagAnalyzer(),
-        keywordExtractor: English.analyzer.keywordExtractor,
         zones: zoneMap,
         strategy: TokenizingStrategy.all);
     final indexer = TestIndex._(index, collection);
@@ -104,7 +103,6 @@ Future<InMemoryIndex> inMemoryIndex(int collectionSize) async {
   return InMemoryIndex(
       collectionSize: collectionSize,
       analyzer: HashTagAnalyzer(),
-      keywordExtractor: English.analyzer.keywordExtractor,
       nGramRange: kNGramRange,
       k: kK,
       zones: kZones,

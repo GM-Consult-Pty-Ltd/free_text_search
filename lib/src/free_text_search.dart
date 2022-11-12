@@ -23,11 +23,7 @@ abstract class FreeTextSearch {
   ///   documents that is queried; and
   /// - [queryParser] returns a [FreeTextQuery] from a searh phrase.
   factory FreeTextSearch(InvertedIndex index) {
-    final queryParser =
-        QueryParser(
-      analyzer: index.analyzer,
-      nGramRange: index.nGramRange,
-    );
+    final queryParser = QueryParser.index(index);
     return _FreeTextSearchImpl(index, queryParser);
   }
 
@@ -60,8 +56,10 @@ abstract class FreeTextSearch {
   /// the weights in [zones].
   ///
   ///  The default [limit] is 20.
-  Future<List<MapEntry<String, double>>> document(JSON document,
-      {int limit = 20, ZoneWeightMap? zones});
+  Future<List<QuerySearchResult>> document(JSON document,
+      {required ZoneWeightMap documentZones,
+      int limit = 20,
+      TokenFilter? tokenFilter});
 
   /// Returns a list of document ids from a keyword index in descending order
   /// of keyword score for keywords that start with [startsWith].
@@ -142,10 +140,17 @@ abstract class FreeTextSearchMixin implements FreeTextSearch {
   }
 
   @override
-  Future<List<MapEntry<String, double>>> document(JSON document,
-          {int limit = 20, ZoneWeightMap? zones}) =>
-      KeywordSearch(index)
-          .documentMatches(document, limit: limit, zones: zones);
+  Future<List<QuerySearchResult>> document(JSON document,
+      {required ZoneWeightMap documentZones,
+      int limit = 20,
+      TokenFilter? tokenFilter}) async {
+    final queryTerms = await QueryParser.index(index)
+        .parseDocument(document, documentZones, tokenFilter: tokenFilter);
+    final phrase = queryTerms.terms.join(' ');
+    final ftQuery = FreeTextQuery(phrase: phrase, queryTerms: queryTerms,
+        targetResultSize: limit * 2,);
+    return await query(ftQuery, limit);
+  }
 
   @override
   Stream<List<MapEntry<String, double>>> suggestionsStream(

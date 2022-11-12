@@ -104,7 +104,7 @@ abstract class FreeTextQueryMixin implements FreeTextQuery {
   @override
   void purgeTerms(DftMap docFrequencyMap, int n) {
     final qtMap = Map<String, QueryTerm>.from(queryTermsMap);
-    final idFtMap = docFrequencyMap.getIdFtMap(n);
+    final idFtMap = docFrequencyMap.idFtMap(n);
     final termsToRemove = idFtMap.entries
         .where((element) => element.value < (iDfThreshold ?? 0.0))
         .map((e) => e.key);
@@ -136,8 +136,10 @@ abstract class FreeTextQueryMixin implements FreeTextQuery {
       final t = qt.term;
       final wM = weightingStrategy.getWeight(qt).abs();
       final tf = termFrequencies[t] = (termFrequencies[t] ?? 0);
-      final tfIdf = tf * dftMap.getIdFt(t, n);
-      retVal[t] = tfIdf * wM;
+      final idf = dftMap.idFt(t, n);
+      if (idf != null) {
+        retVal[t] = tf * idf * wM;
+      }
     }
     return retVal;
   }
