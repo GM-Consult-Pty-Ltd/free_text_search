@@ -45,13 +45,13 @@ abstract class FreeTextQuery {
   /// as they occur in the [phrase].
   Set<QueryTerm> get queryTerms;
 
-  /// A list of all the [Term]s extracted from the [phrase] in the same order
+  /// A list of all the terms extracted from the [phrase] in the same order
   /// as they occur in the [phrase].
-  List<Term> get allTerms;
+  List<String> get allTerms;
 
-  /// A list of the unique [Term]s extracted from the [phrase] in the same order
+  /// A list of the unique terms extracted from the [phrase] in the same order
   /// as they occur in the [phrase].
-  Set<Term> get uniqueTerms;
+  Set<String> get uniqueTerms;
 
   /// A list of all the terms in the query that contain white-space.
   List<String> get phrases;
@@ -77,7 +77,7 @@ abstract class FreeTextQuery {
   /// ``` dart
   ///   tfIdf(idFt) => tFt * idFt
   /// ``
-  Map<Term, double> tfIdfVector(DftMap dftMap, int n);
+  Map<String, double> tfIdfVector(DftMap dftMap, int n);
 
   /// Replaces elements of [queryTerms] with the values in [newTerms].
   ///
@@ -125,13 +125,13 @@ abstract class FreeTextQueryMixin implements FreeTextQuery {
   }
 
   @override
-  Map<Term, double> tfIdfVector(DftMap dftMap, int n) {
+  Map<String, double> tfIdfVector(DftMap dftMap, int n) {
     final termFrequencies = <String, int>{};
     final qtMap = queryTermsMap;
     for (final t in allTerms) {
       termFrequencies[t] = (termFrequencies[t] ?? 0) + 1;
     }
-    final Map<Term, double> retVal = {};
+    final Map<String, double> retVal = {};
     for (final qt in qtMap.values) {
       final t = qt.term;
       final wM = weightingStrategy.getWeight(qt).abs();
@@ -148,10 +148,10 @@ abstract class FreeTextQueryMixin implements FreeTextQuery {
   List<String> get phrases => queryTerms.phrases;
 
   @override
-  List<Term> get allTerms => queryTerms.allTerms;
+  List<String> get allTerms => queryTerms.allTerms;
 
   @override
-  Set<Term> get uniqueTerms => queryTerms.uniqueTerms;
+  Set<String> get uniqueTerms => queryTerms.uniqueTerms;
 }
 
 /// A [FreeTextQuery] implementation base-class with [FreeTextQueryMixin].

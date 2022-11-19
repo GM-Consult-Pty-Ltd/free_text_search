@@ -23,9 +23,8 @@ void main() {
       final index = InMemoryIndex(
           analyzer: English.analyzer,
           collectionSize: 1,
-          nGramRange: NGramRange(1, 2),
-          strategy: TokenizingStrategy.all);
-      final queryParser = QueryParser.index(
+          nGramRange: NGramRange(1, 2));
+      final queryParser = QueryParser(
         index,
       );
       // parse the phrase
@@ -34,7 +33,7 @@ void main() {
       // final queryTerms = query.queryTerms;
       print(phraseWithModifiers);
       // print the terms and their modifiers
-      TestIndex.printQueryTerms(queryTerms);
+      printQueryTerms(queryTerms);
 
       // prints:
       //  - "athletics running track" [EXACT]

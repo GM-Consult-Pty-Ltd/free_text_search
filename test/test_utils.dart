@@ -4,11 +4,8 @@
 
 import 'package:free_text_search/src/_index.dart';
 import 'package:gmconsult_dev/gmconsult_dev.dart';
-import 'package:hive_text_index/hive_text_index.dart';
-import 'data/sample_news.dart';
 import 'package:hive/hive.dart';
 import 'dart:io';
-import 'hashtag_analyzer.dart';
 
 String get kPath => '${Directory.current.path}\\dev\\data';
 
@@ -16,98 +13,95 @@ final kZones = {'id': 1.0, 'name': 1.0, 'hashTag': 1.0};
 
 final kK = 3;
 
-final kStrategy = TokenizingStrategy.all;
-
-final kNGramRange = NGramRange(1, 2);
+// final kNGramRange = NGramRange(1, 2);
 
 final kIndexName = 'hashtags';
 
-class TestIndex extends TextIndexerBase {
-  TestIndex._(
-      this.index, this.collection); // : super(analyzer: TextAnalyzer());
-
-  // Future<TextTokenizer> kTokenizer(JsonDataService<Box<String>> service) async {
-  //   final analyzer = await HashTagAnalyzer.hydrate(service);
-  //   return TextTokenizer(analyzer: analyzer);
-  // }
-
-  @override
-  final InMemoryIndex index;
-
-  static Future<TestIndex> hydrate(
-      [Map<String, Map<String, Object>> collection = sampleNews]) async {
-    final index = InMemoryIndex(
-        dictionary: {},
-        postings: {},
-        keywordPostings: {},
-        collectionSize: collection.length,
-        analyzer: HashTagAnalyzer(),
-        zones: zoneMap,
-        strategy: TokenizingStrategy.all);
-    final indexer = TestIndex._(index, collection);
-    await indexer.indexCollection(indexer.collection);
-    return indexer;
-  }
-
-  /// The in-memory term dictionary for the indexer.
-  DftMap get dictionary => index.dictionary;
-
-  KeywordPostingsMap get keywordPostings => index.keywordPostings;
-
-  /// The in-memory postings hashmap for the indexer.
-  PostingsMap get postings => index.postings;
-
-  final JsonCollection collection;
-
-  static const zoneMap = {'name': 1.0, 'description': 0.5, 'hashTags': 2.0};
-
-  static void printQueryTerms(Iterable<QueryTerm> queryTerms) {
-    for (final qt in queryTerms) {
-      // prints -   "term" [MODIFIER]
-      print(' - "${qt.term}" [${qt.modifier.name}]');
-    }
-  }
-
-  JsonCollection getDocuments(Iterable<DocId> ids) =>
-      JsonCollection.from(collection)
-        ..removeWhere((key, value) => !ids.contains(key));
-
-  void printDocuments(Iterable<DocId> ids) {
-    final documents = getDocuments(ids);
-    print('');
-    print('__________________________________________________________________'
-        '__________________________________________________________________');
-    print('PRINTING: ${documents.length} DOCUMENTS');
-    for (final entry in documents.entries) {
-      final id = entry.key;
-      String name = entry.value['name'].toString();
-      name = (name.length > 80) ? name = name.substring(0, 80) : name;
-      print('$id: $name');
-    }
-    print('=================================================================='
-        '==================================================================');
+void printQueryTerms(Iterable<QueryTerm> queryTerms) {
+  for (final qt in queryTerms) {
+    // prints -   "term" [MODIFIER]
+    print(' - "${qt.term}" [${qt.modifier.name}]');
   }
 }
 
-Future<HiveTextIndex> hiveIndex(CollectionSizeCallback collectionSizeLoader) async {
-  return await HiveTextIndex.hydrate(kIndexName,
-      collectionSizeLoader: collectionSizeLoader,
-      analyzer: HashTagAnalyzer(),
-      nGramRange: kNGramRange,
-      k: kK,
-      zones: kZones,
-      strategy: kStrategy);
-}
+// class TestIndex extends TextIndexerBase {
+//   TestIndex._(
+//       this.index, this.collection); // : super(analyzer: TextAnalyzer());
 
-Future<InMemoryIndex> inMemoryIndex(int collectionSize) async {
-  return InMemoryIndex(
-      collectionSize: collectionSize,
-      analyzer: HashTagAnalyzer(),
-      nGramRange: kNGramRange,
-      k: kK,
-      zones: kZones,
-      strategy: kStrategy);
-}
+//   // Future<TextTokenizer> kTokenizer(JsonDataService<Box<String>> service) async {
+//   //   final analyzer = await HashTagAnalyzer.hydrate(service);
+//   //   return TextTokenizer(analyzer: analyzer);
+//   // }
+
+//   @override
+//   final InMemoryIndex index;
+
+//   static Future<TestIndex> hydrate(
+//       [Map<String, Map<String, Object>> collection = sampleNews]) async {
+//     final index = InMemoryIndex(
+//         dictionary: {},
+//         postings: {},
+//         keywordPostings: {},
+//         collectionSize: collection.length,
+//         analyzer: HashTagAnalyzer(),
+//         zones: zoneMap);
+//     final indexer = TestIndex._(index, collection);
+//     await indexer.indexCollection(indexer.collection);
+//     return indexer;
+//   }
+
+//   /// The in-memory term dictionary for the indexer.
+//   DftMap get dictionary => index.dictionary;
+
+//   KeywordPostingsMap get keywordPostings => index.keywordPostings;
+
+//   /// The in-memory postings hashmap for the indexer.
+//   PostingsMap get postings => index.postings;
+
+//   final JsonCollection collection;
+
+//   static const zoneMap = {'name': 1.0, 'description': 0.5, 'hashTags': 2.0};
+
+//   JsonCollection getDocuments(Iterable<DocId> ids) =>
+//       JsonCollection.from(collection)
+//         ..removeWhere((key, value) => !ids.contains(key));
+
+//   void printDocuments(Iterable<DocId> ids) {
+//     final documents = getDocuments(ids);
+//     print('');
+//     print('__________________________________________________________________'
+//         '__________________________________________________________________');
+//     print('PRINTING: ${documents.length} DOCUMENTS');
+//     for (final entry in documents.entries) {
+//       final id = entry.key;
+//       String name = entry.value['name'].toString();
+//       name = (name.length > 80) ? name = name.substring(0, 80) : name;
+//       print('$id: $name');
+//     }
+//     print('=================================================================='
+//         '==================================================================');
+//   }
+// }
+
+// Future<HiveTextIndex> hiveIndex(CollectionSizeCallback collectionSizeLoader) async {
+ 
+//   //
+//   return await HiveTextIndex.hydrate(kIndexName,
+//       collectionSizeLoader: collectionSizeLoader,
+//       analyzer: HashTagAnalyzer(),
+//       nGramRange: null,
+//       k: kK,
+//       zones: kZones);
+// }
+
+// Future<InMemoryIndex> inMemoryIndex(int collectionSize, ZoneWeightMap zones) async {
+//   return InMemoryIndex(
+//       collectionSize: collectionSize,
+//       analyzer: English.analyzer,
+//       nGramRange: null,
+//       k: kK,
+//       zones: zones);
+// }
 
 /// Hydrates a [JsonDataService] with a large dataset of securities.
 Future<JsonDataService<Box<String>>> getService(String boxName) async {

@@ -21,9 +21,9 @@ Future<List<QueryTerm>> _parsePhrase(String phrase) async {
   // initialize the QueryParser
   final index = InMemoryIndex(
       analyzer: English.analyzer,
-      collectionSize: 1,
-      strategy: TokenizingStrategy.all);
-  final queryParser = QueryParser.index(index);
+    collectionSize: 1,
+  );
+  final queryParser = QueryParser(index);
   // parse the phrase
   final queryTerms = await queryParser.parseQuery(phrase);
 

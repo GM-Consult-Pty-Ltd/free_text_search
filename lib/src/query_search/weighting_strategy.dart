@@ -14,7 +14,7 @@ abstract class WeightingStrategy {
   /// [WeightingStrategy.kDefaultModifierWeights] and a [phraseLengthMultiplier]
   /// of 1.0.
   static const simple =
-      _WeightingStrategyImpl(kDefaultModifierWeights, 1.0, null);
+      _WeightingStrategyImpl(kDefaultModifierWeights, 1.0, null, null);
 
   /// A factory constructor that returns a [WeightingStrategy] implementation.
   /// - [modifierWeights] is a hashmap of [QueryTermModifier] to weighting
@@ -34,9 +34,10 @@ abstract class WeightingStrategy {
           {Map<QueryTermModifier, double> modifierWeights =
               kDefaultModifierWeights,
           double phraseLengthMultiplier = 1.0,
-          Map<String, double>? zoneWeights}) =>
-      _WeightingStrategyImpl(
-          modifierWeights, phraseLengthMultiplier, zoneWeights);
+          Map<String, double>? zoneWeights,
+          int? positionThreshold}) =>
+      _WeightingStrategyImpl(modifierWeights, phraseLengthMultiplier,
+          zoneWeights, positionThreshold);
 
   /// Default value for [WeightingStrategy.modifierWeights].
   static const kDefaultModifierWeights = {
@@ -46,6 +47,15 @@ abstract class WeightingStrategy {
     QueryTermModifier.IMPORTANT: 3.0,
     QueryTermModifier.EXACT: 4.0,
   };
+
+  /// Apply a higher weight to terms that occur at the start of a posting.
+  ///
+  /// Postings that have a termPosition higher than [positionThreshold] will not
+  /// be counted when calculating the document frequency of a term.
+  ///
+  /// If [positionThreshold] is null then all postings will have equal weight,
+  /// regardless of term position.
+  int? get positionThreshold;
 
   /// A hashmap of [QueryTermModifier] to weighting value.
   ///
@@ -110,6 +120,9 @@ class _WeightingStrategyImpl extends WeightingStrategyBase {
   final double phraseLengthMultiplier;
 
   /// A const default generative constructor .
-  const _WeightingStrategyImpl(
-      this.modifierWeights, this.phraseLengthMultiplier, this.zoneWeights);
+  const _WeightingStrategyImpl(this.modifierWeights,
+      this.phraseLengthMultiplier, this.zoneWeights, this.positionThreshold);
+
+  @override
+  final int? positionThreshold;
 }

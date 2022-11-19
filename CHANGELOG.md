@@ -4,6 +4,12 @@ Copyright (c) 2022, GM Consult Pty Ltd
 All rights reserved. 
 -->
 
+## 0.0.1-beta.7
+*PRE-RELEASE*
+
+### *New*
+* New field `WeightingStrategy.positionThreshold`.
+
 ## 0.0.1-beta.6
 *PRE-RELEASE*
 
@@ -24,7 +30,7 @@ All rights reserved.
 
 ### *New*
 * interface `Document`.
-* `Ft PostingsMap.tFt(Term)` and `Ft PostingsMap.dFt(Term)` methods.
+* `Ft PostingsMap.tFt(String)` and `Ft PostingsMap.dFt(String)` methods.
 * `Ft DocumentPostingsEntry.tFt` getter.
 
 ### *Updated*

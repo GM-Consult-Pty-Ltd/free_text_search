@@ -105,11 +105,11 @@ extension QueryTermCollectionExtension on Iterable<QueryTerm> {
   /// [QueryTermModifier.NOT].
   List<QueryTerm> get notTerms => filterByModifier(QueryTermModifier.NOT);
 
-  /// A list of all the [Term]s in the collection that contain white-space.
+  /// A list of all the terms in the collection that contain white-space.
   List<String> get phrases =>
       uniqueTerms.where((element) => element.contains(' ')).toList();
 
-  /// A list of the unique [Term]s in the collection in the same order
+  /// A list of the unique terms in the collection in the same order
   /// as they occur in the source text.
-  Set<Term> get uniqueTerms => allTerms.toSet();
+  Set<String> get uniqueTerms => allTerms.toSet();
 }

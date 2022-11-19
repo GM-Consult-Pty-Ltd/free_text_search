@@ -23,7 +23,7 @@ abstract class FreeTextSearch {
   ///   documents that is queried; and
   /// - [queryParser] returns a [FreeTextQuery] from a searh phrase.
   factory FreeTextSearch(InvertedIndex index) {
-    final queryParser = QueryParser.index(index);
+    final queryParser = QueryParser(index);
     return _FreeTextSearchImpl(index, queryParser);
   }
 
@@ -46,20 +46,23 @@ abstract class FreeTextSearch {
   Future<List<QuerySearchResult>> phrase(String phrase,
       {bool expandUnmatched = false,
       int limit = 20,
-      WeightingStrategy weightingStrategy});
+      WeightingStrategy weightingStrategy,
+      TextAnalyzer? queryAnalyzer});
 
   /// Extracts keywords from the JSON [document] and searches the keyword
   /// [index] for matches for the highest scoring keywords in [zones], returning
   /// the document ids with the [limit] highest keyword scores.
   ///
-  /// If [zones] is not null the search results are weighted in accordance with
-  /// the weights in [zones].
+  /// If [documentZones] is not null the search results are weighted in accordance with
+  /// the weights in [documentZones].
   ///
   ///  The default [limit] is 20.
   Future<List<QuerySearchResult>> document(JSON document,
-      {required ZoneWeightMap documentZones,
+      {required WeightingStrategy weightingStrategy,
       int limit = 20,
-      TokenFilter? tokenFilter});
+      TokenFilter? tokenFilter,
+      TextAnalyzer? docAnalyzer,
+      NGramRange nGramRange});
 
   /// Returns a list of document ids from a keyword index in descending order
   /// of keyword score for keywords that start with [startsWith].
@@ -100,9 +103,12 @@ abstract class FreeTextSearchMixin implements FreeTextSearch {
   Future<List<QuerySearchResult>> phrase(String phrase,
       {bool expandUnmatched = false,
       int limit = 20,
-      WeightingStrategy weightingStrategy = WeightingStrategy.simple}) async {
+      WeightingStrategy weightingStrategy = WeightingStrategy.simple,
+      TextAnalyzer? queryAnalyzer}) async {
     // parse the phrase to a query
-    final queryTerms = (await queryParser.parseQuery(phrase)).toList();
+    final queryTerms =
+        (await queryParser.parseQuery(phrase, queryAnalyzer: queryAnalyzer))
+            .toList();
     // initialize a query
     final query = FreeTextQuery(
         phrase: phrase,
@@ -141,15 +147,40 @@ abstract class FreeTextSearchMixin implements FreeTextSearch {
 
   @override
   Future<List<QuerySearchResult>> document(JSON document,
-      {required ZoneWeightMap documentZones,
+      {required WeightingStrategy weightingStrategy,
       int limit = 20,
-      TokenFilter? tokenFilter}) async {
-    final queryTerms = await QueryParser.index(index)
-        .parseDocument(document, documentZones, tokenFilter: tokenFilter);
+      TokenFilter? tokenFilter,
+      TextAnalyzer? docAnalyzer,
+      NGramRange nGramRange = const NGramRange(1, 3)}) async {
+    final zoneWeights = _getZoneWeights(weightingStrategy, document);
+    final queryTerms = await QueryParser(index).parseDocument(
+        document, zoneWeights,
+        termPositionThreshold: weightingStrategy.positionThreshold,
+        nGramRange: nGramRange,
+        tokenFilter: tokenFilter,
+        docAnalyzer: docAnalyzer);
     final phrase = queryTerms.terms.join(' ');
-    final ftQuery = FreeTextQuery(phrase: phrase, queryTerms: queryTerms,
-        targetResultSize: limit * 2,);
+    final ftQuery = FreeTextQuery(
+      phrase: phrase,
+      weightingStrategy: weightingStrategy,
+      queryTerms: queryTerms,
+      targetResultSize: limit * 2,
+    );
     return await query(ftQuery, limit);
+  }
+
+  ZoneWeightMap _getZoneWeights(WeightingStrategy strategy, JSON document) {
+    if (strategy.zoneWeights != null) {
+      return strategy.zoneWeights!;
+    }
+    final retVal = <String, double>{};
+    for (final e in document.entries) {
+      final v = e.value;
+      if (v is String && v.isNotEmpty) {
+        retVal[e.key] = 1.0;
+      }
+    }
+    return retVal;
   }
 
   @override

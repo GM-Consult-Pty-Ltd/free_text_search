@@ -100,7 +100,7 @@ abstract class StartsWithSearchMixin implements KeywordSearch {
   // /// keyword score for each keyword, using the weights in [zones].
   // ///
   // /// Returns a hashmap of keyword to score for the [document].
-  // Map<String, double> _docKeywords(Map<Zone, double> zones, JSON document) {
+  // Map<String, double> _docKeywords(Map<String, double> zones, JSON document) {
   //   final Map<String, double> docKeywords = {};
   //   for (final zone in zones.entries) {
   //     final fieldName = zone.key;

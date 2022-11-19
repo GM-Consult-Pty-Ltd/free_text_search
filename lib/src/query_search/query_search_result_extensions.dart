@@ -34,7 +34,6 @@ extension _QuerySearchKeywordPostingsExtension on KeywordPostingsMap {
   }
 }
 
-
 /// Private extension methods on `Map<String, ZonePostingsMap>`.
 extension _QuerySearchTermPostingsExtension on Map<String, ZonePostingsMap> {
 //
@@ -57,9 +56,10 @@ extension _QuerySearchTermPostingsExtension on Map<String, ZonePostingsMap> {
 
   /// Aggregates the number of postings of each term and maps the total to
   /// the term.
-  Map<Term, Map<Term, int>> termZoneFrequencies(FreeTextQuery query) {
-    final Map<Term, Map<Term, int>> retVal = {};
+  Map<String, Map<String, int>> termZoneFrequencies(FreeTextQuery query) {
+    final Map<String, Map<String, int>> retVal = {};
     final zoneWeights = query.weightingStrategy.zoneWeights;
+    final positionThreshold = query.weightingStrategy.positionThreshold;
     for (final e in entries) {
       final term = e.key;
       final tF = <String, int>{};
@@ -68,19 +68,35 @@ extension _QuerySearchTermPostingsExtension on Map<String, ZonePostingsMap> {
           : e.value.entries
               .where((element) => zoneWeights.keys.contains(element.key));
       for (final z in zoneEntries) {
-        tF[z.key] = z.value.length;
+        int df = z.value.length;
+        if (positionThreshold != null) {
+          var positionWeight = 0.0;
+          for (final p in z.value) {
+            final numerator =
+                positionThreshold + 1 - p > 0 ? positionThreshold + 1 - p : 0;
+            if (numerator > 0) {
+              positionWeight += (numerator) / (1 + positionThreshold);
+            }
+          }
+          df = positionWeight.round();
+        }
+        if (df != 0.0) {
+          tF[z.key] = df;
+        }
       }
-      retVal[term] = tF;
+      if (tF.isNotEmpty) {
+        retVal[term] = tF;
+      }
     }
     return retVal;
   }
 }
 
-extension _TermZoneFrequencyExtension on Map<Term, Map<Zone, int>> {
+extension _TermZoneFrequencyExtension on Map<String, Map<String, int>> {
   /// Aggregates the term frequencies from all zones to a term frequency for
   /// the document.
-  Map<Term, int> termFrequencies(FreeTextQuery query) {
-    final Map<Term, int> retVal = {};
+  Map<String, int> termFrequencies(FreeTextQuery query) {
+    final Map<String, int> retVal = {};
     final zoneWeights = query.weightingStrategy.zoneWeights;
     for (final e in entries) {
       final term = e.key;
@@ -99,9 +115,9 @@ extension _TermZoneFrequencyExtension on Map<Term, Map<Zone, int>> {
 
   /// Returns a map of term to weighted term frequency from the term zone
   /// frequency map.
-  Map<Term, double> weightedTermFrequencies(FreeTextQuery query) {
+  Map<String, double> weightedTermFrequencies(FreeTextQuery query) {
     final zoneWeights = query.weightingStrategy.zoneWeights;
-    final Map<Term, double> retVal = {};
+    final Map<String, double> retVal = {};
     final qtMap = <String, QueryTerm>{}
       ..addEntries(query.queryTerms.map((e) => MapEntry(e.term, e)));
     for (final e in entries) {
@@ -126,7 +142,7 @@ extension _TermZoneFrequencyExtension on Map<Term, Map<Zone, int>> {
 }
 
 /// Extension on vector map.
-extension _TfIdfMapExtensions on Map<Term, double> {
+extension _TfIdfMapExtensions on Map<String, double> {
   //
 
   /// Computes a score from the tTfIdfMap and the [weighting].

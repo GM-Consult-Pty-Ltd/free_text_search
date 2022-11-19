@@ -44,8 +44,8 @@ abstract class QuerySearchResult {
           {required String docId,
           required Map<String, double> keywordScores,
           required Map<String, Map<String, List<int>>> termPostings,
-          required Map<Term, Map<Term, int>> termZoneFrequencies,
-          required Map<Term, double> weightedTermFrequencies,
+          required Map<String, Map<String, int>> termZoneFrequencies,
+          required Map<String, double> weightedTermFrequencies,
           required Map<String, int> termFrequencies,
           required Map<String, double> tfIdfVector,
           required double tfIdfScore,
@@ -92,52 +92,55 @@ abstract class QuerySearchResult {
     }
     final keywordScores = keyWordPostings.docKeywordScores(docId);
     final termZoneFrequencies = docTermPostings.termZoneFrequencies(query);
-    final termFrequencies = termZoneFrequencies.termFrequencies(query);
-    final weightedTermFrequencies =
-        termZoneFrequencies.weightedTermFrequencies(query);
-    // docTermPostings.docTermFrequencies(query.weightingStrategy.zoneWeights);
-    final tfIdfVector = dFtMap.tfIdfMap(weightedTermFrequencies, docCount);
-    final queryVector = query.tfIdfVector(dFtMap, docCount);
-    final cosineSimilarity = tfIdfVector.cosineSimilarity(queryVector);
-    final tfIdfScore = tfIdfVector.computeTfIdfScore(query);
-    if (termFrequencies.isEmpty || cosineSimilarity <= 0) {
-      return null;
+    if (termZoneFrequencies.isNotEmpty) {
+      final termFrequencies = termZoneFrequencies.termFrequencies(query);
+      final weightedTermFrequencies =
+          termZoneFrequencies.weightedTermFrequencies(query);
+      // docTermPostings.docTermFrequencies(query.weightingStrategy.zoneWeights);
+      final tfIdfVector = dFtMap.tfIdfMap(weightedTermFrequencies, docCount);
+      final queryVector = query.tfIdfVector(dFtMap, docCount);
+      final cosineSimilarity = tfIdfVector.cosineSimilarity(queryVector);
+      final tfIdfScore = tfIdfVector.computeTfIdfScore(query);
+      if (termFrequencies.isEmpty || cosineSimilarity <= 0) {
+        return null;
+      }
+      return _SearchResultImpl(
+          docId,
+          keywordScores,
+          docTermPostings,
+          termFrequencies,
+          tfIdfVector,
+          tfIdfScore,
+          termZoneFrequencies,
+          weightedTermFrequencies,
+          cosineSimilarity);
     }
-    return _SearchResultImpl(
-        docId,
-        keywordScores,
-        docTermPostings,
-        termFrequencies,
-        tfIdfVector,
-        tfIdfScore,
-        termZoneFrequencies,
-        weightedTermFrequencies,
-        cosineSimilarity);
+    return null;
   }
 
   /// The unique identifier of the document result in the corpus.
   String get docId;
 
   /// A hashmap of query terms to postings of the term in the document.
-  Map<Term, ZonePostingsMap> get termPostings;
+  Map<String, ZonePostingsMap> get termPostings;
 
   /// A hashmap of query terms to the number of times each term occurs in
   /// the document.
-  Map<Term, Ft> get termFrequencies;
+  Map<String, Ft> get termFrequencies;
 
   /// A hashmap of query terms to the weighted frequency of the term in the
   /// document.
   ///
   /// The weight is calculated from both the zone-weight and the modifier
   /// weight.
-  Map<Term, double> get weightedTermFrequencies;
+  Map<String, double> get weightedTermFrequencies;
 
   /// A hashmap of query terms to the frequency of a term in the zones of the
   /// document.
-  Map<Term, Map<Zone, int>> get termZoneFrequencies;
+  Map<String, Map<String, int>> get termZoneFrequencies;
 
   /// A hashmap of query terms to keyword scores.
-  Map<Term, double> get keywordScores;
+  Map<String, double> get keywordScores;
 
   /// A hashmap of query terms to tf-idf for the term in the document.
   ///
@@ -148,19 +151,19 @@ abstract class QuerySearchResult {
   /// ``` dart
   ///   tfIdf(idFt) => tFt * idFt
   /// ``
-  Map<Term, double> get tfIdfVector;
+  Map<String, double> get tfIdfVector;
 
   /// Returns all the query terms mapped to this document.
-  Set<Term> get queryTerms;
+  Set<String> get queryTerms;
 
   /// Returns the sum of all the tf-idf weights in [tfIdfVector].
   double get tfIdfScore;
 
   /// Returns the term frequency of a term in the document.
-  int tFt(Term term);
+  int tFt(String term);
 
   /// Returns the tf-idf weighting for [term] in the document.
-  double tfIdf(Term term);
+  double tfIdf(String term);
 
   /// Returns the cosine similarity of the vector representations of the
   /// tf-idf weights of the terms in [query] and the same terms in the document.
@@ -174,10 +177,10 @@ abstract class QuerySearchResultMixin implements QuerySearchResult {
 //
 
   @override
-  double tfIdf(Term term) => tfIdfVector[term] ?? 0;
+  double tfIdf(String term) => tfIdfVector[term] ?? 0;
 
   @override
-  int tFt(Term term) => termFrequencies[term] ?? 0;
+  int tFt(String term) => termFrequencies[term] ?? 0;
 
   @override
   Set<String> get queryTerms => <String>{}
@@ -223,7 +226,7 @@ class _SearchResultImpl extends QuerySearchResultBase {
   final Map<String, ZonePostingsMap> termPostings;
 
   @override
-  final Map<Term, Ft> termFrequencies;
+  final Map<String, Ft> termFrequencies;
 
   @override
   final Map<String, double> tfIdfVector;
@@ -232,10 +235,10 @@ class _SearchResultImpl extends QuerySearchResultBase {
   final double tfIdfScore;
 
   @override
-  final Map<Term, Map<Term, int>> termZoneFrequencies;
+  final Map<String, Map<String, int>> termZoneFrequencies;
 
   @override
-  final Map<Term, double> weightedTermFrequencies;
+  final Map<String, double> weightedTermFrequencies;
 
   @override
   final double cosineSimilarity;

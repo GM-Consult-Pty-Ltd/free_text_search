@@ -88,6 +88,7 @@ abstract class QuerySearchMixin implements QuerySearch {
       Iterable<QueryTerm> queryTerms,
       DftMap dfTMap,
       int docCount) async {
+  
     final qt = queryTerms.map((e) => e.term).toSet();
     final terms = postings.keys.where((element) => qt.contains(element));
     final keywordPostings = await index.getKeywordPostings(terms);
@@ -165,8 +166,7 @@ abstract class QuerySearchMixin implements QuerySearch {
   /// Queries the k-gram index for terms similar to [queryTerm] and then
   /// returns the top [limit] matches as [QueryTerm] instances.
   Future<Set<QueryTerm>> _expandQuery(QueryTerm queryTerm, int limit) async {
-    final term =
-        queryTerm.term.trim().replaceAll(RegExp(r'\s+'), ' ');
+    final term = queryTerm.term.trim().replaceAll(RegExp(r'\s+'), ' ');
     final candidates = await index.getKGramIndex(term.kGrams(index.k));
     final terms = candidates.terms.toList();
     if (term.length < 4) {}
