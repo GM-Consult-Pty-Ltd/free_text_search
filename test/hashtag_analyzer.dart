@@ -737,7 +737,7 @@ class HashTagQueryAnalyzer extends English {
     'leading',
     'leading edge',
     'solid',
-    'medical'
+    'medical',
         'usd',
     'wrap',
     'track',
