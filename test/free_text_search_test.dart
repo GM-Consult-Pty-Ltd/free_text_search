@@ -33,14 +33,15 @@ void main() {
       // final companyNames = await HashTagAnalyzer.getCompanyNames(service);
       final index = await HashTagIndex.hydrate();
       final documents = TestData.stockNews;
-      final documentZones = {'name': 20.0, 'description': 1.0};
-      final weightingStrategy =
-          WeightingStrategy(zoneWeights: documentZones, positionThreshold: 0);
+      // final documentZones = {'name': 20.0, 'description': 1.0};
+      // final weightingStrategy =
+      //     WeightingStrategy(
+      //     zoneWeights: documentZones, positionThreshold: null);
       for (final e in documents.entries) {
         final document = e.value;
         final name = document['name'];
         final results = await FreeTextSearch(index).document(document,
-            weightingStrategy: weightingStrategy,
+            weightingStrategy: HashTagQueryAnalyzer.kWeightingStrategy,
             limit: 5,
             nGramRange: NGramRange(1, 3),
             tokenFilter: HashTagQueryAnalyzer.kFilterTokens,

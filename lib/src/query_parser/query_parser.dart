@@ -106,11 +106,11 @@ abstract class QueryParserMixin implements QueryParser {
     docIndex.keywordPostings
         .removeWhere((key, value) => !dFtMap.keys.contains(key));
     docIndex.postings.removeWhere((key, value) => !dFtMap.keys.contains(key));
-    // - get the weighted document term freqeuncies from the postings
+    // - get the weighted document term frequencies from the postings
     final weightedDtf =
         InvertedIndex.docTermFrequencies(docIndex.postings, documentZones);
     // - retrieve the corpus size from the index
-    final n = docIndex.postings.length;
+    final n = await index.vocabularyLength;
     // - get the inverse term document frequencies for the terms
     final idfMap = dFtMap.idFtMap(n);
     // - get a tf-idft map for the weighted document term frequencies
@@ -180,9 +180,9 @@ abstract class QueryParserMixin implements QueryParser {
       final normalized = v / max;
       final value = normalized > 0.9
           ? QueryTermModifier.EXACT
-          : normalized > 0.5
+          : normalized > 0.8
               ? QueryTermModifier.IMPORTANT
-              : normalized > 0.3
+              : normalized > 0.75
                   ? QueryTermModifier.AND
                   : QueryTermModifier.NOT;
       return MapEntry(k, value);

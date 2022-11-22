@@ -2,8 +2,9 @@
 // BSD 3-Clause License
 // All rights reserved
 
+import 'package:free_text_search/free_text_search.dart';
 import 'package:hive_text_index/hive_text_index.dart';
-import 'package:text_indexing/text_indexing.dart';
+// import 'package:text_indexing/text_indexing.dart';
 import 'package:text_indexing/type_definitions.dart';
 import 'package:text_indexing/extensions.dart';
 import 'package:hive/hive.dart';
@@ -13,6 +14,10 @@ import 'dart:io';
 class HashTagQueryAnalyzer extends English {
   @override
   TermModifier get stemmer => (term) => term.toLowerCase();
+
+
+  static WeightingStrategy kWeightingStrategy = WeightingStrategy(
+      zoneWeights: {'name': 1.0, 'description': 1.0}, positionThreshold: 0);
 
   static Future<List<Token>> kFilterTokens(List<Token> tokens) async {
     final retVal = <Token>[];
@@ -762,7 +767,115 @@ class HashTagQueryAnalyzer extends English {
     'hope',
     'pressure',
     'surge',
-    'storm'
+    'storm',
+    'half',
+    'securities',
+    'security',
+    'merchant',
+    'due',
+    'supply',
+    'focus',
+    'agree',
+    'tech',
+    'healthy',
+    'installed',
+    'advantage',
+    'mind',
+    'investors',
+    'wrapped',
+    'view',
+    'snap',
+    'artificial',
+    'intelligent',
+    'intelligence',
+    'ai',
+    'software',
+    'emerging',
+    'standard',
+    'cool',
+    'grow',
+    'americas',
+    'founders',
+    'point',
+    'fang',
+    'gas',
+    'natural',
+    'credit',
+    'federal',
+    'credits',
+    'general',
+    'parts',
+    'bank',
+    'giga',
+    'texas',
+    'line',
+    '&',
+    'mix',
+    'technical',
+    'industrial',
+    'automotive',
+    'far',
+    'near',
+    'deep',
+    'lighting',
+    'south',
+    'north',
+    'united',
+    'states',
+    'united states',
+    'complete',
+    'post',
+    'progress',
+    'progressive',
+    'exchange',
+    'white',
+    'house',
+    'black',
+    'aim',
+    'chain',
+    'forward',
+    'equity',
+    'home',
+    'trajectory',
+    'electric',
+    'reflect',
+    'research',
+    'interplay',
+    'morgan',
+    'ryan',
+    'metals',
+    'tailwind',
+    'net',
+    'booking',
+    'par',
+    'flow',
+    'prime',
+    'world',
+    'face',
+    'pace',
+    'american',
+    'hong',
+    'hong kong',
+    'sentiment',
+    'global',
+    'environment',
+    'environmental',
+    'waste',
+    'products',
+    'york',
+    'city',
+    'john',
+    'works',
+    'president',
+    'commercial',
+    'change',
+    'public',
+    'services',
+    'public company',
+    'cincinatti,',
+    'children',
+    'place',
+    'fair'
   };
 }
 
@@ -775,7 +888,7 @@ class HashTagAnalyzer extends English {
       final symbol = getSymbolFromTicker(token.term);
       if (symbol != null) {
         retVal.add(Token(
-            symbol.toLowerCase(), token.n, token.termPosition, token.zone));
+            symbol.toLowerCase(), token.n, 0, token.zone));
       } else {
         retVal.add(token);
       }
